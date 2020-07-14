@@ -42,11 +42,9 @@ namespace Hardware.Info
             {
                 hardwareInfo = new Hardware.Info.Linux.HardwareInfo();
             }
-
-            Refresh();
         }
 
-        public void Refresh()
+        public void RefreshAll()
         {
             RefreshBatteryList();
             RefreshBIOSList();
@@ -79,20 +77,20 @@ namespace Hardware.Info
 
         #region Static
 
-        private static bool pingTestInProgress;
-        private static Action<bool>? OnPingTestComplete;
+        private static bool pingInProgress;
+        private static Action<bool>? OnPingComplete;
 
-        public static void PingTest(string hostNameOrAddress, Action<bool> onPingTestComplete)
+        public static void Ping(string hostNameOrAddress, Action<bool> onPingComplete)
         {
-            if (pingTestInProgress)
+            if (pingInProgress)
                 return;
 
-            pingTestInProgress = true;
+            pingInProgress = true;
 
-            OnPingTestComplete = onPingTestComplete;
+            OnPingComplete = onPingComplete;
 
             using Ping pingSender = new Ping();
-            pingSender.PingCompleted += new PingCompletedEventHandler(PingCompletedCallback);
+            pingSender.PingCompleted += new PingCompletedEventHandler(PingCompleted);
 
             byte[] buffer = Enumerable.Repeat<byte>(97, 32).ToArray();
 
@@ -103,9 +101,9 @@ namespace Hardware.Info
             pingSender.SendAsync(hostNameOrAddress, timeout, buffer, options, null);
         }
 
-        private static void PingCompletedCallback(object sender, PingCompletedEventArgs e)
+        private static void PingCompleted(object sender, PingCompletedEventArgs e)
         {
-            pingTestInProgress = false;
+            pingInProgress = false;
 
             bool success = true;
 
@@ -122,7 +120,7 @@ namespace Hardware.Info
             else if (reply.Status != IPStatus.Success)
                 success = false;
 
-            OnPingTestComplete?.Invoke(success);
+            OnPingComplete?.Invoke(success);
         }
 
         public static IEnumerable<IPAddress> GetLocalIPv4Address()

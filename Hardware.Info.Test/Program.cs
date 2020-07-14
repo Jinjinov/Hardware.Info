@@ -22,6 +22,47 @@ namespace Hardware.Info.Test
 
         static void Main(string[] _)
         {
+            hardwareInfo.RefreshAll();
+
+            foreach (var hardware in hardwareInfo.BatteryList)
+                Console.WriteLine(hardware);
+
+            foreach (var hardware in hardwareInfo.BiosList)
+                Console.WriteLine(hardware);
+
+            foreach (var hardware in hardwareInfo.CpuList)
+                Console.WriteLine(hardware);
+
+            foreach (var hardware in hardwareInfo.DriveList)
+                Console.WriteLine(hardware);
+
+            foreach (var hardware in hardwareInfo.KeyboardList)
+                Console.WriteLine(hardware);
+
+            foreach (var hardware in hardwareInfo.MemoryList)
+                Console.WriteLine(hardware);
+
+            foreach (var hardware in hardwareInfo.MonitorList)
+                Console.WriteLine(hardware);
+
+            foreach (var hardware in hardwareInfo.MotherboardList)
+                Console.WriteLine(hardware);
+
+            foreach (var hardware in hardwareInfo.MouseList)
+                Console.WriteLine(hardware);
+
+            foreach (var hardware in hardwareInfo.NetworkAdapterList)
+                Console.WriteLine(hardware);
+
+            foreach (var hardware in hardwareInfo.PrinterList)
+                Console.WriteLine(hardware);
+
+            foreach (var hardware in hardwareInfo.SoundDeviceList)
+                Console.WriteLine(hardware);
+
+            foreach (var hardware in hardwareInfo.VideoControllerList)
+                Console.WriteLine(hardware);
+
             FileStream fs = new FileStream("log.txt", FileMode.OpenOrCreate);
             StreamWriter sw = new StreamWriter(fs);
             string[] Names = { "Win32_Fan", "Win32_HeatPipe", "Win32_Refrigeration", "Win32_TemperatureProbe", "Win32_Keyboard", "Win32_PointingDevice",

@@ -47,5 +47,18 @@ namespace Hardware.Info
             11 => "Partially Charged",
             _ => string.Empty
         };
+
+        public override string ToString()
+        {
+            return
+                "FullChargeCapacity: " + FullChargeCapacity + Environment.NewLine +
+                "DesignCapacity: " + DesignCapacity + Environment.NewLine +
+                "BatteryStatusDescription: " + BatteryStatusDescription + Environment.NewLine +
+                "EstimatedRunTime: " + EstimatedRunTime + Environment.NewLine +
+                "ExpectedLife: " + ExpectedLife + Environment.NewLine +
+                "MaxRechargeTime: " + MaxRechargeTime + Environment.NewLine +
+                "TimeOnBattery: " + TimeOnBattery + Environment.NewLine +
+                "TimeToFullCharge: " + TimeToFullCharge + Environment.NewLine;
+        }
     }
 }

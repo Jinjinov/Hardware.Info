@@ -53,6 +53,14 @@ namespace Hardware.Info.Windows
             {
                 BIOS bios = new BIOS
                 {
+                    Caption = GetPropertyString(mo["Caption"]),
+                    Description = GetPropertyString(mo["Description"]),
+                    Manufacturer = GetPropertyString(mo["Manufacturer"]),
+                    Name = GetPropertyString(mo["Name"]),
+                    ReleaseDate = GetPropertyString(mo["ReleaseDate"]),
+                    SerialNumber = GetPropertyString(mo["SerialNumber"]),
+                    SoftwareElementID = GetPropertyString(mo["SoftwareElementID"]),
+                    Version = GetPropertyString(mo["Version"])
                 };
 
                 biosList.Add(bios);
@@ -71,6 +79,19 @@ namespace Hardware.Info.Windows
             {
                 CPU cpu = new CPU
                 {
+                    Caption = GetPropertyString(mo["Caption"]),
+                    CurrentClockSpeed = GetPropertyString(mo["CurrentClockSpeed"]),
+                    Description = GetPropertyString(mo["Description"]),
+                    L2CacheSize = GetPropertyString(mo["L2CacheSize"]),
+                    L3CacheSize = GetPropertyString(mo["L3CacheSize"]),
+                    Manufacturer = GetPropertyString(mo["Manufacturer"]),
+                    MaxClockSpeed = GetPropertyString(mo["MaxClockSpeed"]),
+                    Name = GetPropertyString(mo["Name"]),
+                    NumberOfCores = GetPropertyString(mo["NumberOfCores"]),
+                    NumberOfLogicalProcessors = GetPropertyString(mo["NumberOfLogicalProcessors"]),
+                    ProcessorId = GetPropertyString(mo["ProcessorId"]),
+                    VirtualizationFirmwareEnabled = GetPropertyString(mo["VirtualizationFirmwareEnabled"]),
+                    VMMonitorModeExtensions = GetPropertyString(mo["VMMonitorModeExtensions"])
                 };
 
                 //CPUSpeed = mo["MaxClockSpeed"]?.ToString()?.Trim() ?? string.Empty;
@@ -92,6 +113,15 @@ namespace Hardware.Info.Windows
             {
                 Drive drive = new Drive
                 {
+                    Caption = GetPropertyString(mo["Caption"]),
+                    Description = GetPropertyString(mo["Description"]),
+                    FirmwareRevision = GetPropertyString(mo["FirmwareRevision"]),
+                    Manufacturer = GetPropertyString(mo["Manufacturer"]),
+                    Model = GetPropertyString(mo["Model"]),
+                    Name = GetPropertyString(mo["Name"]),
+                    Partitions = GetPropertyString(mo["Partitions"]),
+                    SerialNumber = GetPropertyString(mo["SerialNumber"]),
+                    Size = GetPropertyString(mo["Size"])
                 };
 
                 //HarddriveSerialNumber = mo["SerialNumber"]?.ToString()?.Trim() ?? string.Empty;
@@ -112,6 +142,10 @@ namespace Hardware.Info.Windows
             {
                 Keyboard keyboard= new Keyboard
                 {
+                    Caption = GetPropertyString(mo["Caption"]),
+                    Description = GetPropertyString(mo["Description"]),
+                    Name = GetPropertyString(mo["Name"]),
+                    NumberOfFunctionKeys = GetPropertyString(mo["NumberOfFunctionKeys"])
                 };
 
                 keyboardList.Add(keyboard);
@@ -130,6 +164,11 @@ namespace Hardware.Info.Windows
             {
                 Memory memory = new Memory
                 {
+                    Capacity = GetPropertyString(mo["Capacity"]),
+                    Manufacturer = GetPropertyString(mo["Manufacturer"]),
+                    PartNumber = GetPropertyString(mo["PartNumber"]),
+                    SerialNumber = GetPropertyString(mo["SerialNumber"]),
+                    Speed = GetPropertyString(mo["Speed"])
                 };
 
                 //RAMSize = mo["Capacity"]?.ToString()?.Trim() ?? string.Empty;
@@ -151,6 +190,13 @@ namespace Hardware.Info.Windows
             {
                 Monitor monitor = new Monitor
                 {
+                    Caption = GetPropertyString(mo["Caption"]),
+                    Description = GetPropertyString(mo["Description"]),
+                    MonitorManufacturer = GetPropertyString(mo["MonitorManufacturer"]),
+                    MonitorType = GetPropertyString(mo["MonitorType"]),
+                    Name = GetPropertyString(mo["Name"]),
+                    PixelsPerXLogicalInch = GetPropertyString(mo["PixelsPerXLogicalInch"]),
+                    PixelsPerYLogicalInch = GetPropertyString(mo["PixelsPerYLogicalInch"])
                 };
 
                 monitorList.Add(monitor);
@@ -169,6 +215,8 @@ namespace Hardware.Info.Windows
             {
                 Motherboard motherboard = new Motherboard
                 {
+                    Manufacturer = GetPropertyString(mo["Manufacturer"]),
+                    Product = GetPropertyString(mo["Product"])
                 };
 
                 //MotherboardSerialNumber = mo["SerialNumber"]?.ToString()?.Trim() ?? string.Empty;
@@ -189,6 +237,11 @@ namespace Hardware.Info.Windows
             {
                 Mouse mouse = new Mouse
                 {
+                    Caption = GetPropertyString(mo["Caption"]),
+                    Description = GetPropertyString(mo["Description"]),
+                    Manufacturer = GetPropertyString(mo["Manufacturer"]),
+                    Name = GetPropertyString(mo["Name"]),
+                    NumberOfButtons = GetPropertyString(mo["NumberOfButtons"])
                 };
 
                 mouseList.Add(mouse);
@@ -207,6 +260,15 @@ namespace Hardware.Info.Windows
             {
                 NetworkAdapter networkAdapter = new NetworkAdapter
                 {
+                    AdapterType = GetPropertyString(mo["AdapterType"]),
+                    Caption = GetPropertyString(mo["Caption"]),
+                    Description = GetPropertyString(mo["Description"]),
+                    MACAddress = GetPropertyString(mo["MACAddress"]),
+                    Manufacturer = GetPropertyString(mo["Manufacturer"]),
+                    Name = GetPropertyString(mo["Name"]),
+                    NetConnectionID = GetPropertyString(mo["NetConnectionID"]),
+                    ProductName = GetPropertyString(mo["ProductName"]),
+                    Speed = GetPropertyString(mo["Speed"])
                 };
 
                 networkAdapterList.Add(networkAdapter);
@@ -225,6 +287,15 @@ namespace Hardware.Info.Windows
             {
                 Printer printer = new Printer
                 {
+                    Caption = GetPropertyString(mo["Caption"]),
+                    Default = GetPropertyString(mo["Default"]),
+                    Description = GetPropertyString(mo["Description"]),
+                    HorizontalResolution = GetPropertyString(mo["HorizontalResolution"]),
+                    Local = GetPropertyString(mo["Local"]),
+                    Name = GetPropertyString(mo["Name"]),
+                    Network = GetPropertyString(mo["Network"]),
+                    Shared = GetPropertyString(mo["Shared"]),
+                    VerticalResolution = GetPropertyString(mo["VerticalResolution"])
                 };
 
                 printerList.Add(printer);
@@ -243,6 +314,11 @@ namespace Hardware.Info.Windows
             {
                 SoundDevice soundDevice = new SoundDevice
                 {
+                    Caption = GetPropertyString(mo["Caption"]),
+                    Description = GetPropertyString(mo["Description"]),
+                    Manufacturer = GetPropertyString(mo["Manufacturer"]),
+                    Name = GetPropertyString(mo["Name"]),
+                    ProductName = GetPropertyString(mo["ProductName"])
                 };
 
                 soundDeviceList.Add(soundDevice);
@@ -261,6 +337,22 @@ namespace Hardware.Info.Windows
             {
                 VideoController videoController = new VideoController
                 {
+                    AdapterCompatibility = GetPropertyString(mo["AdapterCompatibility"]),
+                    AdapterRAM = GetPropertyString(mo["AdapterRAM"]),
+                    Caption = GetPropertyString(mo["Caption"]),
+                    CurrentBitsPerPixel = GetPropertyString(mo["CurrentBitsPerPixel"]),
+                    CurrentHorizontalResolution = GetPropertyString(mo["CurrentHorizontalResolution"]),
+                    CurrentNumberOfColors = GetPropertyString(mo["CurrentNumberOfColors"]),
+                    CurrentRefreshRate = GetPropertyString(mo["CurrentRefreshRate"]),
+                    CurrentVerticalResolution = GetPropertyString(mo["CurrentVerticalResolution"]),
+                    Description = GetPropertyString(mo["Description"]),
+                    DriverDate = GetPropertyString(mo["DriverDate"]),
+                    DriverVersion = GetPropertyString(mo["DriverVersion"]),
+                    MaxRefreshRate = GetPropertyString(mo["MaxRefreshRate"]),
+                    MinRefreshRate = GetPropertyString(mo["MinRefreshRate"]),
+                    Name = GetPropertyString(mo["Name"]),
+                    VideoModeDescription = GetPropertyString(mo["VideoModeDescription"]),
+                    VideoProcessor = GetPropertyString(mo["VideoProcessor"])
                 };
 
                 videoControllerList.Add(videoController);

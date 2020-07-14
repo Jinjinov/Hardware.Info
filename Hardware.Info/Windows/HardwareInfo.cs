@@ -104,22 +104,61 @@ namespace Hardware.Info.Windows
         {
             List<Drive> driveList = new List<Drive>();
 
-            using ManagementObjectSearcher mos = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
-
-            foreach (ManagementObject mo in mos.Get())
+            using ManagementObjectSearcher Win32_DiskDrive = new ManagementObjectSearcher("SELECT * FROM Win32_DiskDrive");
+            foreach (ManagementObject DiskDrive in Win32_DiskDrive.Get())
             {
                 Drive drive = new Drive
                 {
-                    Caption = GetPropertyString(mo["Caption"]),
-                    Description = GetPropertyString(mo["Description"]),
-                    FirmwareRevision = GetPropertyString(mo["FirmwareRevision"]),
-                    Manufacturer = GetPropertyString(mo["Manufacturer"]),
-                    Model = GetPropertyString(mo["Model"]),
-                    Name = GetPropertyString(mo["Name"]),
-                    Partitions = GetPropertyValue<uint>(mo["Partitions"]),
-                    SerialNumber = GetPropertyString(mo["SerialNumber"]),
-                    Size = GetPropertyValue<ulong>(mo["Size"])
+                    Caption = GetPropertyString(DiskDrive["Caption"]),
+                    Description = GetPropertyString(DiskDrive["Description"]),
+                    FirmwareRevision = GetPropertyString(DiskDrive["FirmwareRevision"]),
+                    Index = GetPropertyValue<uint>(DiskDrive["Index"]),
+                    Manufacturer = GetPropertyString(DiskDrive["Manufacturer"]),
+                    Model = GetPropertyString(DiskDrive["Model"]),
+                    Name = GetPropertyString(DiskDrive["Name"]),
+                    Partitions = GetPropertyValue<uint>(DiskDrive["Partitions"]),
+                    SerialNumber = GetPropertyString(DiskDrive["SerialNumber"]),
+                    Size = GetPropertyValue<ulong>(DiskDrive["Size"])
                 };
+
+                using ManagementObjectSearcher Win32_DiskPartition = new ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" + DiskDrive["DeviceID"] + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition");
+                foreach (ManagementObject DiskPartition in Win32_DiskPartition.Get())
+                {
+                    Partition partition = new Partition
+                    {
+                        Bootable = GetPropertyValue<bool>(DiskPartition["Bootable"]),
+                        BootPartition = GetPropertyValue<bool>(DiskPartition["BootPartition"]),
+                        Caption = GetPropertyString(DiskPartition["Caption"]),
+                        Description = GetPropertyString(DiskPartition["Description"]),
+                        DiskIndex = GetPropertyValue<uint>(DiskPartition["DiskIndex"]),
+                        Index = GetPropertyValue<uint>(DiskPartition["Index"]),
+                        Name = GetPropertyString(DiskPartition["Name"]),
+                        PrimaryPartition = GetPropertyValue<bool>(DiskPartition["PrimaryPartition"]),
+                        Size = GetPropertyValue<ulong>(DiskPartition["Size"]),
+                        StartingOffset = GetPropertyValue<ulong>(DiskPartition["StartingOffset"])
+                    };
+
+                    using ManagementObjectSearcher Win32_LogicalDisk = new ManagementObjectSearcher("ASSOCIATORS OF {Win32_DiskPartition.DeviceID='" + DiskPartition["DeviceID"] + "'} WHERE AssocClass = Win32_LogicalDiskToPartition");
+                    foreach (ManagementObject LogicalDisk in Win32_LogicalDisk.Get())
+                    {
+                        Volume volume = new Volume
+                        {
+                            Caption = GetPropertyString(LogicalDisk["Caption"]),
+                            Compressed = GetPropertyValue<bool>(LogicalDisk["Compressed"]),
+                            Description = GetPropertyString(LogicalDisk["Description"]),
+                            FileSystem = GetPropertyString(LogicalDisk["FileSystem"]),
+                            FreeSpace = GetPropertyValue<ulong>(LogicalDisk["FreeSpace"]),
+                            Name = GetPropertyString(LogicalDisk["Name"]),
+                            Size = GetPropertyValue<ulong>(LogicalDisk["Size"]),
+                            VolumeName = GetPropertyString(LogicalDisk["VolumeName"]),
+                            VolumeSerialNumber = GetPropertyString(LogicalDisk["VolumeSerialNumber"])
+                        };
+
+                        partition.VolumeList.Add(volume);
+                    }
+
+                    drive.PartitionList.Add(partition);
+                }
 
                 driveList.Add(drive);
             }

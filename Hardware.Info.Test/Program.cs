@@ -28,8 +28,18 @@ namespace Hardware.Info.Test
             foreach (var hardware in hardwareInfo.CpuList)
                 Console.WriteLine(hardware);
 
-            foreach (var hardware in hardwareInfo.DriveList)
-                Console.WriteLine(hardware);
+            foreach (var drive in hardwareInfo.DriveList)
+            {
+                Console.WriteLine(drive);
+
+                foreach (var partition in drive.PartitionList)
+                {
+                    Console.WriteLine(partition);
+
+                    foreach (var volume in partition.VolumeList)
+                        Console.WriteLine(volume);
+                }
+            }
 
             foreach (var hardware in hardwareInfo.KeyboardList)
                 Console.WriteLine(hardware);

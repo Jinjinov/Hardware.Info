@@ -37,13 +37,13 @@ namespace Hardware.Info
             List<NetworkAdapter> networkAdapterList = GetNetworkAdapterList(NetworkInterfaceType.Wireless80211, false);
 
             if (networkAdapterList.Count == 0)
-                GetNetworkAdapterList(NetworkInterfaceType.Ethernet, false);
+                networkAdapterList = GetNetworkAdapterList(NetworkInterfaceType.Ethernet, false);
 
             if (networkAdapterList.Count == 0)
-                GetNetworkAdapterList(NetworkInterfaceType.Wireless80211, true);
+                networkAdapterList = GetNetworkAdapterList(NetworkInterfaceType.Wireless80211, true);
 
             if (networkAdapterList.Count == 0)
-                GetNetworkAdapterList(NetworkInterfaceType.Ethernet, true);
+                networkAdapterList = GetNetworkAdapterList(NetworkInterfaceType.Ethernet, true);
 
             return networkAdapterList;
         }

@@ -60,6 +60,7 @@ namespace Hardware.Info.Test
 
             FileStream fs = new FileStream("log.txt", FileMode.OpenOrCreate);
             StreamWriter sw = new StreamWriter(fs);
+
             string[] Names = { "Win32_Fan", "Win32_HeatPipe", "Win32_Refrigeration", "Win32_TemperatureProbe", "Win32_Keyboard", "Win32_PointingDevice",
                              "Win32_AutochkSetting", "Win32_CDROMDrive" , "Win32_DiskDrive" ,"Win32_FloppyDrive", "Win32_PhysicalMedia","Win32_TapeDrive" ,
                              "Win32_1394Controller","Win32_1394ControllerDevice", "Win32_AllocatedResource", "Win32_AssociatedProcessorMemory","Win32_BaseBoard",
@@ -112,6 +113,7 @@ namespace Hardware.Info.Test
                 }
 
             }
+
             sw.Close();
         }
     }

@@ -4,22 +4,22 @@ namespace Hardware.Info
 {
     public class VideoController
     {
-        public string AdapterCompatibility;
-        public UInt32 AdapterRAM;
-        public string Caption;
-        public UInt32 CurrentBitsPerPixel;
-        public UInt32 CurrentHorizontalResolution;
-        public UInt64 CurrentNumberOfColors;
-        public UInt32 CurrentRefreshRate;
-        public UInt32 CurrentVerticalResolution;
-        public string Description;
-        public string DriverDate;
-        public string DriverVersion;
-        public UInt32 MaxRefreshRate;
-        public UInt32 MinRefreshRate;
-        public string Name;
-        public string VideoModeDescription;
-        public string VideoProcessor;
+        public string AdapterCompatibility { get; internal set; } = string.Empty;
+        public UInt32 AdapterRAM { get; internal set; }
+        public string Caption { get; internal set; } = string.Empty;
+        public UInt32 CurrentBitsPerPixel { get; internal set; }
+        public UInt32 CurrentHorizontalResolution { get; internal set; }
+        public UInt64 CurrentNumberOfColors { get; internal set; }
+        public UInt32 CurrentRefreshRate { get; internal set; }
+        public UInt32 CurrentVerticalResolution { get; internal set; }
+        public string Description { get; internal set; } = string.Empty;
+        public string DriverDate { get; internal set; } = string.Empty;
+        public string DriverVersion { get; internal set; } = string.Empty;
+        public UInt32 MaxRefreshRate { get; internal set; }
+        public UInt32 MinRefreshRate { get; internal set; }
+        public string Name { get; internal set; } = string.Empty;
+        public string VideoModeDescription { get; internal set; } = string.Empty;
+        public string VideoProcessor { get; internal set; } = string.Empty;
 
         public override string ToString()
         {

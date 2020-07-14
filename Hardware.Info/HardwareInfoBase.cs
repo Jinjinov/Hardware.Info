@@ -61,8 +61,9 @@ namespace Hardware.Info
                         NetworkAdapter networkAdapter = new NetworkAdapter
                         {
                             MACAddress = networkInterface.GetPhysicalAddress().ToString().Trim(),
-                            Model = networkInterface.Description.Trim(),
-                            SerialNumber = networkInterface.Id.Trim('{', '}')
+                            Description = networkInterface.Description.Trim(),
+                            Name = networkInterface.Name.Trim(),
+                            Speed = (ulong)networkInterface.Speed
                         };
 
                         foreach (UnicastIPAddressInformation ip in networkInterface.GetIPProperties().UnicastAddresses)

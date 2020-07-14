@@ -76,16 +76,6 @@ namespace Hardware.Info
         public string SerialNumber { get; internal set; } = string.Empty;
         public UInt64 Size { get; internal set; }
 
-        public long AvailableFreeSpace { get; internal set; }
-        public string DriveFormat { get; internal set; } = string.Empty;
-        public string DriveType { get; internal set; } = string.Empty;
-        public bool IsReady { get; internal set; }
-        //public string Name { get; internal set; } = string.Empty;
-        public string RootDirectory { get; internal set; } = string.Empty;
-        public long TotalFreeSpace { get; internal set; }
-        public long TotalSize { get; internal set; }
-        public string VolumeLabel { get; internal set; } = string.Empty;
-
         public override string ToString()
         {
             return

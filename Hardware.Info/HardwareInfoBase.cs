@@ -11,23 +11,29 @@ namespace Hardware.Info
         {
             List<Drive> driveList = new List<Drive>();
 
+            Drive drive = new Drive();
+
+            Partition partition = new Partition();
+
             foreach (DriveInfo driveInfo in DriveInfo.GetDrives())
             {
-                Drive drive = new Drive
+                Volume volume = new Volume
                 {
-                    AvailableFreeSpace = driveInfo.AvailableFreeSpace,
-                    DriveFormat = driveInfo.DriveFormat,
-                    DriveType = driveInfo.DriveType.ToString(),
-                    IsReady = driveInfo.IsReady,
+                    FileSystem = driveInfo.DriveFormat,
+                    Description = driveInfo.DriveType.ToString(),
                     Name = driveInfo.Name,
-                    RootDirectory = driveInfo.RootDirectory.FullName,
-                    TotalFreeSpace = driveInfo.TotalFreeSpace,
-                    TotalSize = driveInfo.TotalSize,
-                    VolumeLabel = driveInfo.VolumeLabel
+                    Caption = driveInfo.RootDirectory.FullName,
+                    FreeSpace = (ulong)driveInfo.TotalFreeSpace,
+                    Size = (ulong)driveInfo.TotalSize,
+                    VolumeName = driveInfo.VolumeLabel
                 };
 
-                driveList.Add(drive);
+                partition.VolumeList.Add(volume);
             }
+
+            drive.PartitionList.Add(partition);
+
+            driveList.Add(drive);
 
             return driveList;
         }

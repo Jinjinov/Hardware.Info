@@ -4,11 +4,11 @@ namespace Hardware.Info
 {
     public class Mouse
     {
-        public string Caption;
-        public string Description;
-        public string Manufacturer;
-        public string Name;
-        public string NumberOfButtons;
+        public string Caption { get; internal set; } = string.Empty;
+        public string Description { get; internal set; } = string.Empty;
+        public string Manufacturer { get; internal set; } = string.Empty;
+        public string Name { get; internal set; } = string.Empty;
+        public byte NumberOfButtons { get; internal set; }
 
         public override string ToString()
         {

@@ -4,19 +4,19 @@ namespace Hardware.Info
 {
     public class CPU
     {
-        public string Caption;
-        public string CurrentClockSpeed;
-        public string Description;
-        public string L2CacheSize;
-        public string L3CacheSize;
-        public string Manufacturer;
-        public string MaxClockSpeed;
-        public string Name;
-        public string NumberOfCores;
-        public string NumberOfLogicalProcessors;
-        public string ProcessorId;
-        public string VirtualizationFirmwareEnabled;
-        public string VMMonitorModeExtensions;
+        public string Caption { get; internal set; } = string.Empty;
+        public UInt32 CurrentClockSpeed { get; internal set; }
+        public string Description { get; internal set; } = string.Empty;
+        public UInt32 L2CacheSize { get; internal set; }
+        public UInt32 L3CacheSize { get; internal set; }
+        public string Manufacturer { get; internal set; } = string.Empty;
+        public UInt32 MaxClockSpeed { get; internal set; }
+        public string Name { get; internal set; } = string.Empty;
+        public UInt32 NumberOfCores { get; internal set; }
+        public UInt32 NumberOfLogicalProcessors { get; internal set; }
+        public string ProcessorId { get; internal set; } = string.Empty;
+        public Boolean VirtualizationFirmwareEnabled { get; internal set; }
+        public Boolean VMMonitorModeExtensions { get; internal set; }
 
         public override string ToString()
         {

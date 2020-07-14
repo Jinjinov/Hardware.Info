@@ -80,22 +80,19 @@ namespace Hardware.Info.Windows
                 CPU cpu = new CPU
                 {
                     Caption = GetPropertyString(mo["Caption"]),
-                    CurrentClockSpeed = GetPropertyString(mo["CurrentClockSpeed"]),
+                    CurrentClockSpeed = GetPropertyValue<uint>(mo["CurrentClockSpeed"]),
                     Description = GetPropertyString(mo["Description"]),
-                    L2CacheSize = GetPropertyString(mo["L2CacheSize"]),
-                    L3CacheSize = GetPropertyString(mo["L3CacheSize"]),
+                    L2CacheSize = GetPropertyValue<uint>(mo["L2CacheSize"]),
+                    L3CacheSize = GetPropertyValue<uint>(mo["L3CacheSize"]),
                     Manufacturer = GetPropertyString(mo["Manufacturer"]),
-                    MaxClockSpeed = GetPropertyString(mo["MaxClockSpeed"]),
+                    MaxClockSpeed = GetPropertyValue<uint>(mo["MaxClockSpeed"]),
                     Name = GetPropertyString(mo["Name"]),
-                    NumberOfCores = GetPropertyString(mo["NumberOfCores"]),
-                    NumberOfLogicalProcessors = GetPropertyString(mo["NumberOfLogicalProcessors"]),
+                    NumberOfCores = GetPropertyValue<uint>(mo["NumberOfCores"]),
+                    NumberOfLogicalProcessors = GetPropertyValue<uint>(mo["NumberOfLogicalProcessors"]),
                     ProcessorId = GetPropertyString(mo["ProcessorId"]),
-                    VirtualizationFirmwareEnabled = GetPropertyString(mo["VirtualizationFirmwareEnabled"]),
-                    VMMonitorModeExtensions = GetPropertyString(mo["VMMonitorModeExtensions"])
+                    VirtualizationFirmwareEnabled = GetPropertyValue<bool>(mo["VirtualizationFirmwareEnabled"]),
+                    VMMonitorModeExtensions = GetPropertyValue<bool>(mo["VMMonitorModeExtensions"])
                 };
-
-                //CPUSpeed = mo["MaxClockSpeed"]?.ToString()?.Trim() ?? string.Empty;
-                //CPUSerialNumber = mo["ProcessorID"]?.ToString()?.Trim() ?? string.Empty;
 
                 cpuList.Add(cpu);
             }
@@ -119,12 +116,10 @@ namespace Hardware.Info.Windows
                     Manufacturer = GetPropertyString(mo["Manufacturer"]),
                     Model = GetPropertyString(mo["Model"]),
                     Name = GetPropertyString(mo["Name"]),
-                    Partitions = GetPropertyString(mo["Partitions"]),
+                    Partitions = GetPropertyValue<uint>(mo["Partitions"]),
                     SerialNumber = GetPropertyString(mo["SerialNumber"]),
-                    Size = GetPropertyString(mo["Size"])
+                    Size = GetPropertyValue<ulong>(mo["Size"])
                 };
-
-                //HarddriveSerialNumber = mo["SerialNumber"]?.ToString()?.Trim() ?? string.Empty;
 
                 driveList.Add(drive);
             }
@@ -145,7 +140,7 @@ namespace Hardware.Info.Windows
                     Caption = GetPropertyString(mo["Caption"]),
                     Description = GetPropertyString(mo["Description"]),
                     Name = GetPropertyString(mo["Name"]),
-                    NumberOfFunctionKeys = GetPropertyString(mo["NumberOfFunctionKeys"])
+                    NumberOfFunctionKeys = GetPropertyValue<ushort>(mo["NumberOfFunctionKeys"])
                 };
 
                 keyboardList.Add(keyboard);
@@ -164,15 +159,12 @@ namespace Hardware.Info.Windows
             {
                 Memory memory = new Memory
                 {
-                    Capacity = GetPropertyString(mo["Capacity"]),
+                    Capacity = GetPropertyValue<ulong>(mo["Capacity"]),
                     Manufacturer = GetPropertyString(mo["Manufacturer"]),
                     PartNumber = GetPropertyString(mo["PartNumber"]),
                     SerialNumber = GetPropertyString(mo["SerialNumber"]),
-                    Speed = GetPropertyString(mo["Speed"])
+                    Speed = GetPropertyValue<uint>(mo["Speed"])
                 };
-
-                //RAMSize = mo["Capacity"]?.ToString()?.Trim() ?? string.Empty;
-                //RAMSerialNumber = mo["SerialNumber"]?.ToString()?.Trim() ?? string.Empty;
 
                 memoryList.Add(memory);
             }
@@ -184,7 +176,7 @@ namespace Hardware.Info.Windows
         {
             List<Monitor> monitorList = new List<Monitor>();
 
-            using ManagementObjectSearcher mos = new ManagementObjectSearcher("SELECT * FROM Win32_DesktopMonitor");
+            using ManagementObjectSearcher mos = new ManagementObjectSearcher("SELECT * FROM Win32_DesktopMonitor WHERE PNPDeviceID IS NOT NULL");
 
             foreach (ManagementObject mo in mos.Get())
             {
@@ -195,8 +187,8 @@ namespace Hardware.Info.Windows
                     MonitorManufacturer = GetPropertyString(mo["MonitorManufacturer"]),
                     MonitorType = GetPropertyString(mo["MonitorType"]),
                     Name = GetPropertyString(mo["Name"]),
-                    PixelsPerXLogicalInch = GetPropertyString(mo["PixelsPerXLogicalInch"]),
-                    PixelsPerYLogicalInch = GetPropertyString(mo["PixelsPerYLogicalInch"])
+                    PixelsPerXLogicalInch = GetPropertyValue<uint>(mo["PixelsPerXLogicalInch"]),
+                    PixelsPerYLogicalInch = GetPropertyValue<uint>(mo["PixelsPerYLogicalInch"])
                 };
 
                 monitorList.Add(monitor);
@@ -241,7 +233,7 @@ namespace Hardware.Info.Windows
                     Description = GetPropertyString(mo["Description"]),
                     Manufacturer = GetPropertyString(mo["Manufacturer"]),
                     Name = GetPropertyString(mo["Name"]),
-                    NumberOfButtons = GetPropertyString(mo["NumberOfButtons"])
+                    NumberOfButtons = GetPropertyValue<byte>(mo["NumberOfButtons"])
                 };
 
                 mouseList.Add(mouse);
@@ -268,7 +260,7 @@ namespace Hardware.Info.Windows
                     Name = GetPropertyString(mo["Name"]),
                     NetConnectionID = GetPropertyString(mo["NetConnectionID"]),
                     ProductName = GetPropertyString(mo["ProductName"]),
-                    Speed = GetPropertyString(mo["Speed"])
+                    Speed = GetPropertyValue<ulong>(mo["Speed"])
                 };
 
                 networkAdapterList.Add(networkAdapter);
@@ -288,14 +280,14 @@ namespace Hardware.Info.Windows
                 Printer printer = new Printer
                 {
                     Caption = GetPropertyString(mo["Caption"]),
-                    Default = GetPropertyString(mo["Default"]),
+                    Default = GetPropertyValue<bool>(mo["Default"]),
                     Description = GetPropertyString(mo["Description"]),
-                    HorizontalResolution = GetPropertyString(mo["HorizontalResolution"]),
-                    Local = GetPropertyString(mo["Local"]),
+                    HorizontalResolution = GetPropertyValue<uint>(mo["HorizontalResolution"]),
+                    Local = GetPropertyValue<bool>(mo["Local"]),
                     Name = GetPropertyString(mo["Name"]),
-                    Network = GetPropertyString(mo["Network"]),
-                    Shared = GetPropertyString(mo["Shared"]),
-                    VerticalResolution = GetPropertyString(mo["VerticalResolution"])
+                    Network = GetPropertyValue<bool>(mo["Network"]),
+                    Shared = GetPropertyValue<bool>(mo["Shared"]),
+                    VerticalResolution = GetPropertyValue<uint>(mo["VerticalResolution"])
                 };
 
                 printerList.Add(printer);
@@ -338,18 +330,18 @@ namespace Hardware.Info.Windows
                 VideoController videoController = new VideoController
                 {
                     AdapterCompatibility = GetPropertyString(mo["AdapterCompatibility"]),
-                    AdapterRAM = GetPropertyString(mo["AdapterRAM"]),
+                    AdapterRAM = GetPropertyValue<uint>(mo["AdapterRAM"]),
                     Caption = GetPropertyString(mo["Caption"]),
-                    CurrentBitsPerPixel = GetPropertyString(mo["CurrentBitsPerPixel"]),
-                    CurrentHorizontalResolution = GetPropertyString(mo["CurrentHorizontalResolution"]),
-                    CurrentNumberOfColors = GetPropertyString(mo["CurrentNumberOfColors"]),
-                    CurrentRefreshRate = GetPropertyString(mo["CurrentRefreshRate"]),
-                    CurrentVerticalResolution = GetPropertyString(mo["CurrentVerticalResolution"]),
+                    CurrentBitsPerPixel = GetPropertyValue<uint>(mo["CurrentBitsPerPixel"]),
+                    CurrentHorizontalResolution = GetPropertyValue<uint>(mo["CurrentHorizontalResolution"]),
+                    CurrentNumberOfColors = GetPropertyValue<ulong>(mo["CurrentNumberOfColors"]),
+                    CurrentRefreshRate = GetPropertyValue<uint>(mo["CurrentRefreshRate"]),
+                    CurrentVerticalResolution = GetPropertyValue<uint>(mo["CurrentVerticalResolution"]),
                     Description = GetPropertyString(mo["Description"]),
                     DriverDate = GetPropertyString(mo["DriverDate"]),
                     DriverVersion = GetPropertyString(mo["DriverVersion"]),
-                    MaxRefreshRate = GetPropertyString(mo["MaxRefreshRate"]),
-                    MinRefreshRate = GetPropertyString(mo["MinRefreshRate"]),
+                    MaxRefreshRate = GetPropertyValue<uint>(mo["MaxRefreshRate"]),
+                    MinRefreshRate = GetPropertyValue<uint>(mo["MinRefreshRate"]),
                     Name = GetPropertyString(mo["Name"]),
                     VideoModeDescription = GetPropertyString(mo["VideoModeDescription"]),
                     VideoProcessor = GetPropertyString(mo["VideoProcessor"])

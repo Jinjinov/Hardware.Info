@@ -4,11 +4,11 @@ namespace Hardware.Info
 {
     public class Memory
     {
-        public string Capacity;
-        public string Manufacturer;
-        public string PartNumber;
-        public string SerialNumber;
-        public string Speed;
+        public UInt64 Capacity { get; internal set; }
+        public string Manufacturer { get; internal set; } = string.Empty;
+        public string PartNumber { get; internal set; } = string.Empty;
+        public string SerialNumber { get; internal set; } = string.Empty;
+        public UInt32 Speed { get; internal set; }
 
         public override string ToString()
         {

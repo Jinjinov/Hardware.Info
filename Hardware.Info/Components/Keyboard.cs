@@ -4,10 +4,10 @@ namespace Hardware.Info
 {
     public class Keyboard
     {
-        public string Caption;
-        public string Description;
-        public string Name;
-        public string NumberOfFunctionKeys;
+        public string Caption { get; internal set; } = string.Empty;
+        public string Description { get; internal set; } = string.Empty;
+        public string Name { get; internal set; } = string.Empty;
+        public UInt16 NumberOfFunctionKeys { get; internal set; }
 
         public override string ToString()
         {

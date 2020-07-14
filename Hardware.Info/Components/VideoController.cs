@@ -5,18 +5,18 @@ namespace Hardware.Info
     public class VideoController
     {
         public string AdapterCompatibility;
-        public string AdapterRAM;
+        public UInt32 AdapterRAM;
         public string Caption;
-        public string CurrentBitsPerPixel;
-        public string CurrentHorizontalResolution;
-        public string CurrentNumberOfColors;
-        public string CurrentRefreshRate;
-        public string CurrentVerticalResolution;
+        public UInt32 CurrentBitsPerPixel;
+        public UInt32 CurrentHorizontalResolution;
+        public UInt64 CurrentNumberOfColors;
+        public UInt32 CurrentRefreshRate;
+        public UInt32 CurrentVerticalResolution;
         public string Description;
         public string DriverDate;
         public string DriverVersion;
-        public string MaxRefreshRate;
-        public string MinRefreshRate;
+        public UInt32 MaxRefreshRate;
+        public UInt32 MinRefreshRate;
         public string Name;
         public string VideoModeDescription;
         public string VideoProcessor;

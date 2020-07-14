@@ -4,8 +4,8 @@ namespace Hardware.Info
 {
     public class Motherboard
     {
-        public string Manufacturer;
-        public string Product;
+        public string Manufacturer { get; internal set; } = string.Empty;
+        public string Product { get; internal set; } = string.Empty;
 
         public override string ToString()
         {

@@ -5,20 +5,20 @@ namespace Hardware.Info
 {
     public class NetworkAdapter
     {
-        public string MACAddress { get; internal set; } = string.Empty;
+        //public string MACAddress { get; internal set; } = string.Empty;
         public string Model { get; internal set; } = string.Empty;
         public string SerialNumber { get; internal set; } = string.Empty;
         public IPAddress IPAddress { get; internal set; } = IPAddress.None;
 
-        public string AdapterType;
-        public string Caption;
-        public string Description;
-        //public string MACAddress;
-        public string Manufacturer;
-        public string Name;
-        public string NetConnectionID;
-        public string ProductName;
-        public string Speed;
+        public string AdapterType { get; internal set; } = string.Empty;
+        public string Caption { get; internal set; } = string.Empty;
+        public string Description { get; internal set; } = string.Empty;
+        public string MACAddress { get; internal set; } = string.Empty;
+        public string Manufacturer { get; internal set; } = string.Empty;
+        public string Name { get; internal set; } = string.Empty;
+        public string NetConnectionID { get; internal set; } = string.Empty;
+        public string ProductName { get; internal set; } = string.Empty;
+        public UInt64 Speed { get; internal set; }
 
         public override string ToString()
         {

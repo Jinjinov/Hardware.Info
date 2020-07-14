@@ -4,21 +4,21 @@ namespace Hardware.Info
 {
     public class Drive
     {
-        public string Caption;
-        public string Description;
-        public string FirmwareRevision;
-        public string Manufacturer;
-        public string Model;
-        //public string Name;
-        public string Partitions;
-        public string SerialNumber;
-        public string Size;
+        public string Caption { get; internal set; } = string.Empty;
+        public string Description { get; internal set; } = string.Empty;
+        public string FirmwareRevision { get; internal set; } = string.Empty;
+        public string Manufacturer { get; internal set; } = string.Empty;
+        public string Model { get; internal set; } = string.Empty;
+        public string Name { get; internal set; } = string.Empty;
+        public UInt32 Partitions { get; internal set; }
+        public string SerialNumber { get; internal set; } = string.Empty;
+        public UInt64 Size { get; internal set; }
 
         public long AvailableFreeSpace { get; internal set; }
         public string DriveFormat { get; internal set; } = string.Empty;
         public string DriveType { get; internal set; } = string.Empty;
         public bool IsReady { get; internal set; }
-        public string Name { get; internal set; } = string.Empty;
+        //public string Name { get; internal set; } = string.Empty;
         public string RootDirectory { get; internal set; } = string.Empty;
         public long TotalFreeSpace { get; internal set; }
         public long TotalSize { get; internal set; }

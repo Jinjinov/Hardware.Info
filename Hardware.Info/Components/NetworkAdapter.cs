@@ -1,12 +1,11 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Net;
 
 namespace Hardware.Info
 {
     public class NetworkAdapter
     {
-        public IPAddress IPAddress { get; internal set; } = IPAddress.None;
-
         public string AdapterType { get; internal set; } = string.Empty;
         public string Caption { get; internal set; } = string.Empty;
         public string Description { get; internal set; } = string.Empty;
@@ -16,6 +15,12 @@ namespace Hardware.Info
         public string NetConnectionID { get; internal set; } = string.Empty;
         public string ProductName { get; internal set; } = string.Empty;
         public UInt64 Speed { get; internal set; }
+
+        public List<IPAddress> DefaultIPGatewayList { get; internal set; } = new List<IPAddress>();
+        public IPAddress DHCPServer { get; internal set; } = IPAddress.None;
+        public List<IPAddress> DNSServerSearchOrderList { get; internal set; } = new List<IPAddress>();
+        public List<IPAddress> IPAddressList { get; internal set; } = new List<IPAddress>();
+        public List<IPAddress> IPSubnetList { get; internal set; } = new List<IPAddress>();
 
         public override string ToString()
         {

@@ -1,5 +1,7 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Management;
+using System.Net;
 
 namespace Hardware.Info.Windows
 {
@@ -8,6 +10,11 @@ namespace Hardware.Info.Windows
         public static T GetPropertyValue<T>(object obj) where T : struct
         {
             return (obj == null) ? default(T) : (T)obj;
+        }
+
+        public static T[] GetPropertyArray<T>(object obj)
+        {
+            return (obj is T[] array) ? array : Array.Empty<T>();
         }
 
         public static string GetPropertyString(object obj)
@@ -301,6 +308,29 @@ namespace Hardware.Info.Windows
                     ProductName = GetPropertyString(mo["ProductName"]),
                     Speed = GetPropertyValue<ulong>(mo["Speed"])
                 };
+
+                IPAddress address;
+                foreach (ManagementObject configuration in mo.GetRelated("Win32_NetworkAdapterConfiguration"))
+                {
+                    foreach (string str in GetPropertyArray<string>(configuration["DefaultIPGateway"]))
+                        if (IPAddress.TryParse(str, out address))
+                            networkAdapter.DefaultIPGatewayList.Add(address);
+
+                    if (IPAddress.TryParse(GetPropertyString(configuration["DHCPServer"]), out address))
+                        networkAdapter.DHCPServer = address;
+
+                    foreach (string str in GetPropertyArray<string>(configuration["DNSServerSearchOrder"]))
+                        if (IPAddress.TryParse(str, out address))
+                            networkAdapter.DNSServerSearchOrderList.Add(address);
+
+                    foreach (string str in GetPropertyArray<string>(configuration["IPAddress"]))
+                        if (IPAddress.TryParse(str, out address))
+                            networkAdapter.IPAddressList.Add(address);
+
+                    foreach (string str in GetPropertyArray<string>(configuration["IPSubnet"]))
+                        if (IPAddress.TryParse(str, out address))
+                            networkAdapter.IPSubnetList.Add(address);
+                }
 
                 networkAdapterList.Add(networkAdapter);
             }

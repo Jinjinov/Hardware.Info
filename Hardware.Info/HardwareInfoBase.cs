@@ -76,8 +76,7 @@ namespace Hardware.Info
                         {
                             if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
                             {
-                                networkAdapter.IPAddress = ip.Address;
-                                break;
+                                networkAdapter.IPAddressList.Add(ip.Address);
                             }
                         }
 

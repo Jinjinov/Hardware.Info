@@ -6,6 +6,10 @@ using System.Management;
 
 namespace Hardware.Info.Test
 {
+    // https://stackoverflow.com/a/49597492/4675770
+    // https://stackoverflow.com/questions/55376313/class-performancecounter-documentation
+    // https://stackoverflow.com/questions/23366831/c-sharp-performancecounter-list-of-possible-parameters
+
     class Program
     {
         static readonly HardwareInfo hardwareInfo = new HardwareInfo();
@@ -113,7 +117,10 @@ namespace Hardware.Info.Test
 
                         foreach (PropertyData data in obj.Properties)
                         {
-                            sw.WriteLine("{0} = {1}", data.Name, data.Value);
+                            if (data.Value is Array array)
+                                sw.WriteLine("{0} = {1}", data.Name, string.Join(',', array.Cast<object>().Select(obj => obj.ToString())));
+                            else
+                                sw.WriteLine("{0} = {1}", data.Name, data.Value);
                         }
                     }
                 }

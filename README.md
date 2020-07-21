@@ -8,11 +8,6 @@ Battery, BIOS, CPU, drives, keyboard, memory, monitors, motherboard, mouse, netw
 
         static void Main(string[] _)
         {
-            foreach (var address in HardwareInfo.GetLocalIPv4Address())
-                Console.WriteLine(address);
-
-            Console.WriteLine();
-
             hardwareInfo.RefreshAll();
 
             Console.WriteLine(hardwareInfo.MemoryStatus);
@@ -67,6 +62,11 @@ Battery, BIOS, CPU, drives, keyboard, memory, monitors, motherboard, mouse, netw
 
             foreach (var hardware in hardwareInfo.VideoControllerList)
                 Console.WriteLine(hardware);
+
+            Console.ReadLine();
+
+            foreach (var address in HardwareInfo.GetLocalIPv4Address())
+                Console.WriteLine(address);
 
             Console.ReadLine();
         }

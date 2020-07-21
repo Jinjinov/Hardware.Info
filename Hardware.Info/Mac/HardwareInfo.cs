@@ -84,7 +84,6 @@ namespace Hardware.Info.Mac
 
                 cpu.Name = info[0];
                 cpu.CurrentClockSpeed = uint.Parse(info[1]);
-                cpu.MaxClockSpeed = uint.Parse(info[1]);
             }
             catch (Exception)
             {

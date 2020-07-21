@@ -129,7 +129,6 @@ namespace Hardware.Info.Linux
                     if (match.Success)
                     {
                         cpu.CurrentClockSpeed = uint.Parse(match.Groups[1].Value);
-                        cpu.MaxClockSpeed = uint.Parse(match.Groups[1].Value);
 
                         continue;
                     }

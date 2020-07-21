@@ -4,6 +4,8 @@ namespace Hardware.Info
 {
     internal interface IHardwareInfo
     {
+        MemoryStatus GetMemoryStatus();
+
         List<Battery> GetBatteryList();
         List<BIOS> GetBiosList();
         List<CPU> GetCpuList();

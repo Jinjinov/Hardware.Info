@@ -1,9 +1,29 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Diagnostics;
+using System.Runtime.InteropServices;
 
 namespace Hardware.Info.Mac
 {
     internal class HardwareInfo : HardwareInfoBase, IHardwareInfo
     {
+        static IntPtr SizeOfLineSize = (IntPtr)IntPtr.Size;
+
+        [DllImport("libc")]
+        static extern int sysctlbyname(string name, out IntPtr oldp, ref IntPtr oldlenp, IntPtr newp, IntPtr newlen);
+
+        readonly MemoryStatus memoryStatus = new MemoryStatus();
+
+        public MemoryStatus GetMemoryStatus()
+        {
+            if (sysctlbyname("hw.memsize", out IntPtr lineSize, ref SizeOfLineSize, IntPtr.Zero, IntPtr.Zero) == 0)
+            {
+                memoryStatus.TotalPhysical = (ulong)lineSize.ToInt64();
+            }
+
+            return memoryStatus;
+        }
+
         public List<Battery> GetBatteryList()
         {
             List<Battery> batteryList = new List<Battery>();
@@ -20,7 +40,88 @@ namespace Hardware.Info.Mac
 
         public List<CPU> GetCpuList()
         {
+            static Process StartProcess(string cmd, string args)
+            {
+                var psi = new ProcessStartInfo(cmd, args)
+                {
+                    CreateNoWindow = true,
+                    ErrorDialog = false,
+                    RedirectStandardError = true,
+                    RedirectStandardInput = true,
+                    RedirectStandardOutput = true
+                };
+
+                return Process.Start(psi);
+            }
+
             List<CPU> cpuList = new List<CPU>();
+
+            CPU cpu = new CPU();
+
+            try
+            {
+                using var p = StartProcess("sysctl", "-n machdep.cpu.brand_string");
+                using var sr = p.StandardOutput;
+                p.WaitForExit();
+
+                var info = sr.ReadToEnd().Trim().Split('@');
+
+                info[1] = info[1].Trim();
+
+                if (info[1].EndsWith("GHz"))
+                {
+                    info[1] = ((uint)(double.Parse(info[1].Replace("GHz", "").Replace(" ", "")) * 1000))
+                        .ToString();
+                }
+                else if (info[1].EndsWith("KHz"))
+                {
+                    info[1] = ((uint)(double.Parse(info[1].Replace("KHz", "")) / 1000)).ToString();
+                }
+                else
+                {
+                    info[1] = info[1].Replace("MHz", "").Trim();
+                }
+
+                cpu.Name = info[0];
+                cpu.CurrentClockSpeed = uint.Parse(info[1]);
+                cpu.MaxClockSpeed = uint.Parse(info[1]);
+            }
+            catch (Exception)
+            {
+                // Intentionally left blank
+            }
+
+            try
+            {
+                using var p = StartProcess("sysctl", "-n hw.physicalcpu");
+                using var sr = p.StandardOutput;
+                p.WaitForExit();
+
+                var info = sr.ReadToEnd().Trim();
+
+                cpu.NumberOfCores = uint.Parse(info);
+            }
+            catch (Exception)
+            {
+                // Intentionally left blank
+            }
+
+            try
+            {
+                using var p = StartProcess("sysctl", "-n hw.logicalcpu");
+                using var sr = p.StandardOutput;
+                p.WaitForExit();
+
+                var info = sr.ReadToEnd().Trim();
+
+                cpu.NumberOfLogicalProcessors = uint.Parse(info);
+            }
+            catch (Exception)
+            {
+                // Intentionally left blank
+            }
+
+            cpuList.Add(cpu);
 
             return cpuList;
         }

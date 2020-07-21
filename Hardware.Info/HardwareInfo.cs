@@ -10,6 +10,8 @@ namespace Hardware.Info
 {
     public class HardwareInfo
     {
+        public MemoryStatus MemoryStatus { get; private set; } = new MemoryStatus();
+
         public List<Battery> BatteryList { get; private set; } = new List<Battery>();
         public List<BIOS> BiosList { get; private set; } = new List<BIOS>();
         public List<CPU> CpuList { get; private set; } = new List<CPU>();
@@ -46,6 +48,8 @@ namespace Hardware.Info
 
         public void RefreshAll()
         {
+            RefreshMemoryStatus();
+
             RefreshBatteryList();
             RefreshBIOSList();
             RefreshCPUList();
@@ -60,6 +64,8 @@ namespace Hardware.Info
             RefreshSoundDeviceList();
             RefreshVideoControllerList();
         }
+
+        public void RefreshMemoryStatus() => MemoryStatus = hardwareInfo.GetMemoryStatus();
 
         public void RefreshBatteryList() => BatteryList = hardwareInfo.GetBatteryList();
         public void RefreshBIOSList() => BiosList = hardwareInfo.GetBiosList();

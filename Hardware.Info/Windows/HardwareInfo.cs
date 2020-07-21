@@ -2,11 +2,55 @@
 using System.Collections.Generic;
 using System.Management;
 using System.Net;
+using System.Runtime.InteropServices;
 
 namespace Hardware.Info.Windows
 {
+    [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
+    internal class MEMORYSTATUSEX
+    {
+        public uint dwLength;
+        public uint dwMemoryLoad;
+        public ulong ullTotalPhys;
+        public ulong ullAvailPhys;
+        public ulong ullTotalPageFile;
+        public ulong ullAvailPageFile;
+        public ulong ullTotalVirtual;
+        public ulong ullAvailVirtual;
+        public ulong ullAvailExtendedVirtual;
+
+        public MEMORYSTATUSEX()
+        {
+            dwLength = (uint)Marshal.SizeOf(typeof(MEMORYSTATUSEX));
+        }
+    }
+
     internal class HardwareInfo : HardwareInfoBase, IHardwareInfo
     {
+        readonly MEMORYSTATUSEX memoryStatusEx = new MEMORYSTATUSEX();
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool GlobalMemoryStatusEx([In, Out] MEMORYSTATUSEX lpBuffer);
+
+        readonly MemoryStatus memoryStatus = new MemoryStatus();
+
+        public MemoryStatus GetMemoryStatus()
+        {
+            if (GlobalMemoryStatusEx(memoryStatusEx))
+            {
+                memoryStatus.TotalPhysical = memoryStatusEx.ullTotalPhys;
+                memoryStatus.AvailablePhysical = memoryStatusEx.ullAvailPhys;
+                memoryStatus.TotalPageFile = memoryStatusEx.ullTotalPageFile;
+                memoryStatus.AvailablePageFile = memoryStatusEx.ullAvailPageFile;
+                memoryStatus.TotalVirtual = memoryStatusEx.ullTotalVirtual;
+                memoryStatus.AvailableVirtual = memoryStatusEx.ullAvailVirtual;
+                memoryStatus.AvailableExtendedVirtual = memoryStatusEx.ullAvailExtendedVirtual;
+            }
+
+            return memoryStatus;
+        }
+
         public static T GetPropertyValue<T>(object obj) where T : struct
         {
             return (obj == null) ? default(T) : (T)obj;

@@ -23,6 +23,8 @@ namespace Hardware.Info.Test
 
             hardwareInfo.RefreshAll();
 
+            Console.WriteLine(hardwareInfo.MemoryStatus);
+
             foreach (var hardware in hardwareInfo.BatteryList)
                 Console.WriteLine(hardware);
 
@@ -44,6 +46,8 @@ namespace Hardware.Info.Test
                         Console.WriteLine(volume);
                 }
             }
+
+            Console.ReadLine();
 
             foreach (var hardware in hardwareInfo.KeyboardList)
                 Console.WriteLine(hardware);
@@ -71,6 +75,8 @@ namespace Hardware.Info.Test
 
             foreach (var hardware in hardwareInfo.VideoControllerList)
                 Console.WriteLine(hardware);
+
+            Console.ReadLine();
 
             FileStream fs = new FileStream("log.txt", FileMode.OpenOrCreate);
             StreamWriter sw = new StreamWriter(fs);

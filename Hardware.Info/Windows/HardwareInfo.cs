@@ -250,6 +250,7 @@ namespace Hardware.Info.Windows
                 Memory memory = new Memory
                 {
                     Capacity = GetPropertyValue<ulong>(mo["Capacity"]),
+                    FormFactor = (FormFactor)GetPropertyValue<ushort>(mo["FormFactor"]),
                     Manufacturer = GetPropertyString(mo["Manufacturer"]),
                     PartNumber = GetPropertyString(mo["PartNumber"]),
                     SerialNumber = GetPropertyString(mo["SerialNumber"]),
@@ -442,7 +443,7 @@ namespace Hardware.Info.Windows
             {
                 VideoController videoController = new VideoController
                 {
-                    AdapterCompatibility = GetPropertyString(mo["AdapterCompatibility"]),
+                    Manufacturer = GetPropertyString(mo["AdapterCompatibility"]),
                     AdapterRAM = GetPropertyValue<uint>(mo["AdapterRAM"]),
                     Caption = GetPropertyString(mo["Caption"]),
                     CurrentBitsPerPixel = GetPropertyValue<uint>(mo["CurrentBitsPerPixel"]),

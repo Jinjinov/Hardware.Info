@@ -1,6 +1,6 @@
 # Hardware.Info
 
-Basic info on the battery, BIOS, CPU, drives, keyboard, memory, monitors, motherboard, mouse, network adapters, printers, sound devices and video controllers. Hardware.Info is a .NET Standard 2.0 library and uses WMI on Windows, lshw on Linux and sysctl on macOS.
+Battery, BIOS, CPU, drives, keyboard, memory, monitors, motherboard, mouse, network adapters, printers, sound devices and video controllers. Hardware.Info is a .NET Standard 2.0 library and uses WMI on Windows, lshw on Linux and sysctl on macOS.
 
     class Program
     {

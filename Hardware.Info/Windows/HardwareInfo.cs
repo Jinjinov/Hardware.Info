@@ -299,10 +299,9 @@ namespace Hardware.Info.Windows
                 Motherboard motherboard = new Motherboard
                 {
                     Manufacturer = GetPropertyString(mo["Manufacturer"]),
-                    Product = GetPropertyString(mo["Product"])
+                    Product = GetPropertyString(mo["Product"]),
+                    SerialNumber = GetPropertyString(mo["SerialNumber"])
                 };
-
-                //MotherboardSerialNumber = mo["SerialNumber"]?.ToString()?.Trim() ?? string.Empty;
 
                 motherboardList.Add(motherboard);
             }

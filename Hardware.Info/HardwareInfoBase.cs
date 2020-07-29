@@ -40,49 +40,27 @@ namespace Hardware.Info
 
         public virtual List<NetworkAdapter> GetNetworkAdapterList()
         {
-            List<NetworkAdapter> networkAdapterList = GetNetworkAdapterList(NetworkInterfaceType.Wireless80211, false);
-
-            if (networkAdapterList.Count == 0)
-                networkAdapterList = GetNetworkAdapterList(NetworkInterfaceType.Ethernet, false);
-
-            if (networkAdapterList.Count == 0)
-                networkAdapterList = GetNetworkAdapterList(NetworkInterfaceType.Wireless80211, true);
-
-            if (networkAdapterList.Count == 0)
-                networkAdapterList = GetNetworkAdapterList(NetworkInterfaceType.Ethernet, true);
-
-            return networkAdapterList;
-        }
-
-        protected List<NetworkAdapter> GetNetworkAdapterList(NetworkInterfaceType networkInterfaceType, bool anyStatus)
-        {
             List<NetworkAdapter> networkAdapterList = new List<NetworkAdapter>();
 
             foreach (NetworkInterface networkInterface in NetworkInterface.GetAllNetworkInterfaces())
             {
-                if (networkInterface.NetworkInterfaceType == networkInterfaceType)
+                NetworkAdapter networkAdapter = new NetworkAdapter
                 {
-                    if (anyStatus || networkInterface.OperationalStatus == OperationalStatus.Up)
+                    MACAddress = networkInterface.GetPhysicalAddress().ToString().Trim(),
+                    Description = networkInterface.Description.Trim(),
+                    Name = networkInterface.Name.Trim(),
+                    Speed = (ulong)networkInterface.Speed
+                };
+
+                foreach (UnicastIPAddressInformation addressInformation in networkInterface.GetIPProperties().UnicastAddresses)
+                {
+                    if (addressInformation.Address.AddressFamily == AddressFamily.InterNetwork)
                     {
-                        NetworkAdapter networkAdapter = new NetworkAdapter
-                        {
-                            MACAddress = networkInterface.GetPhysicalAddress().ToString().Trim(),
-                            Description = networkInterface.Description.Trim(),
-                            Name = networkInterface.Name.Trim(),
-                            Speed = (ulong)networkInterface.Speed
-                        };
-
-                        foreach (UnicastIPAddressInformation ip in networkInterface.GetIPProperties().UnicastAddresses)
-                        {
-                            if (ip.Address.AddressFamily == AddressFamily.InterNetwork)
-                            {
-                                networkAdapter.IPAddressList.Add(ip.Address);
-                            }
-                        }
-
-                        networkAdapterList.Add(networkAdapter);
+                        networkAdapter.IPAddressList.Add(addressInformation.Address);
                     }
                 }
+
+                networkAdapterList.Add(networkAdapter);
             }
 
             return networkAdapterList;

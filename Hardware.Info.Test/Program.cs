@@ -1,8 +1,5 @@
 ﻿using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Management;
+using System.Net.NetworkInformation;
 
 namespace Hardware.Info.Test
 {
@@ -73,7 +70,16 @@ namespace Hardware.Info.Test
 
             Console.ReadLine();
 
-            foreach (var address in HardwareInfo.GetLocalIPv4Address())
+            foreach (var address in HardwareInfo.GetLocalIPv4Addresses(NetworkInterfaceType.Ethernet, OperationalStatus.Up))
+                Console.WriteLine(address);
+
+            foreach (var address in HardwareInfo.GetLocalIPv4Addresses(NetworkInterfaceType.Wireless80211))
+                Console.WriteLine(address);
+
+            foreach (var address in HardwareInfo.GetLocalIPv4Addresses(OperationalStatus.Up))
+                Console.WriteLine(address);
+
+            foreach (var address in HardwareInfo.GetLocalIPv4Addresses())
                 Console.WriteLine(address);
 
             Console.ReadLine();

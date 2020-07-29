@@ -129,9 +129,36 @@ namespace Hardware.Info
             OnPingComplete?.Invoke(success);
         }
 
-        public static IEnumerable<IPAddress> GetLocalIPv4Address()
+        public static IEnumerable<IPAddress> GetLocalIPv4Addresses()
         {
             return Dns.GetHostEntry(Dns.GetHostName()).AddressList.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork);
+        }
+
+        public static IEnumerable<IPAddress> GetLocalIPv4Addresses(NetworkInterfaceType networkInterfaceType)
+        {
+            return NetworkInterface.GetAllNetworkInterfaces()
+                                   .Where(networkInterface => networkInterface.NetworkInterfaceType == networkInterfaceType)
+                                   .SelectMany(networkInterface => networkInterface.GetIPProperties().UnicastAddresses)
+                                   .Where(addressInformation => addressInformation.Address.AddressFamily == AddressFamily.InterNetwork)
+                                   .Select(addressInformation => addressInformation.Address);
+        }
+
+        public static IEnumerable<IPAddress> GetLocalIPv4Addresses(OperationalStatus operationalStatus)
+        {
+            return NetworkInterface.GetAllNetworkInterfaces()
+                                   .Where(networkInterface => networkInterface.OperationalStatus == operationalStatus)
+                                   .SelectMany(networkInterface => networkInterface.GetIPProperties().UnicastAddresses)
+                                   .Where(addressInformation => addressInformation.Address.AddressFamily == AddressFamily.InterNetwork)
+                                   .Select(addressInformation => addressInformation.Address);
+        }
+
+        public static IEnumerable<IPAddress> GetLocalIPv4Addresses(NetworkInterfaceType networkInterfaceType, OperationalStatus operationalStatus)
+        {
+            return NetworkInterface.GetAllNetworkInterfaces()
+                                   .Where(networkInterface => networkInterface.NetworkInterfaceType == networkInterfaceType && networkInterface.OperationalStatus == operationalStatus)
+                                   .SelectMany(networkInterface => networkInterface.GetIPProperties().UnicastAddresses)
+                                   .Where(addressInformation => addressInformation.Address.AddressFamily == AddressFamily.InterNetwork)
+                                   .Select(addressInformation => addressInformation.Address);
         }
 
         #endregion

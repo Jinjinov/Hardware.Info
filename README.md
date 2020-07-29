@@ -76,11 +76,17 @@ How to use:
                 foreach (var address in HardwareInfo.GetLocalIPv4Addresses(NetworkInterfaceType.Ethernet, OperationalStatus.Up))
                     Console.WriteLine(address);
 
+                Console.WriteLine();
+
                 foreach (var address in HardwareInfo.GetLocalIPv4Addresses(NetworkInterfaceType.Wireless80211))
                     Console.WriteLine(address);
 
+                Console.WriteLine();
+
                 foreach (var address in HardwareInfo.GetLocalIPv4Addresses(OperationalStatus.Up))
                     Console.WriteLine(address);
+
+                Console.WriteLine();
 
                 foreach (var address in HardwareInfo.GetLocalIPv4Address())
                     Console.WriteLine(address);

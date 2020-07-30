@@ -85,7 +85,7 @@ namespace Hardware.Info.Mac
                 cpu.Name = info[0];
                 cpu.CurrentClockSpeed = uint.Parse(info[1]);
             }
-            catch (Exception)
+            catch
             {
                 // Intentionally left blank
             }
@@ -100,7 +100,7 @@ namespace Hardware.Info.Mac
 
                 cpu.NumberOfCores = uint.Parse(info);
             }
-            catch (Exception)
+            catch
             {
                 // Intentionally left blank
             }
@@ -115,7 +115,7 @@ namespace Hardware.Info.Mac
 
                 cpu.NumberOfLogicalProcessors = uint.Parse(info);
             }
-            catch (Exception)
+            catch
             {
                 // Intentionally left blank
             }

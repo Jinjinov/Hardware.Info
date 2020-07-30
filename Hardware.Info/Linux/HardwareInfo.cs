@@ -66,7 +66,7 @@ namespace Hardware.Info.Linux
             {
                 bios.Version = File.ReadAllText("/sys/class/dmi/id/bios_version").Trim();
             }
-            catch (Exception)
+            catch
             {
                 // Intentionally left blank
             }
@@ -75,7 +75,7 @@ namespace Hardware.Info.Linux
             {
                 bios.Manufacturer = File.ReadAllText("/sys/class/dmi/id/bios_vendor").Trim();
             }
-            catch (Exception)
+            catch
             {
                 // Intentionally left blank
             }
@@ -98,7 +98,7 @@ namespace Hardware.Info.Linux
             {
                 File.OpenRead("/proc/cpuinfo").Dispose();
             }
-            catch (Exception)
+            catch
             {
                 return cpuList;
             }
@@ -151,7 +151,7 @@ namespace Hardware.Info.Linux
                         continue;
                     }
                 }
-                catch (Exception)
+                catch
                 {
                     // Intentionally left blank
                 }
@@ -286,7 +286,6 @@ namespace Hardware.Info.Linux
                                     }
                                     else
                                     {
-                                        // Oof
                                         rawNumber = (ulong)number;
                                     }
 
@@ -328,7 +327,7 @@ namespace Hardware.Info.Linux
             {
                 motherboard.Product = File.ReadAllText("/sys/class/dmi/id/board_name").Trim();
             }
-            catch (Exception)
+            catch
             {
                 // Intentionally left blank
             }
@@ -337,7 +336,7 @@ namespace Hardware.Info.Linux
             {
                 motherboard.Manufacturer = File.ReadAllText("/sys/class/dmi/id/board_vendor").Trim();
             }
-            catch (Exception)
+            catch
             {
                 // Intentionally left blank
             }

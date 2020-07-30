@@ -3,10 +3,6 @@ using System.Net.NetworkInformation;
 
 namespace Hardware.Info.Test
 {
-    // https://stackoverflow.com/a/49597492/4675770
-    // https://stackoverflow.com/questions/55376313/class-performancecounter-documentation
-    // https://stackoverflow.com/questions/23366831/c-sharp-performancecounter-list-of-possible-parameters
-
     class Program
     {
         static readonly HardwareInfo hardwareInfo = new HardwareInfo();

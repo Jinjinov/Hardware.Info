@@ -9,6 +9,21 @@ namespace Hardware.Info.Test
 
         static void Main(string[] _)
         {
+            //hardwareInfo.RefreshMemoryStatus();
+            //hardwareInfo.RefreshBatteryList();
+            //hardwareInfo.RefreshBIOSList();
+            //hardwareInfo.RefreshCPUList();
+            //hardwareInfo.RefreshDriveList();
+            //hardwareInfo.RefreshKeyboardList();
+            //hardwareInfo.RefreshMemoryList();
+            //hardwareInfo.RefreshMonitorList();
+            //hardwareInfo.RefreshMotherboardList();
+            //hardwareInfo.RefreshMouseList();
+            //hardwareInfo.RefreshNetworkAdapterList();
+            //hardwareInfo.RefreshPrinterList();
+            //hardwareInfo.RefreshSoundDeviceList();
+            //hardwareInfo.RefreshVideoControllerList();
+
             hardwareInfo.RefreshAll();
 
             Console.WriteLine(hardwareInfo.MemoryStatus);

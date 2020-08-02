@@ -5,13 +5,12 @@ using System.Runtime.InteropServices;
 
 // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/sysctlbyname.3.html
 // https://wiki.freepascal.org/Accessing_macOS_System_Information
+// https://stackoverflow.com/questions/6592578/how-to-to-print-motherboard-and-display-card-info-on-mac
 
 namespace Hardware.Info.Mac
 {
     internal class HardwareInfo : HardwareInfoBase, IHardwareInfo
     {
-        static IntPtr SizeOfLineSize = (IntPtr)IntPtr.Size;
-
         [DllImport("libc")]
         static extern int sysctlbyname(string name, out IntPtr oldp, ref IntPtr oldlenp, IntPtr newp, IntPtr newlen);
 
@@ -19,6 +18,8 @@ namespace Hardware.Info.Mac
 
         public MemoryStatus GetMemoryStatus()
         {
+            IntPtr SizeOfLineSize = (IntPtr)IntPtr.Size;
+
             if (sysctlbyname("hw.memsize", out IntPtr lineSize, ref SizeOfLineSize, IntPtr.Zero, IntPtr.Zero) == 0)
             {
                 memoryStatus.TotalPhysical = (ulong)lineSize.ToInt64();
@@ -32,6 +33,10 @@ namespace Hardware.Info.Mac
             List<Battery> batteryList = new List<Battery>();
 
             Battery battery = new Battery();
+
+            // https://stackoverflow.com/questions/29278961/check-mac-battery-percentage-in-swift
+
+            // https://developer.apple.com/documentation/iokit/iopowersources_h
 
             batteryList.Add(battery);
 
@@ -169,6 +174,18 @@ namespace Hardware.Info.Mac
 
             Monitor monitor = new Monitor();
 
+            // https://developer.apple.com/documentation/appkit/nsscreen
+
+            // https://developer.apple.com/documentation/iokit/iographicslib_h
+
+            // IODisplayConnect
+
+            // IODisplayEDID
+
+            //auto mainDisplayId = CGMainDisplayID();
+            //width = CGDisplayPixelsWide(mainDisplayId);
+            //height = CGDisplayPixelsHigh(mainDisplayId);
+
             monitorList.Add(monitor);
 
             return monitorList;
@@ -207,6 +224,12 @@ namespace Hardware.Info.Mac
 
             Printer printer = new Printer();
 
+            // https://stackoverflow.com/questions/57617998/how-to-retrieve-installed-printers-on-macos-in-c-sharp
+
+            // https://developer.apple.com/documentation/appkit/nsprinter
+
+            // https://developer.apple.com/documentation/iokit/1424817-printer_class_requests
+
             printerList.Add(printer);
 
             return printerList;
@@ -228,6 +251,10 @@ namespace Hardware.Info.Mac
             List<VideoController> videoControllerList = new List<VideoController>();
 
             VideoController videoController = new VideoController();
+
+            // https://stackoverflow.com/questions/18077639/getting-graphic-card-information-in-objective-c
+
+            // https://developer.apple.com/documentation/iokit/iographicslib_h
 
             videoControllerList.Add(videoController);
 

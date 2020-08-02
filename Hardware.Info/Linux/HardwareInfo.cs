@@ -11,8 +11,6 @@ namespace Hardware.Info.Linux
 {
     internal class HardwareInfo : HardwareInfoBase, IHardwareInfo
     {
-        const string KbToken = "kB";
-
         readonly MemoryStatus memoryStatus = new MemoryStatus();
 
         public MemoryStatus GetMemoryStatus()
@@ -29,6 +27,8 @@ namespace Hardware.Info.Linux
 
         private ulong GetBytesFromLine(string[] meminfo, string token)
         {
+            const string KbToken = "kB";
+
             string? memLine = meminfo.FirstOrDefault(x => x.StartsWith(token))?.Substring(token.Length);
 
             if (memLine != null && memLine.EndsWith(KbToken) && ulong.TryParse(memLine.Substring(0, memLine.Length - KbToken.Length), out ulong memKb))
@@ -49,6 +49,18 @@ namespace Hardware.Info.Linux
             };
 
             return Process.Start(psi);
+        }
+
+        internal static string TryReadFile(string path)
+        {
+            try
+            {
+                return File.ReadAllText(path).Trim();
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
 
         public List<Battery> GetBatteryList()
@@ -74,25 +86,12 @@ namespace Hardware.Info.Linux
         {
             List<BIOS> biosList = new List<BIOS>();
 
-            BIOS bios = new BIOS();
-
-            try
+            BIOS bios = new BIOS
             {
-                bios.Version = File.ReadAllText("/sys/class/dmi/id/bios_version").Trim();
-            }
-            catch
-            {
-                // Intentionally left blank
-            }
-
-            try
-            {
-                bios.Manufacturer = File.ReadAllText("/sys/class/dmi/id/bios_vendor").Trim();
-            }
-            catch
-            {
-                // Intentionally left blank
-            }
+                ReleaseDate = TryReadFile("/sys/class/dmi/id/bios_date"),
+                Version = TryReadFile("/sys/class/dmi/id/bios_version"),
+                Manufacturer = TryReadFile("/sys/class/dmi/id/bios_vendor")
+            };
 
             biosList.Add(bios);
 
@@ -338,6 +337,12 @@ namespace Hardware.Info.Linux
 
             Monitor monitor = new Monitor();
 
+            // https://superuser.com/questions/526497/how-do-you-find-out-a-laptop-screen-panel-manufacturer-model-with-linux-sams
+
+            // /sys/class/graphics/fb0/mode
+
+            // /sys/class/drm/ * /edid
+
             monitorList.Add(monitor);
 
             return monitorList;
@@ -347,25 +352,12 @@ namespace Hardware.Info.Linux
         {
             List<Motherboard> motherboardList = new List<Motherboard>();
 
-            Motherboard motherboard = new Motherboard();
-
-            try
+            Motherboard motherboard = new Motherboard
             {
-                motherboard.Product = File.ReadAllText("/sys/class/dmi/id/board_name").Trim();
-            }
-            catch
-            {
-                // Intentionally left blank
-            }
-
-            try
-            {
-                motherboard.Manufacturer = File.ReadAllText("/sys/class/dmi/id/board_vendor").Trim();
-            }
-            catch
-            {
-                // Intentionally left blank
-            }
+                Product = TryReadFile("/sys/class/dmi/id/board_name"),
+                Manufacturer = TryReadFile("/sys/class/dmi/id/board_vendor"),
+                SerialNumber = TryReadFile("/sys/class/dmi/id/board_serial")
+            };
 
             motherboardList.Add(motherboard);
 

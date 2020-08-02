@@ -37,20 +37,6 @@ namespace Hardware.Info.Linux
             return 0;
         }
 
-        internal static Process StartProcess(string cmd, string args)
-        {
-            var psi = new ProcessStartInfo(cmd, args)
-            {
-                CreateNoWindow = true,
-                ErrorDialog = false,
-                RedirectStandardError = true,
-                RedirectStandardInput = true,
-                RedirectStandardOutput = true
-            };
-
-            return Process.Start(psi);
-        }
-
         internal static string TryReadFile(string path)
         {
             try

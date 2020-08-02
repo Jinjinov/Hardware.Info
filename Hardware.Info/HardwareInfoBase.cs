@@ -1,4 +1,5 @@
 ﻿using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
@@ -7,6 +8,36 @@ namespace Hardware.Info
 {
     internal class HardwareInfoBase
     {
+        internal static Process StartProcess(string cmd, string args)
+        {
+            ProcessStartInfo processStartInfo = new ProcessStartInfo(cmd, args)
+            {
+                CreateNoWindow = true,
+                ErrorDialog = false,
+                RedirectStandardError = true,
+                RedirectStandardInput = true,
+                RedirectStandardOutput = true
+            };
+
+            return Process.Start(processStartInfo);
+        }
+
+        internal static string ReadProcessOutput(string cmd, string args)
+        {
+            try
+            {
+                using Process process = StartProcess(cmd, args);
+                using StreamReader streamReader = process.StandardOutput;
+                process.WaitForExit();
+
+                return streamReader.ReadToEnd().Trim();
+            }
+            catch
+            {
+                return string.Empty;
+            }
+        }
+
         public virtual List<Drive> GetDriveList()
         {
             List<Drive> driveList = new List<Drive>();

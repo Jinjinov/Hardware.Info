@@ -6,6 +6,8 @@ using System.Runtime.InteropServices;
 // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/sysctlbyname.3.html
 // https://wiki.freepascal.org/Accessing_macOS_System_Information
 // https://stackoverflow.com/questions/6592578/how-to-to-print-motherboard-and-display-card-info-on-mac
+// https://stackoverflow.com/questions/53117107/cocoa-nstask-ouput-extraction
+// https://docs.python.org/3/library/plistlib.html
 
 namespace Hardware.Info.Mac
 {
@@ -15,6 +17,10 @@ namespace Hardware.Info.Mac
         static extern int sysctlbyname(string name, out IntPtr oldp, ref IntPtr oldlenp, IntPtr newp, IntPtr newlen);
 
         readonly MemoryStatus memoryStatus = new MemoryStatus();
+
+        public HardwareInfo()
+        {
+        }
 
         public MemoryStatus GetMemoryStatus()
         {
@@ -56,38 +62,20 @@ namespace Hardware.Info.Mac
 
         public List<CPU> GetCpuList()
         {
-            static Process StartProcess(string cmd, string args)
-            {
-                var psi = new ProcessStartInfo(cmd, args)
-                {
-                    CreateNoWindow = true,
-                    ErrorDialog = false,
-                    RedirectStandardError = true,
-                    RedirectStandardInput = true,
-                    RedirectStandardOutput = true
-                };
-
-                return Process.Start(psi);
-            }
-
             List<CPU> cpuList = new List<CPU>();
 
             CPU cpu = new CPU();
 
-            try
+            string processOutput = ReadProcessOutput("sysctl", "-n machdep.cpu.brand_string");
+            string[] info = processOutput.Split('@');
+
+            if (info.Length > 1)
             {
-                using var p = StartProcess("sysctl", "-n machdep.cpu.brand_string");
-                using var sr = p.StandardOutput;
-                p.WaitForExit();
-
-                var info = sr.ReadToEnd().Trim().Split('@');
-
                 info[1] = info[1].Trim();
 
                 if (info[1].EndsWith("GHz"))
                 {
-                    info[1] = ((uint)(double.Parse(info[1].Replace("GHz", "").Replace(" ", "")) * 1000))
-                        .ToString();
+                    info[1] = ((uint)(double.Parse(info[1].Replace("GHz", "").Replace(" ", "")) * 1000)).ToString();
                 }
                 else if (info[1].EndsWith("KHz"))
                 {
@@ -101,40 +89,16 @@ namespace Hardware.Info.Mac
                 cpu.Name = info[0];
                 cpu.CurrentClockSpeed = uint.Parse(info[1]);
             }
-            catch
-            {
-                // Intentionally left blank
-            }
 
-            try
-            {
-                using var p = StartProcess("sysctl", "-n hw.physicalcpu");
-                using var sr = p.StandardOutput;
-                p.WaitForExit();
+            processOutput = ReadProcessOutput("sysctl", "-n hw.physicalcpu");
 
-                var info = sr.ReadToEnd().Trim();
+            if (uint.TryParse(processOutput, out uint numberOfCores))
+                cpu.NumberOfCores = numberOfCores;
 
-                cpu.NumberOfCores = uint.Parse(info);
-            }
-            catch
-            {
-                // Intentionally left blank
-            }
+            processOutput = ReadProcessOutput("sysctl", "-n hw.logicalcpu");
 
-            try
-            {
-                using var p = StartProcess("sysctl", "-n hw.logicalcpu");
-                using var sr = p.StandardOutput;
-                p.WaitForExit();
-
-                var info = sr.ReadToEnd().Trim();
-
-                cpu.NumberOfLogicalProcessors = uint.Parse(info);
-            }
-            catch
-            {
-                // Intentionally left blank
-            }
+            if (uint.TryParse(processOutput, out uint numberOfLogicalProcessors))
+                cpu.NumberOfLogicalProcessors = numberOfLogicalProcessors;
 
             cpuList.Add(cpu);
 

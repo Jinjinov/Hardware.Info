@@ -20,6 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <PackageReference Include="PListNet" Version="3.2.0" />
     <PackageReference Include="System.Management" Version="4.7.0" />
   </ItemGroup>
 

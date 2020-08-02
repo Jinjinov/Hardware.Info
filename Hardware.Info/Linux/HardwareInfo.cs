@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
@@ -11,7 +10,7 @@ namespace Hardware.Info.Linux
 {
     internal class HardwareInfo : HardwareInfoBase, IHardwareInfo
     {
-        readonly MemoryStatus memoryStatus = new MemoryStatus();
+        private readonly MemoryStatus memoryStatus = new MemoryStatus();
 
         public MemoryStatus GetMemoryStatus()
         {
@@ -102,19 +101,19 @@ namespace Hardware.Info.Linux
                 return cpuList;
             }
 
-            var info = File.ReadAllLines("/proc/cpuinfo");
-            var modelNameRegex = new Regex(@"^model name\s+:\s+(.+)");
-            var cpuSpeedRegex = new Regex(@"^cpu MHz\s+:\s+(.+)");
-            var physicalCoresRegex = new Regex(@"^cpu cores\s+:\s+(.+)");
-            var logicalCoresRegex = new Regex(@"^siblings\s+:\s+(.+)");
+            string[] info = File.ReadAllLines("/proc/cpuinfo");
+            Regex modelNameRegex = new Regex(@"^model name\s+:\s+(.+)");
+            Regex cpuSpeedRegex = new Regex(@"^cpu MHz\s+:\s+(.+)");
+            Regex physicalCoresRegex = new Regex(@"^cpu cores\s+:\s+(.+)");
+            Regex logicalCoresRegex = new Regex(@"^siblings\s+:\s+(.+)");
 
             CPU cpu = new CPU();
 
-            foreach (var s in info)
+            foreach (string s in info)
             {
                 try
                 {
-                    var match = modelNameRegex.Match(s);
+                    Match match = modelNameRegex.Match(s);
 
                     if (match.Success)
                     {
@@ -165,54 +164,46 @@ namespace Hardware.Info.Linux
         {
             List<Drive> driveList = new List<Drive>();
 
-            try
+            string processOutput = ReadProcessOutput("lshw", "-class disk");
+
+            string[] lines = processOutput.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+
+            Drive? disk = null;
+
+            foreach (string line in lines)
             {
-                var p = StartProcess("lshw", "-class disk");
-                var sr = p.StandardOutput;
-                p.WaitForExit();
-                var lines = sr.ReadToEnd().Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-
-                Drive? disk = null;
-
-                foreach (var line in lines)
+                if (line.StartsWith("*-"))
                 {
-                    if (line.StartsWith("*-"))
-                    {
-                        if (disk != null)
-                        {
-                            driveList.Add(disk);
-                        }
-
-                        disk = null;
-                    }
-
-                    if (line.StartsWith("*-disk:"))
-                    {
-                        disk = new Drive();
-                        continue;
-                    }
-
                     if (disk != null)
                     {
-                        if (line.StartsWith("product:"))
-                        {
-                            disk.Model = disk.Caption = line.Replace("product:", "").Trim();
-                        }
-                        else if (line.StartsWith("vendor:"))
-                        {
-                            disk.Manufacturer = line.Replace("vendor:", "").Trim();
-                        }
+                        driveList.Add(disk);
                     }
+
+                    disk = null;
+                }
+
+                if (line.StartsWith("*-disk:"))
+                {
+                    disk = new Drive();
+                    continue;
                 }
 
                 if (disk != null)
                 {
-                    driveList.Add(disk);
+                    if (line.StartsWith("product:"))
+                    {
+                        disk.Model = disk.Caption = line.Replace("product:", string.Empty).Trim();
+                    }
+                    else if (line.StartsWith("vendor:"))
+                    {
+                        disk.Manufacturer = line.Replace("vendor:", string.Empty).Trim();
+                    }
                 }
             }
-            catch
+
+            if (disk != null)
             {
-                // Intentionally left blank
+                driveList.Add(disk);
             }
 
             return driveList;
@@ -237,81 +228,73 @@ namespace Hardware.Info.Linux
         {
             List<Memory> memoryList = new List<Memory>();
 
-            try
+            string processOutput = ReadProcessOutput("lshw", "-short -C memory");
+
+            string[] lines = processOutput.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string line in lines)
             {
-                var p = StartProcess("lshw", "-short -C memory");
-                var sr = p.StandardOutput;
-                p.WaitForExit();
-                var lines = sr.ReadToEnd().Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (var line in lines)
+                try
                 {
-                    try
-                    {
-                        var relevant = line.Split(new[] { "memory" }, StringSplitOptions.RemoveEmptyEntries)[1].Trim();
+                    string relevant = line.Split(new[] { "memory" }, StringSplitOptions.RemoveEmptyEntries)[1].Trim();
 
-                        if (relevant.Contains("DDR") || relevant.Contains("DIMM"))
+                    if (relevant.Contains("DDR") || relevant.Contains("DIMM"))
+                    {
+                        Memory ram = new Memory();
+                        string[] parts = relevant.Split(' ');
+
+                        foreach (string part in parts)
                         {
-                            var ram = new Memory();
-                            var parts = relevant.Split(' ');
+                            Regex sizeRegex = new Regex("^([0-9]+)(K|M|G|T)iB");
+                            string formFactor = Enum.GetNames(typeof(FormFactor)).FirstOrDefault(ff => ff == part);
 
-                            foreach (var part in parts)
+                            if (formFactor != null)
                             {
-                                var sizeRegex = new Regex("^([0-9]+)(K|M|G|T)iB");
-                                var formFactor = Enum.GetNames(typeof(FormFactor)).FirstOrDefault(ff => ff == part);
-
-                                if (formFactor != null)
-                                {
-                                    ram.FormFactor = (FormFactor)Enum.Parse(typeof(FormFactor), formFactor);
-                                }
-                                else if (new Regex("^[0-9]+$").IsMatch(part))
-                                {
-                                    ram.Speed = uint.Parse(part);
-                                }
-                                else if (sizeRegex.IsMatch(part))
-                                {
-                                    var match = sizeRegex.Match(part);
-                                    var number = int.Parse(match.Groups[1].Value);
-                                    var rawNumber = 0uL;
-                                    var exponent = match.Groups[2].Value;
-
-                                    if (exponent == "T")
-                                    {
-                                        rawNumber = (ulong)number * 1024uL * 1024uL * 1024uL * 1024uL;
-                                    }
-                                    else if (exponent == "G")
-                                    {
-                                        rawNumber = (ulong)number * 1024uL * 1024uL * 1024uL;
-                                    }
-                                    else if (exponent == "M")
-                                    {
-                                        rawNumber = (ulong)number * 1024uL * 1024uL;
-                                    }
-                                    else if (exponent == "K")
-                                    {
-                                        rawNumber = (ulong)number * 1024uL;
-                                    }
-                                    else
-                                    {
-                                        rawNumber = (ulong)number;
-                                    }
-
-                                    ram.Capacity = rawNumber;
-                                }
+                                ram.FormFactor = (FormFactor)Enum.Parse(typeof(FormFactor), formFactor);
                             }
+                            else if (new Regex("^[0-9]+$").IsMatch(part))
+                            {
+                                ram.Speed = uint.Parse(part);
+                            }
+                            else if (sizeRegex.IsMatch(part))
+                            {
+                                Match match = sizeRegex.Match(part);
+                                int number = int.Parse(match.Groups[1].Value);
+                                ulong rawNumber = 0uL;
+                                string exponent = match.Groups[2].Value;
 
-                            memoryList.Add(ram);
+                                if (exponent == "T")
+                                {
+                                    rawNumber = (ulong)number * 1024uL * 1024uL * 1024uL * 1024uL;
+                                }
+                                else if (exponent == "G")
+                                {
+                                    rawNumber = (ulong)number * 1024uL * 1024uL * 1024uL;
+                                }
+                                else if (exponent == "M")
+                                {
+                                    rawNumber = (ulong)number * 1024uL * 1024uL;
+                                }
+                                else if (exponent == "K")
+                                {
+                                    rawNumber = (ulong)number * 1024uL;
+                                }
+                                else
+                                {
+                                    rawNumber = (ulong)number;
+                                }
+
+                                ram.Capacity = rawNumber;
+                            }
                         }
-                    }
-                    catch
-                    {
-                        // Intentionally left blank
+
+                        memoryList.Add(ram);
                     }
                 }
-            }
-            catch
-            {
-                // Intentionally left blank
+                catch
+                {
+                    // Intentionally left blank
+                }
             }
 
             return memoryList;
@@ -400,56 +383,44 @@ namespace Hardware.Info.Linux
         {
             List<VideoController> videoControllerList = new List<VideoController>();
 
-            try
+            string processOutput = ReadProcessOutput("lspci", string.Empty);
+
+            string[] lines = processOutput.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string line in lines.Where(l => l.Contains("VGA compatible controller")))
             {
-                var p = StartProcess("lspci", "");
-                using var sr = p.StandardOutput;
-                p.WaitForExit();
-
-                var lines = sr.ReadToEnd().Trim().Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-
-                foreach (var line in lines)
+                try
                 {
-                    if (line.Contains("VGA compatible controller"))
+                    string relevant = line.Split(':')[2];
+
+                    if (!string.IsNullOrWhiteSpace(relevant))
                     {
-                        try
+                        string vendor = string.Empty;
+
+                        if (relevant.Contains("Intel"))
                         {
-                            var relevant = line.Split(':')[2];
-
-                            if (!string.IsNullOrWhiteSpace(relevant))
-                            {
-                                var vendor = "";
-
-                                if (relevant.Contains("Intel"))
-                                {
-                                    vendor = "Intel Corporation";
-                                }
-                                else if (relevant.Contains("AMD") || relevant.Contains("Advanced Micro Devices") || relevant.Contains("ATI"))
-                                {
-                                    vendor = "Advanced Micro Devices, Inc.";
-                                }
-                                else if (relevant.ToUpperInvariant().Contains("NVIDIA"))
-                                {
-                                    vendor = "NVIDIA Corporation";
-                                }
-
-                                var name = relevant.Replace(vendor, "").Replace("[AMD/ATI]", "");
-
-                                var gpu = new VideoController { Description = relevant, Manufacturer = vendor, Name = name };
-
-                                videoControllerList.Add(gpu);
-                            }
+                            vendor = "Intel Corporation";
                         }
-                        catch
+                        else if (relevant.Contains("AMD") || relevant.Contains("Advanced Micro Devices") || relevant.Contains("ATI"))
                         {
-                            // Intentionally left blank
+                            vendor = "Advanced Micro Devices, Inc.";
                         }
+                        else if (relevant.ToUpperInvariant().Contains("NVIDIA"))
+                        {
+                            vendor = "NVIDIA Corporation";
+                        }
+
+                        string name = relevant.Replace(vendor, string.Empty).Replace("[AMD/ATI]", string.Empty);
+
+                        VideoController gpu = new VideoController { Description = relevant, Manufacturer = vendor, Name = name };
+
+                        videoControllerList.Add(gpu);
                     }
                 }
-            }
-            catch
-            {
-                // Intentionally left blank
+                catch
+                {
+                    // Intentionally left blank
+                }
             }
 
             return videoControllerList;

@@ -1,6 +1,8 @@
-﻿using System;
+﻿using PListNet;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 
 // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/sysctlbyname.3.html
@@ -16,10 +18,23 @@ namespace Hardware.Info.Mac
         [DllImport("libc")]
         static extern int sysctlbyname(string name, out IntPtr oldp, ref IntPtr oldlenp, IntPtr newp, IntPtr newlen);
 
-        readonly MemoryStatus memoryStatus = new MemoryStatus();
+        private readonly MemoryStatus memoryStatus = new MemoryStatus();
+
+        private readonly PNode? system_profiler;
 
         public HardwareInfo()
         {
+            try
+            {
+                using Process process = StartProcess("system_profiler", "-xml");
+                using StreamReader streamReader = process.StandardOutput;
+                process.WaitForExit();
+
+                system_profiler = PList.Load(streamReader.BaseStream);
+            }
+            catch
+            {
+            }
         }
 
         public MemoryStatus GetMemoryStatus()
@@ -75,15 +90,15 @@ namespace Hardware.Info.Mac
 
                 if (info[1].EndsWith("GHz"))
                 {
-                    info[1] = ((uint)(double.Parse(info[1].Replace("GHz", "").Replace(" ", "")) * 1000)).ToString();
+                    info[1] = ((uint)(double.Parse(info[1].Replace("GHz", string.Empty).Replace(" ", string.Empty)) * 1000)).ToString();
                 }
                 else if (info[1].EndsWith("KHz"))
                 {
-                    info[1] = ((uint)(double.Parse(info[1].Replace("KHz", "")) / 1000)).ToString();
+                    info[1] = ((uint)(double.Parse(info[1].Replace("KHz", string.Empty)) / 1000)).ToString();
                 }
                 else
                 {
-                    info[1] = info[1].Replace("MHz", "").Trim();
+                    info[1] = info[1].Replace("MHz", string.Empty).Trim();
                 }
 
                 cpu.Name = info[0];

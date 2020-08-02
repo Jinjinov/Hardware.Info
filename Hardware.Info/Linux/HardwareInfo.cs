@@ -5,6 +5,8 @@ using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
+// https://www.binarytides.com/linux-commands-hardware-info/
+
 namespace Hardware.Info.Linux
 {
     internal class HardwareInfo : HardwareInfoBase, IHardwareInfo
@@ -52,6 +54,18 @@ namespace Hardware.Info.Linux
         public List<Battery> GetBatteryList()
         {
             List<Battery> batteryList = new List<Battery>();
+
+            Battery battery = new Battery();
+
+            // https://stackoverflow.com/questions/26888636/how-to-calculate-the-time-remaining-until-the-end-of-the-battery-charge
+
+            // https://stackoverflow.com/questions/4858657/how-can-i-obtain-battery-level-inside-a-linux-kernel-module
+
+            // /sys/class/power_supply/BAT0/charge_now
+
+            // /sys/class/power_supply/BAT0/charge_full
+
+            batteryList.Add(battery);
 
             return batteryList;
         }
@@ -223,6 +237,14 @@ namespace Hardware.Info.Linux
         {
             List<Keyboard> keyboardList = new List<Keyboard>();
 
+            Keyboard keyboard = new Keyboard();
+
+            // /dev/input/by-path/*-kbd
+
+            // /proc/bus/input/devices
+
+            keyboardList.Add(keyboard);
+
             return keyboardList;
         }
 
@@ -314,6 +336,10 @@ namespace Hardware.Info.Linux
         {
             List<Monitor> monitorList = new List<Monitor>();
 
+            Monitor monitor = new Monitor();
+
+            monitorList.Add(monitor);
+
             return monitorList;
         }
 
@@ -350,6 +376,14 @@ namespace Hardware.Info.Linux
         {
             List<Mouse> mouseList = new List<Mouse>();
 
+            Mouse mouse = new Mouse();
+
+            // /dev/input/by-path/*-kbd
+
+            // /proc/bus/input/devices
+
+            mouseList.Add(mouse);
+
             return mouseList;
         }
 
@@ -362,12 +396,24 @@ namespace Hardware.Info.Linux
         {
             List<Printer> printerList = new List<Printer>();
 
+            Printer printer = new Printer();
+
+            // /dev/usb/lp0
+
+            printerList.Add(printer);
+
             return printerList;
         }
 
         public List<SoundDevice> GetSoundDeviceList()
         {
             List<SoundDevice> soundDeviceList = new List<SoundDevice>();
+
+            SoundDevice soundDevice = new SoundDevice();
+
+            // /proc/asound/cards
+
+            soundDeviceList.Add(soundDevice);
 
             return soundDeviceList;
         }

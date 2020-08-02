@@ -3,6 +3,9 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 
+// https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/sysctlbyname.3.html
+// https://wiki.freepascal.org/Accessing_macOS_System_Information
+
 namespace Hardware.Info.Mac
 {
     internal class HardwareInfo : HardwareInfoBase, IHardwareInfo
@@ -28,12 +31,20 @@ namespace Hardware.Info.Mac
         {
             List<Battery> batteryList = new List<Battery>();
 
+            Battery battery = new Battery();
+
+            batteryList.Add(battery);
+
             return batteryList;
         }
 
         public List<BIOS> GetBiosList()
         {
             List<BIOS> biosList = new List<BIOS>();
+
+            BIOS bios = new BIOS();
+
+            biosList.Add(bios);
 
             return biosList;
         }
@@ -134,12 +145,20 @@ namespace Hardware.Info.Mac
         {
             List<Keyboard> keyboardList = new List<Keyboard>();
 
+            Keyboard keyboard = new Keyboard();
+
+            keyboardList.Add(keyboard);
+
             return keyboardList;
         }
 
         public List<Memory> GetMemoryList()
         {
             List<Memory> memoryList = new List<Memory>();
+
+            Memory memory = new Memory();
+
+            memoryList.Add(memory);
 
             return memoryList;
         }
@@ -148,6 +167,10 @@ namespace Hardware.Info.Mac
         {
             List<Monitor> monitorList = new List<Monitor>();
 
+            Monitor monitor = new Monitor();
+
+            monitorList.Add(monitor);
+
             return monitorList;
         }
 
@@ -155,12 +178,20 @@ namespace Hardware.Info.Mac
         {
             List<Motherboard> motherboardList = new List<Motherboard>();
 
+            Motherboard motherboard = new Motherboard();
+
+            motherboardList.Add(motherboard);
+
             return motherboardList;
         }
 
         public List<Mouse> GetMouseList()
         {
             List<Mouse> mouseList = new List<Mouse>();
+
+            Mouse mouse = new Mouse();
+
+            mouseList.Add(mouse);
 
             return mouseList;
         }
@@ -174,6 +205,10 @@ namespace Hardware.Info.Mac
         {
             List<Printer> printerList = new List<Printer>();
 
+            Printer printer = new Printer();
+
+            printerList.Add(printer);
+
             return printerList;
         }
 
@@ -181,12 +216,20 @@ namespace Hardware.Info.Mac
         {
             List<SoundDevice> soundDeviceList = new List<SoundDevice>();
 
+            SoundDevice soundDevice = new SoundDevice();
+
+            soundDeviceList.Add(soundDevice);
+
             return soundDeviceList;
         }
 
         public List<VideoController> GetVideoControllerList()
         {
             List<VideoController> videoControllerList = new List<VideoController>();
+
+            VideoController videoController = new VideoController();
+
+            videoControllerList.Add(videoController);
 
             return videoControllerList;
         }

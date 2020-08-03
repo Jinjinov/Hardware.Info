@@ -128,8 +128,8 @@ namespace Hardware.Info.Linux
 
                 if (match.Success && match.Groups.Count > 1)
                 {
-                    if (uint.TryParse(match.Groups[1].Value, out uint currentClockSpeed))
-                        cpu.CurrentClockSpeed = currentClockSpeed;
+                    if (double.TryParse(match.Groups[1].Value, out double currentClockSpeed))
+                        cpu.CurrentClockSpeed = (uint)currentClockSpeed;
 
                     continue;
                 }
@@ -405,7 +405,10 @@ namespace Hardware.Info.Linux
                             vendor = "NVIDIA Corporation";
                         }
 
-                        string name = relevant.Replace(vendor, string.Empty).Replace("[AMD/ATI]", string.Empty);
+                        string name = relevant.Replace("[AMD/ATI]", string.Empty);
+
+                        if (!string.IsNullOrEmpty(vendor))
+                            name = name.Replace(vendor, string.Empty);
 
                         VideoController gpu = new VideoController { Description = relevant, Manufacturer = vendor, Name = name };
 

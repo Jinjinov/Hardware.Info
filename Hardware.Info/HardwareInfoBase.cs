@@ -3,6 +3,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
+using System.Runtime.InteropServices;
 
 namespace Hardware.Info
 {
@@ -79,9 +80,13 @@ namespace Hardware.Info
                 {
                     MACAddress = networkInterface.GetPhysicalAddress().ToString().Trim(),
                     Description = networkInterface.Description.Trim(),
-                    Name = networkInterface.Name.Trim(),
-                    Speed = (ulong)networkInterface.Speed
+                    Name = networkInterface.Name.Trim()
                 };
+
+                if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
+                {
+                    networkAdapter.Speed = (ulong)networkInterface.Speed;
+                }
 
                 foreach (UnicastIPAddressInformation addressInformation in networkInterface.GetIPProperties().UnicastAddresses)
                 {

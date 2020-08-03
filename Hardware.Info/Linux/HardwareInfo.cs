@@ -386,7 +386,7 @@ namespace Hardware.Info.Linux
 
                 if (split.Length > 2)
                 {
-                    string relevant = split[2];
+                    string relevant = split[2].Trim();
 
                     if (!string.IsNullOrWhiteSpace(relevant))
                     {

@@ -1,4 +1,4 @@
-﻿using PListNet;
+﻿//using PListNet;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -19,7 +19,7 @@ namespace Hardware.Info.Mac
         static extern int sysctlbyname(string name, out IntPtr oldp, ref IntPtr oldlenp, IntPtr newp, IntPtr newlen);
 
         private readonly MemoryStatus memoryStatus = new MemoryStatus();
-
+        /*
         private readonly PNode? system_profiler;
 
         public HardwareInfo()
@@ -36,7 +36,7 @@ namespace Hardware.Info.Mac
             {
             }
         }
-
+        /**/
         public MemoryStatus GetMemoryStatus()
         {
             IntPtr SizeOfLineSize = (IntPtr)IntPtr.Size;
@@ -86,23 +86,29 @@ namespace Hardware.Info.Mac
 
             if (info.Length > 1)
             {
-                info[1] = info[1].Trim();
+                string speedString = info[1].Trim();
+                uint speed = 0;
 
-                if (info[1].EndsWith("GHz"))
+                if (speedString.EndsWith("GHz"))
                 {
-                    info[1] = ((uint)(double.Parse(info[1].Replace("GHz", string.Empty).Replace(" ", string.Empty)) * 1000)).ToString();
+                    string number = speedString.Replace("GHz", string.Empty).Trim();
+                    if (uint.TryParse(number, out speed))
+                        speed *= 1000;
                 }
-                else if (info[1].EndsWith("KHz"))
+                else if (speedString.EndsWith("KHz"))
                 {
-                    info[1] = ((uint)(double.Parse(info[1].Replace("KHz", string.Empty)) / 1000)).ToString();
+                    string number = speedString.Replace("KHz", string.Empty).Trim();
+                    if (uint.TryParse(number, out speed))
+                        speed /= 1000;
                 }
-                else
+                else if (speedString.EndsWith("MHz"))
                 {
-                    info[1] = info[1].Replace("MHz", string.Empty).Trim();
+                    string number = speedString.Replace("MHz", string.Empty).Trim();
+                    uint.TryParse(number, out speed);
                 }
 
                 cpu.Name = info[0];
-                cpu.CurrentClockSpeed = uint.Parse(info[1]);
+                cpu.CurrentClockSpeed = speed;
             }
 
             processOutput = ReadProcessOutput("sysctl", "-n hw.physicalcpu");

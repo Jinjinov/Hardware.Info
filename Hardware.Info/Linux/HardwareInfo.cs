@@ -101,7 +101,8 @@ namespace Hardware.Info.Linux
                 return cpuList;
             }
 
-            string[] info = File.ReadAllLines("/proc/cpuinfo");
+            string[] lines = File.ReadAllLines("/proc/cpuinfo");
+
             Regex modelNameRegex = new Regex(@"^model name\s+:\s+(.+)");
             Regex cpuSpeedRegex = new Regex(@"^cpu MHz\s+:\s+(.+)");
             Regex physicalCoresRegex = new Regex(@"^cpu cores\s+:\s+(.+)");
@@ -109,49 +110,45 @@ namespace Hardware.Info.Linux
 
             CPU cpu = new CPU();
 
-            foreach (string s in info)
+            foreach (string line in lines)
             {
-                try
+                Match match = modelNameRegex.Match(line);
+
+                if (match.Success && match.Groups.Count > 1)
                 {
-                    Match match = modelNameRegex.Match(s);
+                    cpu.Name = match.Groups[1].Value.Trim();
 
-                    if (match.Success)
-                    {
-                        cpu.Name = match.Groups[1].Value.Trim();
-
-                        continue;
-                    }
-
-                    match = cpuSpeedRegex.Match(s);
-
-                    if (match.Success)
-                    {
-                        cpu.CurrentClockSpeed = uint.Parse(match.Groups[1].Value);
-
-                        continue;
-                    }
-
-                    match = physicalCoresRegex.Match(s);
-
-                    if (match.Success)
-                    {
-                        cpu.NumberOfCores = uint.Parse(match.Groups[1].Value);
-
-                        continue;
-                    }
-
-                    match = logicalCoresRegex.Match(s);
-
-                    if (match.Success)
-                    {
-                        cpu.NumberOfLogicalProcessors = uint.Parse(match.Groups[1].Value);
-
-                        continue;
-                    }
+                    continue;
                 }
-                catch
+
+                match = cpuSpeedRegex.Match(line);
+
+                if (match.Success && match.Groups.Count > 1)
                 {
-                    // Intentionally left blank
+                    if (uint.TryParse(match.Groups[1].Value, out uint currentClockSpeed))
+                        cpu.CurrentClockSpeed = currentClockSpeed;
+
+                    continue;
+                }
+
+                match = physicalCoresRegex.Match(line);
+
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    if (uint.TryParse(match.Groups[1].Value, out uint numberOfCores))
+                        cpu.NumberOfCores = numberOfCores;
+
+                    continue;
+                }
+
+                match = logicalCoresRegex.Match(line);
+
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    if (uint.TryParse(match.Groups[1].Value, out uint numberOfLogicalProcessors))
+                        cpu.NumberOfLogicalProcessors = numberOfLogicalProcessors;
+
+                    continue;
                 }
             }
 
@@ -232,68 +229,61 @@ namespace Hardware.Info.Linux
 
             string[] lines = processOutput.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
+            string[] formFactorNames = Enum.GetNames(typeof(FormFactor));
+
             foreach (string line in lines)
             {
-                try
+                string[] split = line.Split(new[] { "memory" }, StringSplitOptions.RemoveEmptyEntries);
+
+                if (split.Length > 1)
                 {
-                    string relevant = line.Split(new[] { "memory" }, StringSplitOptions.RemoveEmptyEntries)[1].Trim();
+                    string relevant = split[1].Trim();
 
                     if (relevant.Contains("DDR") || relevant.Contains("DIMM"))
                     {
                         Memory ram = new Memory();
+
                         string[] parts = relevant.Split(' ');
 
                         foreach (string part in parts)
                         {
                             Regex sizeRegex = new Regex("^([0-9]+)(K|M|G|T)iB");
-                            string formFactor = Enum.GetNames(typeof(FormFactor)).FirstOrDefault(ff => ff == part);
 
-                            if (formFactor != null)
+                            if (formFactorNames.Any(name => name == part))
                             {
-                                ram.FormFactor = (FormFactor)Enum.Parse(typeof(FormFactor), formFactor);
+                                if (Enum.TryParse(part, out FormFactor formFactor))
+                                    ram.FormFactor = formFactor;
                             }
                             else if (new Regex("^[0-9]+$").IsMatch(part))
                             {
-                                ram.Speed = uint.Parse(part);
+                                if (uint.TryParse(part, out uint speed))
+                                    ram.Speed = speed;
                             }
                             else if (sizeRegex.IsMatch(part))
                             {
                                 Match match = sizeRegex.Match(part);
-                                int number = int.Parse(match.Groups[1].Value);
-                                ulong rawNumber = 0uL;
-                                string exponent = match.Groups[2].Value;
 
-                                if (exponent == "T")
+                                if (match.Groups.Count > 2)
                                 {
-                                    rawNumber = (ulong)number * 1024uL * 1024uL * 1024uL * 1024uL;
-                                }
-                                else if (exponent == "G")
-                                {
-                                    rawNumber = (ulong)number * 1024uL * 1024uL * 1024uL;
-                                }
-                                else if (exponent == "M")
-                                {
-                                    rawNumber = (ulong)number * 1024uL * 1024uL;
-                                }
-                                else if (exponent == "K")
-                                {
-                                    rawNumber = (ulong)number * 1024uL;
-                                }
-                                else
-                                {
-                                    rawNumber = (ulong)number;
-                                }
+                                    if (ulong.TryParse(match.Groups[1].Value, out ulong number))
+                                    {
+                                        string exponent = match.Groups[2].Value;
 
-                                ram.Capacity = rawNumber;
+                                        ram.Capacity = exponent switch
+                                        {
+                                            "T" => number * 1024uL * 1024uL * 1024uL * 1024uL,
+                                            "G" => number * 1024uL * 1024uL * 1024uL,
+                                            "M" => number * 1024uL * 1024uL,
+                                            "K" => number * 1024uL,
+                                            _ => number,
+                                        };
+                                    }
+                                }
                             }
                         }
 
                         memoryList.Add(ram);
                     }
-                }
-                catch
-                {
-                    // Intentionally left blank
                 }
             }
 
@@ -389,9 +379,11 @@ namespace Hardware.Info.Linux
 
             foreach (string line in lines.Where(l => l.Contains("VGA compatible controller")))
             {
-                try
+                string[] split = line.Split(':');
+
+                if (split.Length > 2)
                 {
-                    string relevant = line.Split(':')[2];
+                    string relevant = split[2];
 
                     if (!string.IsNullOrWhiteSpace(relevant))
                     {
@@ -416,10 +408,6 @@ namespace Hardware.Info.Linux
 
                         videoControllerList.Add(gpu);
                     }
-                }
-                catch
-                {
-                    // Intentionally left blank
                 }
             }
 

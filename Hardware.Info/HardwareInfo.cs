@@ -131,7 +131,17 @@ namespace Hardware.Info
 
         public static IEnumerable<IPAddress> GetLocalIPv4Addresses()
         {
-            return Dns.GetHostEntry(Dns.GetHostName()).AddressList.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork);
+            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX))
+            {
+                return NetworkInterface.GetAllNetworkInterfaces()
+                                   .SelectMany(networkInterface => networkInterface.GetIPProperties().UnicastAddresses)
+                                   .Where(addressInformation => addressInformation.Address.AddressFamily == AddressFamily.InterNetwork)
+                                   .Select(addressInformation => addressInformation.Address);
+            }
+            else
+            {
+                return Dns.GetHostEntry(Dns.GetHostName()).AddressList.Where(ip => ip.AddressFamily == AddressFamily.InterNetwork);
+            }
         }
 
         public static IEnumerable<IPAddress> GetLocalIPv4Addresses(NetworkInterfaceType networkInterfaceType)

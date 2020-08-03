@@ -14,7 +14,7 @@ namespace Hardware.Info.Linux
 
         public MemoryStatus GetMemoryStatus()
         {
-            string[] meminfo = File.ReadAllLines("/proc/meminfo");
+            string[] meminfo = TryReadFileLines("/proc/meminfo");
 
             memoryStatus.TotalPhysical = GetBytesFromLine(meminfo, "MemTotal:");
             memoryStatus.AvailablePhysical = GetBytesFromLine(meminfo, "MemFree:");
@@ -28,15 +28,20 @@ namespace Hardware.Info.Linux
         {
             const string KbToken = "kB";
 
-            string? memLine = meminfo.FirstOrDefault(x => x.StartsWith(token))?.Substring(token.Length);
+            string? memLine = meminfo.FirstOrDefault(line => line.StartsWith(token) && line.EndsWith(KbToken));
 
-            if (memLine != null && memLine.EndsWith(KbToken) && ulong.TryParse(memLine.Substring(0, memLine.Length - KbToken.Length), out ulong memKb))
-                return memKb * 1024;
+            if (memLine != null)
+            {
+                string mem = memLine.Replace(token, string.Empty).Replace(KbToken, string.Empty).Trim();
+
+                if (ulong.TryParse(mem, out ulong memKb))
+                    return memKb * 1024;
+            }
 
             return 0;
         }
 
-        internal static string TryReadFile(string path)
+        internal static string TryReadFileText(string path)
         {
             try
             {
@@ -45,6 +50,18 @@ namespace Hardware.Info.Linux
             catch
             {
                 return string.Empty;
+            }
+        }
+
+        internal static string[] TryReadFileLines(string path)
+        {
+            try
+            {
+                return File.ReadAllLines(path);
+            }
+            catch
+            {
+                return Array.Empty<string>();
             }
         }
 
@@ -73,9 +90,9 @@ namespace Hardware.Info.Linux
 
             BIOS bios = new BIOS
             {
-                ReleaseDate = TryReadFile("/sys/class/dmi/id/bios_date"),
-                Version = TryReadFile("/sys/class/dmi/id/bios_version"),
-                Manufacturer = TryReadFile("/sys/class/dmi/id/bios_vendor")
+                ReleaseDate = TryReadFileText("/sys/class/dmi/id/bios_date"),
+                Version = TryReadFileText("/sys/class/dmi/id/bios_version"),
+                Manufacturer = TryReadFileText("/sys/class/dmi/id/bios_vendor")
             };
 
             biosList.Add(bios);
@@ -87,21 +104,7 @@ namespace Hardware.Info.Linux
         {
             List<CPU> cpuList = new List<CPU>();
 
-            if (!File.Exists("/proc/cpuinfo"))
-            {
-                return cpuList;
-            }
-
-            try
-            {
-                File.OpenRead("/proc/cpuinfo").Dispose();
-            }
-            catch
-            {
-                return cpuList;
-            }
-
-            string[] lines = File.ReadAllLines("/proc/cpuinfo");
+            string[] lines = TryReadFileLines("/proc/cpuinfo");
 
             Regex modelNameRegex = new Regex(@"^model name\s+:\s+(.+)");
             Regex cpuSpeedRegex = new Regex(@"^cpu MHz\s+:\s+(.+)");
@@ -313,9 +316,9 @@ namespace Hardware.Info.Linux
 
             Motherboard motherboard = new Motherboard
             {
-                Product = TryReadFile("/sys/class/dmi/id/board_name"),
-                Manufacturer = TryReadFile("/sys/class/dmi/id/board_vendor"),
-                SerialNumber = TryReadFile("/sys/class/dmi/id/board_serial")
+                Product = TryReadFileText("/sys/class/dmi/id/board_name"),
+                Manufacturer = TryReadFileText("/sys/class/dmi/id/board_vendor"),
+                SerialNumber = TryReadFileText("/sys/class/dmi/id/board_serial")
             };
 
             motherboardList.Add(motherboard);

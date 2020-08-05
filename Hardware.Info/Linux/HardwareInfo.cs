@@ -106,8 +106,10 @@ namespace Hardware.Info.Linux
 
             string[] lines = TryReadFileLines("/proc/cpuinfo");
 
+            Regex vendorIdRegex = new Regex(@"^vendor_id\s+:\s+(.+)");
             Regex modelNameRegex = new Regex(@"^model name\s+:\s+(.+)");
             Regex cpuSpeedRegex = new Regex(@"^cpu MHz\s+:\s+(.+)");
+            Regex cacheSizeRegex = new Regex(@"^cache size\s+:\s+(.+)\s+KB");
             Regex physicalCoresRegex = new Regex(@"^cpu cores\s+:\s+(.+)");
             Regex logicalCoresRegex = new Regex(@"^siblings\s+:\s+(.+)");
 
@@ -115,42 +117,49 @@ namespace Hardware.Info.Linux
 
             foreach (string line in lines)
             {
-                Match match = modelNameRegex.Match(line);
+                Match match = vendorIdRegex.Match(line);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    cpu.Manufacturer = match.Groups[1].Value.Trim();
+                    continue;
+                }
 
+                match = modelNameRegex.Match(line);
                 if (match.Success && match.Groups.Count > 1)
                 {
                     cpu.Name = match.Groups[1].Value.Trim();
-
                     continue;
                 }
 
                 match = cpuSpeedRegex.Match(line);
-
                 if (match.Success && match.Groups.Count > 1)
                 {
                     if (double.TryParse(match.Groups[1].Value, out double currentClockSpeed))
                         cpu.CurrentClockSpeed = (uint)currentClockSpeed;
+                    continue;
+                }
 
+                match = cacheSizeRegex.Match(line);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    if (uint.TryParse(match.Groups[1].Value, out uint cacheSize))
+                        cpu.L3CacheSize = cacheSize;
                     continue;
                 }
 
                 match = physicalCoresRegex.Match(line);
-
                 if (match.Success && match.Groups.Count > 1)
                 {
                     if (uint.TryParse(match.Groups[1].Value, out uint numberOfCores))
                         cpu.NumberOfCores = numberOfCores;
-
                     continue;
                 }
 
                 match = logicalCoresRegex.Match(line);
-
                 if (match.Success && match.Groups.Count > 1)
                 {
                     if (uint.TryParse(match.Groups[1].Value, out uint numberOfLogicalProcessors))
                         cpu.NumberOfLogicalProcessors = numberOfLogicalProcessors;
-
                     continue;
                 }
             }

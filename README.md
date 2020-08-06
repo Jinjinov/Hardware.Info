@@ -109,3 +109,20 @@ How to use:
                 Console.ReadLine();
             }
         }
+
+Version history:
+
+- 0.0.1.1:
+    - Added BIOS.ReleaseDate in Linux
+    - Added CPU.Manufacturer in Linux
+    - Added CPU.L3CacheSize in Linux
+    - Added Motherboard.SerialNumber in Linux
+    - Fixed NetworkAdapter info in Linux
+    - Fixed GetLocalIPv4Addresses() in macOS
+- 0.0.1.0:
+    - Added GetLocalIPv4Addresses() in Windows, macOS, Linux
+    - Added SerialNumber in Motherboard
+    - Added Drive, NetworkAdapter info in macOS, Linux
+- 0.0.0.1:
+    - All hardware info in Windows
+    - CPU, RAM info in macOS, Linux

@@ -1,8 +1,8 @@
 ﻿//using PListNet;
 using System;
 using System.Collections.Generic;
-using System.Diagnostics;
-using System.IO;
+//using System.Diagnostics;
+//using System.IO;
 using System.Runtime.InteropServices;
 
 // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/sysctlbyname.3.html

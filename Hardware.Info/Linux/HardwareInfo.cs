@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.IO;
 using System.Linq;
 using System.Text.RegularExpressions;
 
@@ -39,30 +38,6 @@ namespace Hardware.Info.Linux
             }
 
             return 0;
-        }
-
-        internal static string TryReadFileText(string path)
-        {
-            try
-            {
-                return File.ReadAllText(path).Trim();
-            }
-            catch
-            {
-                return string.Empty;
-            }
-        }
-
-        internal static string[] TryReadFileLines(string path)
-        {
-            try
-            {
-                return File.ReadAllLines(path);
-            }
-            catch
-            {
-                return Array.Empty<string>();
-            }
         }
 
         public List<Battery> GetBatteryList()

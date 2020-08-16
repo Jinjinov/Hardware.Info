@@ -1,8 +1,8 @@
-﻿//using PListNet;
+﻿using PListNet;
 using System;
 using System.Collections.Generic;
-//using System.Diagnostics;
-//using System.IO;
+using System.Diagnostics;
+using System.IO;
 using System.Runtime.InteropServices;
 
 // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/sysctlbyname.3.html
@@ -19,7 +19,7 @@ namespace Hardware.Info.Mac
         static extern int sysctlbyname(string name, out IntPtr oldp, ref IntPtr oldlenp, IntPtr newp, IntPtr newlen);
 
         private readonly MemoryStatus memoryStatus = new MemoryStatus();
-        /*
+
         private readonly PNode? system_profiler;
 
         public HardwareInfo()
@@ -36,7 +36,7 @@ namespace Hardware.Info.Mac
             {
             }
         }
-        /**/
+
         public MemoryStatus GetMemoryStatus()
         {
             IntPtr SizeOfLineSize = (IntPtr)IntPtr.Size;

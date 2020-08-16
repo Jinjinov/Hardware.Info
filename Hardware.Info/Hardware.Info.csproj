@@ -9,9 +9,9 @@
   <PropertyGroup>
     <PackageId>Hardware.Info</PackageId>
     <Product>Hardware.Info</Product>
-    <Version>0.0.1.1</Version>
+    <Version>0.1.0.0</Version>
     <Authors>Jinjinov</Authors>
-    <Description>Battery, BIOS, CPU, drives, keyboard, memory, monitors, motherboard, mouse, network adapters, printers, sound devices and video controllers. Hardware.Info is a .NET Standard 2.0 library and uses WMI on Windows, lshw on Linux and sysctl on macOS.</Description>
+    <Description>Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, motherboard, mouse, NIC - network adapter, printer, sound card - audio card, graphics card - video card. Hardware.Info is a .NET Standard 2.0 library and uses WMI on Windows, lshw on Linux and sysctl on macOS.</Description>
     <PackageTags>Computer;Device;Hardware;Info;Information;NET Standard;Windows;Linux;macOS</PackageTags>
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <PackageProjectUrl>https://github.com/Jinjinov/Hardware.Info</PackageProjectUrl>
@@ -20,9 +20,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <!--
     <PackageReference Include="PListNet" Version="3.2.0" />
-    -->
     <PackageReference Include="System.Management" Version="4.7.0" />
   </ItemGroup>
 

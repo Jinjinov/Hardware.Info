@@ -290,6 +290,11 @@ Hardware:
             if (uint.TryParse(processOutput, out uint L2CacheSize))
                 cpu.L2CacheSize = L2CacheSize;
 
+            processOutput = ReadProcessOutput("sysctl", "-n hw.l3cachesize");
+
+            if (uint.TryParse(processOutput, out uint L3CacheSize))
+                cpu.L3CacheSize = L3CacheSize;
+
             processOutput = ReadProcessOutput("sysctl", "-n hw.physicalcpu");
 
             if (uint.TryParse(processOutput, out uint numberOfCores))

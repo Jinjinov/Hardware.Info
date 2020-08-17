@@ -114,6 +114,7 @@ Version history:
 
 - 0.1.0.0:
     - Added CPU.L2CacheSize in macOS
+    - Added CPU.L3CacheSize in macOS
 - 0.0.1.1:
     - Added BIOS.ReleaseDate in Linux
     - Added CPU.Manufacturer in Linux

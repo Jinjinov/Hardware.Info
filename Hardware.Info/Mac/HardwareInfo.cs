@@ -1,4 +1,4 @@
-﻿using PListNet;
+﻿//using PListNet;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -12,6 +12,7 @@ using System.Threading;
 // https://stackoverflow.com/questions/6592578/how-to-to-print-motherboard-and-display-card-info-on-mac
 // https://stackoverflow.com/questions/53117107/cocoa-nstask-ouput-extraction
 // https://docs.python.org/3/library/plistlib.html
+// https://ss64.com/osx/system_profiler.html
 
 namespace Hardware.Info.Mac
 {
@@ -22,33 +23,118 @@ namespace Hardware.Info.Mac
 
         private readonly MemoryStatus memoryStatus = new MemoryStatus();
 
-        private PNode? system_profiler;
-
+        /*
         public HardwareInfo()
+        {
+            //SystemProfiler();
+
+            //SystemProfilerPList();
+        }
+        /**/
+
+        /*
+        private void SystemProfilerPList()
         {
             try
             {
-                SystemProfiler();
+                using MemoryStream stream = new MemoryStream();
+                using StreamWriter output = new StreamWriter(stream);
+                StringBuilder error = new StringBuilder();
+
+                if (StartProcess("system_profiler", "-xml", standardOutput => output.Write(standardOutput), standardError => error.AppendLine(standardError)))
+                {
+                    output.Flush();
+                    stream.Position = 0;
+
+                    PNode system_profiler = PList.Load(stream);
+                }
             }
             catch (Exception ex)
             {
             }
         }
+        /**/
 
+        /*
         private void SystemProfiler()
+        {
+            string[] dataTypes = {
+                "SPParallelATADataType",
+                "SPUniversalAccessDataType",
+                //"SPApplicationsDataType",
+                "SPAudioDataType",
+                "SPBluetoothDataType",
+                "SPCameraDataType",
+                "SPCardReaderDataType",
+                //"SPComponentDataType",
+                "SPDeveloperToolsDataType",
+                "SPDiagnosticsDataType",
+                "SPDisabledSoftwareDataType",
+                "SPDiscBurningDataType",
+                "SPEthernetDataType",
+                //"SPExtensionsDataType",
+                "SPFibreChannelDataType",
+                "SPFireWireDataType",
+                "SPFirewallDataType",
+                //"SPFontsDataType",
+                //"SPFrameworksDataType",
+                "SPDisplaysDataType",
+                "SPHardwareDataType",
+                "SPHardwareRAIDDataType",
+                //"SPInstallHistoryDataType",
+                "SPNetworkLocationDataType",
+                //"SPLogsDataType",
+                "SPManagedClientDataType",
+                "SPMemoryDataType",
+                "SPNVMeDataType",
+                "SPNetworkDataType",
+                "SPPCIDataType",
+                "SPParallelSCSIDataType",
+                "SPPowerDataType",
+                //"SPPrefPaneDataType",
+                //"SPPrintersSoftwareDataType",
+                "SPPrintersDataType",
+                "SPConfigurationProfileDataType",
+                //"SPRawCameraDataType",
+                "SPSASDataType",
+                "SPSerialATADataType",
+                "SPSPIDataType",
+                //"SPSmartCardsDataType",
+                "SPSoftwareDataType",
+                "SPStartupItemDataType",
+                "SPStorageDataType",
+                //"SPSyncServicesDataType",
+                "SPThunderboltDataType",
+                "SPUSBDataType",
+                "SPNetworkVolumeDataType",
+                "SPWWANDataType",
+                "SPAirPortDataType",
+                "SPiBridgeDataType"
+            };
+
+            foreach (string dataType in dataTypes)
+            {
+                Console.WriteLine(dataType);
+
+                StartProcess("system_profiler", dataType, standardOutput => Console.WriteLine(standardOutput), standardError => Console.WriteLine(standardError));
+
+                Console.WriteLine(dataType + " END");
+
+                //Console.ReadLine();
+            }
+        }
+        /**/
+
+        private bool StartProcess(string fileName, string arguments, Action<string> output, Action<string> error, int millisecondsTimeout = 60 * 1000)
         {
             using Process process = new Process();
 
-            process.StartInfo.FileName = "system_profiler";
-            process.StartInfo.Arguments = "-xml";
+            process.StartInfo.FileName = fileName;
+            process.StartInfo.Arguments = arguments;
             process.StartInfo.CreateNoWindow = true;
             process.StartInfo.UseShellExecute = false;
             process.StartInfo.RedirectStandardOutput = true;
             process.StartInfo.RedirectStandardError = true;
-
-            using MemoryStream stream = new MemoryStream();
-            using StreamWriter output = new StreamWriter(stream);
-            StringBuilder error = new StringBuilder();
 
             using AutoResetEvent outputWaitHandle = new AutoResetEvent(false);
             using AutoResetEvent errorWaitHandle = new AutoResetEvent(false);
@@ -61,7 +147,7 @@ namespace Hardware.Info.Mac
                 }
                 else
                 {
-                    output.Write(e.Data);
+                    output.Invoke(e.Data);
                 }
             };
             process.ErrorDataReceived += (sender, e) =>
@@ -72,7 +158,7 @@ namespace Hardware.Info.Mac
                 }
                 else
                 {
-                    error.AppendLine(e.Data);
+                    error.Invoke(e.Data);
                 }
             };
 
@@ -81,21 +167,7 @@ namespace Hardware.Info.Mac
             process.BeginOutputReadLine();
             process.BeginErrorReadLine();
 
-            int millisecondsTimeout = 60 * 1000;
-
-            if (process.WaitForExit(millisecondsTimeout) && outputWaitHandle.WaitOne(millisecondsTimeout) && errorWaitHandle.WaitOne(millisecondsTimeout))
-            {
-                // Process completed. Check process.ExitCode here.
-
-                output.Flush();
-                stream.Position = 0;
-
-                system_profiler = PList.Load(stream);
-            }
-            else
-            {
-                // Timed out.
-            }
+            return process.WaitForExit(millisecondsTimeout) && outputWaitHandle.WaitOne(millisecondsTimeout) && errorWaitHandle.WaitOne(millisecondsTimeout);
         }
 
         public MemoryStatus GetMemoryStatus()
@@ -120,6 +192,27 @@ namespace Hardware.Info.Mac
 
             // https://developer.apple.com/documentation/iokit/iopowersources_h
 
+            /*
+            SPPowerDataType
+Power:
+
+    System Power Settings:
+
+      AC Power:
+          System Sleep Timer (Minutes): 10
+          Disk Sleep Timer (Minutes): 10
+          Display Sleep Timer (Minutes): 10
+          Sleep on Power Button: Yes
+          Current Power Source: Yes
+          Hibernate Mode: 0
+          Standby Delay: 4200
+          Standby Enabled: 1
+
+    Hardware Configuration:
+
+      UPS Installed: No
+            /**/
+
             batteryList.Add(battery);
 
             return batteryList;
@@ -135,6 +228,26 @@ namespace Hardware.Info.Mac
 
             return biosList;
         }
+
+        /*
+        SPHardwareDataType
+Hardware:
+
+    Hardware Overview:
+
+      Model Name: iMac
+      Model Identifier: iMac11,3
+      Processor Speed: 3,29 GHz
+      Number of Processors: 1
+      Total Number of Cores: 4
+      L2 Cache (per Core): 256 KB
+      L3 Cache: 24 MB
+      Memory: 4 GB
+      Boot ROM Version: VirtualBox
+      SMC Version (system): 2.3f35
+      Serial Number (system): 0
+      Hardware UUID: F6D9C340-725A-224A-8855-99AB8348F745
+        /**/
 
         public List<CPU> GetCpuList()
         {
@@ -189,6 +302,98 @@ namespace Hardware.Info.Mac
 
         public override List<Drive> GetDriveList()
         {
+            /*
+            SPSerialATADataType
+SATA/SATA Express:
+
+    Intel ICH8-M AHCI:
+
+      Vendor: Intel
+      Product: ICH8-M AHCI
+      Link Speed: 3 Gigabit
+      Negotiated Link Speed: 3 Gigabit
+      Physical Interconnect: SATA
+      Description: AHCI Version 1.10 Supported
+
+        VBOX HARDDISK:
+
+          Capacity: 536,87 GB (536.870.912.000 bytes)
+          Model: VBOX HARDDISK                           
+          Revision: 1,000000
+          Serial Number: VBa308df62-62a2d2a0 
+          Native Command Queuing: Yes
+          Queue Depth: 32
+          Removable Media: No
+          Detachable Drive: No
+          BSD Name: disk0
+          Medium Type: Rotational
+          Partition Map Type: GPT (GUID Partition Table)
+          Volumes:
+            EFI:
+              Capacity: 209,7 MB (209.715.200 bytes)
+              File System: MS-DOS FAT32
+              BSD Name: disk0s1
+              Content: EFI
+              Volume UUID: 0E239BC6-F960-3107-89CF-1C97F78BB46B
+            Macintosh HD:
+              Capacity: 536,01 GB (536.011.153.408 bytes)
+              Available: 513,49 GB (513.488.637.952 bytes)
+              Writable: Yes
+              File System: Journaled HFS+
+              BSD Name: disk0s2
+              Mount Point: /
+              Content: Apple_HFS
+              Volume UUID: 510DC06E-E3D7-36E9-9711-C8A209E8C61E
+            Recovery HD:
+              Capacity: 650 MB (650.002.432 bytes)
+              File System: Journaled HFS+
+              BSD Name: disk0s3
+              Content: Apple_Boot
+              Volume UUID: B822D1A0-3CE3-3BA2-852F-85F818623545
+
+    Intel ICH8-M AHCI:
+
+      Vendor: Intel
+      Product: ICH8-M AHCI
+      Link Speed: 3 Gigabit
+      Negotiated Link Speed: 3 Gigabit
+      Physical Interconnect: SATA
+      Description: AHCI Version 1.10 Supported
+
+        VBOX CD-ROM:
+
+          Model: VBOX CD-ROM                             
+          Revision: 1,000000
+          Serial Number: VB1-1a2b3c4d        
+          Native Command Queuing: No
+          Detachable Drive: No
+          Power Off: No
+          Async Notification: No
+            /**/
+
+            /*
+            SPStorageDataType
+Storage:
+
+    Macintosh HD:
+
+      Available: 513,49 GB (513.488.637.952 bytes)
+      Capacity: 536,01 GB (536.011.153.408 bytes)
+      Mount Point: /
+      File System: Journaled HFS+
+      Writable: Yes
+      Ignore Ownership: No
+      BSD Name: disk0s2
+      Volume UUID: 510DC06E-E3D7-36E9-9711-C8A209E8C61E
+      Physical Drive:
+          Device Name: VBOX HARDDISK
+          Media Name: VBOX HARDDISK Media
+          Medium Type: Rotational
+          Protocol: SATA
+          Internal: Yes
+          Partition Map Type: GPT (GUID Partition Table)
+            /**/
+
             return base.GetDriveList();
         }
 
@@ -197,6 +402,42 @@ namespace Hardware.Info.Mac
             List<Keyboard> keyboardList = new List<Keyboard>();
 
             Keyboard keyboard = new Keyboard();
+
+            /*
+            SPUSBDataType
+USB:
+
+    USB Bus:
+
+      Host Controller Driver: AppleUSBOHCIPCI
+      PCI Device ID: 0x003f 
+      PCI Revision ID: 0x0000 
+      PCI Vendor ID: 0x106b 
+
+        USB Tablet:
+
+          Product ID: 0x0021
+          Vendor ID: 0x80ee
+          Version: 1.00
+          Speed: Up to 12 Mb/sec
+          Manufacturer: VirtualBox
+          Location ID: 0x06200000 / 2
+          Current Available (mA): 500
+          Current Required (mA): 100
+          Extra Operating Current (mA): 0
+
+        USB Keyboard:
+
+          Product ID: 0x0010
+          Vendor ID: 0x80ee
+          Version: 1.00
+          Speed: Up to 12 Mb/sec
+          Manufacturer: VirtualBox
+          Location ID: 0x06100000 / 1
+          Current Available (mA): 500
+          Current Required (mA): 100
+          Extra Operating Current (mA): 0
+            /**/
 
             keyboardList.Add(keyboard);
 
@@ -208,6 +449,26 @@ namespace Hardware.Info.Mac
             List<Memory> memoryList = new List<Memory>();
 
             Memory memory = new Memory();
+
+            /*
+            SPMemoryDataType
+Memory:
+
+    Memory Slots:
+
+      ECC: Disabled
+      Upgradeable Memory: Yes
+
+        Bank 0/DIMM 0:
+
+          Size: 4 GB
+          Type: DRAM
+          Speed: 1600 MHz
+          Status: OK
+          Manufacturer: innotek GmbH
+          Part Number: -
+          Serial Number: -
+            /**/
 
             memoryList.Add(memory);
 
@@ -232,6 +493,29 @@ namespace Hardware.Info.Mac
             //width = CGDisplayPixelsWide(mainDisplayId);
             //height = CGDisplayPixelsHigh(mainDisplayId);
 
+            /*
+            SPDisplaysDataType
+Graphics/Displays:
+
+    Display:
+
+      Type: GPU
+      Bus: PCI
+      VRAM (Total): 8 MB
+      Device ID: 0xbeef
+      Revision ID: 0x0000
+      Kernel Extension Info: No Kext Loaded
+      Displays:
+        Display:
+          Resolution: 1920 x 1200
+          Framebuffer Depth: 24-Bit Color (ARGB8888)
+          Main Display: Yes
+          Mirror: Off
+          Online: Yes
+          Automatically Adjust Brightness: No
+      Vendor ID: 0x80ee
+            /**/
+
             monitorList.Add(monitor);
 
             return monitorList;
@@ -254,6 +538,42 @@ namespace Hardware.Info.Mac
 
             Mouse mouse = new Mouse();
 
+            /*
+            SPUSBDataType
+USB:
+
+    USB Bus:
+
+      Host Controller Driver: AppleUSBOHCIPCI
+      PCI Device ID: 0x003f 
+      PCI Revision ID: 0x0000 
+      PCI Vendor ID: 0x106b 
+
+        USB Tablet:
+
+          Product ID: 0x0021
+          Vendor ID: 0x80ee
+          Version: 1.00
+          Speed: Up to 12 Mb/sec
+          Manufacturer: VirtualBox
+          Location ID: 0x06200000 / 2
+          Current Available (mA): 500
+          Current Required (mA): 100
+          Extra Operating Current (mA): 0
+
+        USB Keyboard:
+
+          Product ID: 0x0010
+          Vendor ID: 0x80ee
+          Version: 1.00
+          Speed: Up to 12 Mb/sec
+          Manufacturer: VirtualBox
+          Location ID: 0x06100000 / 1
+          Current Available (mA): 500
+          Current Required (mA): 100
+          Extra Operating Current (mA): 0
+            /**/
+
             mouseList.Add(mouse);
 
             return mouseList;
@@ -261,6 +581,52 @@ namespace Hardware.Info.Mac
 
         public override List<NetworkAdapter> GetNetworkAdapterList()
         {
+            /*
+            SPNetworkDataType
+Network:
+
+    Ethernet:
+
+      Type: Ethernet
+      Hardware: Ethernet
+      BSD Device Name: en0
+      IPv4 Addresses: 10.0.2.15
+      IPv4:
+          AdditionalRoutes:
+              DestinationAddress: 10.0.2.15
+              SubnetMask: 255.255.255.255
+              DestinationAddress: 169.254.0.0
+              SubnetMask: 255.255.0.0
+          Addresses: 10.0.2.15
+          ARPResolvedHardwareAddress: 52:54:00:12:35:02
+          ARPResolvedIPAddress: 10.0.2.2
+          Configuration Method: DHCP
+          ConfirmedInterfaceName: en0
+          Interface Name: en0
+          Network Signature: IPv4.Router=10.0.2.2;IPv4.RouterHardwareAddress=52:54:00:12:35:02
+          Router: 10.0.2.2
+          Subnet Masks: 255.255.255.0
+      IPv6:
+          Configuration Method: Automatic
+      DNS:
+          Server Addresses: 192.168.0.1
+      DHCP Server Responses:
+          Domain Name Servers: 192.168.0.1
+          Lease Duration (seconds): 0
+          DHCP Message Type: 0x05
+          Routers: 10.0.2.2
+          Server Identifier: 10.0.2.2
+          Subnet Mask: 255.255.255.0
+      Ethernet:
+          MAC Address: 08:00:27:5f:7a:7e
+          Media Options: Full Duplex
+          Media Subtype: 1000baseT
+      Proxies:
+          Exceptions List: *.local, 169.254/16
+          FTP Passive Mode: Yes
+      Service Order: 0
+            /**/
+
             return base.GetNetworkAdapterList();
         }
 
@@ -276,6 +642,11 @@ namespace Hardware.Info.Mac
 
             // https://developer.apple.com/documentation/iokit/1424817-printer_class_requests
 
+            /*
+            SPPrintersDataType
+Printers:
+            /**/
+
             printerList.Add(printer);
 
             return printerList;
@@ -286,6 +657,13 @@ namespace Hardware.Info.Mac
             List<SoundDevice> soundDeviceList = new List<SoundDevice>();
 
             SoundDevice soundDevice = new SoundDevice();
+
+            /*
+            SPAudioDataType
+Audio:
+
+    Devices:
+            /**/
 
             soundDeviceList.Add(soundDevice);
 
@@ -301,6 +679,29 @@ namespace Hardware.Info.Mac
             // https://stackoverflow.com/questions/18077639/getting-graphic-card-information-in-objective-c
 
             // https://developer.apple.com/documentation/iokit/iographicslib_h
+
+            /*
+            SPDisplaysDataType
+Graphics/Displays:
+
+    Display:
+
+      Type: GPU
+      Bus: PCI
+      VRAM (Total): 8 MB
+      Device ID: 0xbeef
+      Revision ID: 0x0000
+      Kernel Extension Info: No Kext Loaded
+      Displays:
+        Display:
+          Resolution: 1920 x 1200
+          Framebuffer Depth: 24-Bit Color (ARGB8888)
+          Main Display: Yes
+          Mirror: Off
+          Online: Yes
+          Automatically Adjust Brightness: No
+      Vendor ID: 0x80ee
+            /**/
 
             videoControllerList.Add(videoController);
 

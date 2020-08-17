@@ -15,7 +15,7 @@ namespace Hardware.Info
             ProcessStartInfo processStartInfo = new ProcessStartInfo(cmd, args)
             {
                 CreateNoWindow = true,
-                ErrorDialog = false,
+                UseShellExecute = false,
                 RedirectStandardError = true,
                 RedirectStandardInput = true,
                 RedirectStandardOutput = true

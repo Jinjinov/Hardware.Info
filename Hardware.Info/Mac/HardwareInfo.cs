@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Runtime.InteropServices;
+using System.Text;
+using System.Threading;
 
 // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/sysctlbyname.3.html
 // https://wiki.freepascal.org/Accessing_macOS_System_Information
@@ -20,20 +22,79 @@ namespace Hardware.Info.Mac
 
         private readonly MemoryStatus memoryStatus = new MemoryStatus();
 
-        private readonly PNode? system_profiler;
+        private PNode? system_profiler;
 
         public HardwareInfo()
         {
             try
             {
-                using Process process = StartProcess("system_profiler", "-xml");
-                using StreamReader streamReader = process.StandardOutput;
-                process.WaitForExit();
-
-                system_profiler = PList.Load(streamReader.BaseStream);
+                SystemProfiler();
             }
-            catch
+            catch (Exception ex)
             {
+            }
+        }
+
+        private void SystemProfiler()
+        {
+            using Process process = new Process();
+
+            process.StartInfo.FileName = "system_profiler";
+            process.StartInfo.Arguments = "-xml";
+            process.StartInfo.CreateNoWindow = true;
+            process.StartInfo.UseShellExecute = false;
+            process.StartInfo.RedirectStandardOutput = true;
+            process.StartInfo.RedirectStandardError = true;
+
+            using MemoryStream stream = new MemoryStream();
+            using StreamWriter output = new StreamWriter(stream);
+            StringBuilder error = new StringBuilder();
+
+            using AutoResetEvent outputWaitHandle = new AutoResetEvent(false);
+            using AutoResetEvent errorWaitHandle = new AutoResetEvent(false);
+
+            process.OutputDataReceived += (sender, e) =>
+            {
+                if (e.Data == null)
+                {
+                    outputWaitHandle.Set();
+                }
+                else
+                {
+                    output.Write(e.Data);
+                }
+            };
+            process.ErrorDataReceived += (sender, e) =>
+            {
+                if (e.Data == null)
+                {
+                    errorWaitHandle.Set();
+                }
+                else
+                {
+                    error.AppendLine(e.Data);
+                }
+            };
+
+            process.Start();
+
+            process.BeginOutputReadLine();
+            process.BeginErrorReadLine();
+
+            int millisecondsTimeout = 60 * 1000;
+
+            if (process.WaitForExit(millisecondsTimeout) && outputWaitHandle.WaitOne(millisecondsTimeout) && errorWaitHandle.WaitOne(millisecondsTimeout))
+            {
+                // Process completed. Check process.ExitCode here.
+
+                output.Flush();
+                stream.Position = 0;
+
+                system_profiler = PList.Load(stream);
+            }
+            else
+            {
+                // Timed out.
             }
         }
 

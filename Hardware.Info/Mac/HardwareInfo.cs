@@ -285,6 +285,11 @@ Hardware:
                 cpu.CurrentClockSpeed = speed;
             }
 
+            processOutput = ReadProcessOutput("sysctl", "-n hw.l2cachesize");
+
+            if (uint.TryParse(processOutput, out uint L2CacheSize))
+                cpu.L2CacheSize = L2CacheSize;
+
             processOutput = ReadProcessOutput("sysctl", "-n hw.physicalcpu");
 
             if (uint.TryParse(processOutput, out uint numberOfCores))

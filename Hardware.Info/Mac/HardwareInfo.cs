@@ -211,6 +211,27 @@ Power:
     Hardware Configuration:
 
       UPS Installed: No
+
+      Model Information:
+          Serial Number: W01396THJD3LA
+          Manufacturer: SMP
+          Device Name: bq20z451
+          Pack Lot Code: 0
+          PCB Lot Code: 0
+          Firmware Version: 201
+          Hardware Revision: 000a
+          Cell Revision: 165
+      Charge Information:
+          Charge Remaining (mAh): 5013
+          Fully Charged: Yes
+          Charging: No
+          Full Charge Capacity (mAh): 5086
+      Health Information:
+          Cycle Count: 72
+          Condition: Normal
+      Battery Installed: Yes
+      Amperage (mA): -300
+      Voltage (mV): 12303
             /**/
 
             batteryList.Add(battery);
@@ -458,7 +479,7 @@ USB:
         {
             List<Memory> memoryList = new List<Memory>();
 
-            Memory memory = new Memory();
+            Memory? memory = null;
 
             /*
             SPMemoryDataType
@@ -480,7 +501,79 @@ Memory:
           Serial Number: -
             /**/
 
-            memoryList.Add(memory);
+            StartProcess("system_profiler", "SPMemoryDataType", 
+                standardOutput => 
+                {
+                    string line = standardOutput.Trim();
+
+                    string[] split = line.Split(' ');
+
+                    if (line.StartsWith("Bank"))
+                    {
+                        if (memory != null)
+                            memoryList.Add(memory);
+
+                        memory = new Memory();
+                    }
+
+                    if (memory != null)
+                    {
+                        if (line.StartsWith("Size:"))
+                        {
+                            if (split.Length == 3)
+                            {
+                                if (ulong.TryParse(split[1], out ulong size))
+                                {
+                                    memory.Capacity = split[2] switch
+                                    {
+                                        "TB" => size * 1024uL * 1024uL * 1024uL * 1024uL,
+                                        "GB" => size * 1024uL * 1024uL * 1024uL,
+                                        "MB" => size * 1024uL * 1024uL,
+                                        "KB" => size * 1024uL,
+                                        _ => size,
+                                    };
+                                }
+                            }
+                        }
+
+                        if (line.StartsWith("Type:"))
+                        {
+                            if (split.Length == 2)
+                            {
+                                if (Enum.TryParse(split[1], out FormFactor formFactor))
+                                    memory.FormFactor = formFactor;
+                            }
+                        }
+
+                        if (line.StartsWith("Speed:"))
+                        {
+                            if (split.Length == 3)
+                            {
+                                if (uint.TryParse(split[1], out uint speed))
+                                    memory.Speed = speed;
+                            }
+                        }
+
+                        if (line.StartsWith("Manufacturer: "))
+                        {
+                            memory.Manufacturer = line.Replace("Manufacturer: ", string.Empty);
+                        }
+
+                        if (line.StartsWith("Part Number: "))
+                        {
+                            memory.PartNumber = line.Replace("Part Number: ", string.Empty);
+                        }
+
+                        if (line.StartsWith("Serial Number: "))
+                        {
+                            memory.SerialNumber = line.Replace("Serial Number: ", string.Empty);
+                        }
+                    }
+                }, 
+                standardError => { });
+
+            if (memory != null)
+                memoryList.Add(memory);
 
             return memoryList;
         }

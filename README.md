@@ -112,6 +112,9 @@ How to use:
 
 Version history:
 
+- 0.1.0.1:
+    - Added Monitor info in macOS
+    - Added VideoController info in macOS
 - 0.1.0.0:
     - Added CPU.L2CacheSize in macOS
     - Added CPU.L3CacheSize in macOS

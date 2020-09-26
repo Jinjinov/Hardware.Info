@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
+using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
 using System.Threading;
@@ -582,7 +583,7 @@ Memory:
         {
             List<Monitor> monitorList = new List<Monitor>();
 
-            Monitor monitor = new Monitor();
+            Monitor? monitor = null;
 
             // https://developer.apple.com/documentation/appkit/nsscreen
 
@@ -595,6 +596,40 @@ Memory:
             //auto mainDisplayId = CGMainDisplayID();
             //width = CGDisplayPixelsWide(mainDisplayId);
             //height = CGDisplayPixelsHigh(mainDisplayId);
+
+            StartProcess("system_profiler", "SPDisplaysDataType",
+                standardOutput =>
+                {
+                    int spaceCount = standardOutput.TakeWhile(c => c == ' ').Count();
+
+                    string line = standardOutput.Trim();
+
+                    string[] split = line.Split(':');
+
+                    if (spaceCount == 8)
+                    {
+                        if (monitor != null)
+                            monitorList.Add(monitor);
+
+                        string name = line.TrimEnd(':');
+
+                        monitor = new Monitor
+                        {
+                            Caption = name,
+                            Description = name,
+                            Name = name
+                        };
+                    }
+
+                    if (monitor != null)
+                    {
+                        if (line.StartsWith("Display Type: "))
+                        {
+                            monitor.MonitorType = line.Replace("Display Type: ", string.Empty);
+                        }
+                    }
+                },
+                standardError => { });
 
             /*
             SPDisplaysDataType
@@ -619,7 +654,91 @@ Graphics/Displays:
       Vendor ID: 0x80ee
             /**/
 
-            monitorList.Add(monitor);
+            /*
+Graphics/Displays:
+
+    Intel Iris Pro:
+
+      Chipset Model: Intel Iris Pro
+      Type: GPU
+      Bus: Built-In
+      VRAM (Dynamic, Max): 1536 MB
+      Vendor: Intel
+      Device ID: 0x0d26
+      Revision ID: 0x0008
+      Metal: Supported, feature set macOS GPUFamily1 v4
+      Displays:
+        DELL U2718Q:
+          Resolution: 3840 x 2160 (2160p 4K UHD - Ultra High Definition)
+          UI Looks like: 1920 x 1080 @ 60 Hz
+          Framebuffer Depth: 24-Bit Color (ARGB8888)
+          Display Serial Number: 5DWRH7AU05LL
+          Main Display: Yes
+          Mirror: Off
+          Online: Yes
+          Rotation: Supported
+          Automatically Adjust Brightness: No
+          Connection Type: DisplayPort
+        DELL U2718Q:
+          Resolution: 2160 x 3840
+          UI Looks like: 1080 x 1920 @ 60 Hz
+          Framebuffer Depth: 24-Bit Color (ARGB8888)
+          Display Serial Number: 5DWRH7AQ12UL
+          Mirror: Off
+          Online: Yes
+          Rotation: 90
+          Automatically Adjust Brightness: No
+          Connection Type: DisplayPort
+            /**/
+
+            /*
+Graphics/Displays:
+
+    Intel HD Graphics 4000:
+
+      Chipset Model: Intel HD Graphics 4000
+      Type: GPU
+      Bus: Built-In
+      VRAM (Total): 384 MB
+      Vendor: Intel (0x8086)
+      Device ID: 0x0166
+      Revision ID: 0x0009
+      gMux Version: 1.9.23
+
+    NVIDIA GeForce GT 650M:
+
+      Chipset Model: NVIDIA GeForce GT 650M
+      Type: GPU
+      Bus: PCIe
+      PCIe Lane Width: x8
+      VRAM (Total): 512 MB
+      Vendor: NVIDIA (0x10de)
+      Device ID: 0x0fd5
+      Revision ID: 0x00a2
+      ROM Revision: 3682
+      gMux Version: 1.9.23
+      Displays:
+        Color LCD:
+          Display Type: LCD
+          Resolution: 1440 x 900
+          Pixel Depth: 32-Bit Color (ARGB8888)
+          Mirror: Off
+          Online: Yes
+          Built-In: Yes
+        Thunderbolt Display:
+          Display Type: LCD
+          Resolution: 2560 x 1440
+          Pixel Depth: 32-Bit Color (ARGB8888)
+          Display Serial Number: C02K80FPF2GC
+          Main Display: Yes
+          Mirror: Off
+          Online: Yes
+          Rotation: Supported
+          Connection Type: DisplayPort
+            /**/
+
+            if (monitor != null)
+                monitorList.Add(monitor);
 
             return monitorList;
         }
@@ -777,11 +896,59 @@ Audio:
         {
             List<VideoController> videoControllerList = new List<VideoController>();
 
-            VideoController videoController = new VideoController();
+            VideoController? videoController = null;
 
             // https://stackoverflow.com/questions/18077639/getting-graphic-card-information-in-objective-c
 
             // https://developer.apple.com/documentation/iokit/iographicslib_h
+
+            StartProcess("system_profiler", "SPDisplaysDataType",
+                standardOutput =>
+                {
+                    int spaceCount = standardOutput.TakeWhile(c => c == ' ').Count();
+
+                    string line = standardOutput.Trim();
+
+                    string[] split = line.Split(':');
+
+                    if (spaceCount == 4)
+                    {
+                        if (videoController != null)
+                            videoControllerList.Add(videoController);
+
+                        string name = line.TrimEnd(':');
+
+                        videoController = new VideoController
+                        {
+                            Caption = name,
+                            Description = name,
+                            Name = name
+                        };
+                    }
+
+                    if (videoController != null)
+                    {
+                        if (line.StartsWith("Chipset Model: "))
+                        {
+                            videoController.VideoProcessor = line.Replace("Chipset Model: ", string.Empty);
+                        }
+
+                        if (line.StartsWith("VRAM "))
+                        {
+                            if (split.Length == 2)
+                            {
+                                if (uint.TryParse(split[1].Replace("MB", string.Empty).Trim(), out uint ram))
+                                    videoController.AdapterRAM = ram;
+                            }
+                        }
+
+                        if (line.StartsWith("Vendor: "))
+                        {
+                            videoController.Manufacturer = line.Replace("Vendor: ", string.Empty);
+                        }
+                    }
+                },
+                standardError => { });
 
             /*
             SPDisplaysDataType
@@ -806,7 +973,91 @@ Graphics/Displays:
       Vendor ID: 0x80ee
             /**/
 
-            videoControllerList.Add(videoController);
+            /*
+Graphics/Displays:
+
+    Intel Iris Pro:
+
+      Chipset Model: Intel Iris Pro
+      Type: GPU
+      Bus: Built-In
+      VRAM (Dynamic, Max): 1536 MB
+      Vendor: Intel
+      Device ID: 0x0d26
+      Revision ID: 0x0008
+      Metal: Supported, feature set macOS GPUFamily1 v4
+      Displays:
+        DELL U2718Q:
+          Resolution: 3840 x 2160 (2160p 4K UHD - Ultra High Definition)
+          UI Looks like: 1920 x 1080 @ 60 Hz
+          Framebuffer Depth: 24-Bit Color (ARGB8888)
+          Display Serial Number: 5DWRH7AU05LL
+          Main Display: Yes
+          Mirror: Off
+          Online: Yes
+          Rotation: Supported
+          Automatically Adjust Brightness: No
+          Connection Type: DisplayPort
+        DELL U2718Q:
+          Resolution: 2160 x 3840
+          UI Looks like: 1080 x 1920 @ 60 Hz
+          Framebuffer Depth: 24-Bit Color (ARGB8888)
+          Display Serial Number: 5DWRH7AQ12UL
+          Mirror: Off
+          Online: Yes
+          Rotation: 90
+          Automatically Adjust Brightness: No
+          Connection Type: DisplayPort
+            /**/
+
+            /*
+Graphics/Displays:
+
+    Intel HD Graphics 4000:
+
+      Chipset Model: Intel HD Graphics 4000
+      Type: GPU
+      Bus: Built-In
+      VRAM (Total): 384 MB
+      Vendor: Intel (0x8086)
+      Device ID: 0x0166
+      Revision ID: 0x0009
+      gMux Version: 1.9.23
+
+    NVIDIA GeForce GT 650M:
+
+      Chipset Model: NVIDIA GeForce GT 650M
+      Type: GPU
+      Bus: PCIe
+      PCIe Lane Width: x8
+      VRAM (Total): 512 MB
+      Vendor: NVIDIA (0x10de)
+      Device ID: 0x0fd5
+      Revision ID: 0x00a2
+      ROM Revision: 3682
+      gMux Version: 1.9.23
+      Displays:
+        Color LCD:
+          Display Type: LCD
+          Resolution: 1440 x 900
+          Pixel Depth: 32-Bit Color (ARGB8888)
+          Mirror: Off
+          Online: Yes
+          Built-In: Yes
+        Thunderbolt Display:
+          Display Type: LCD
+          Resolution: 2560 x 1440
+          Pixel Depth: 32-Bit Color (ARGB8888)
+          Display Serial Number: C02K80FPF2GC
+          Main Display: Yes
+          Mirror: Off
+          Online: Yes
+          Rotation: Supported
+          Connection Type: DisplayPort
+            /**/
+
+            if (videoController != null)
+                videoControllerList.Add(videoController);
 
             return videoControllerList;
         }

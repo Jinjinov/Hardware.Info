@@ -909,8 +909,6 @@ Audio:
 
                     string line = standardOutput.Trim();
 
-                    string[] split = line.Split(':');
-
                     if (spaceCount == 4)
                     {
                         if (videoController != null)
@@ -935,6 +933,8 @@ Audio:
 
                         if (line.StartsWith("VRAM "))
                         {
+                            string[] split = line.Split(':');
+
                             if (split.Length == 2)
                             {
                                 if (uint.TryParse(split[1].Replace("MB", string.Empty).Trim(), out uint ram))
@@ -945,6 +945,53 @@ Audio:
                         if (line.StartsWith("Vendor: "))
                         {
                             videoController.Manufacturer = line.Replace("Vendor: ", string.Empty);
+                        }
+
+                        if (line.StartsWith("Resolution: "))
+                        {
+                            string[] split = line.Replace("Resolution: ", string.Empty).Split(' ');
+
+                            if (split.Length >= 3)
+                            {
+                                if (uint.TryParse(split[0].Trim(), out uint x))
+                                    videoController.CurrentHorizontalResolution = x;
+
+                                if (uint.TryParse(split[2].Trim(), out uint y))
+                                    videoController.CurrentVerticalResolution = y;
+                            }
+                        }
+
+                        if (line.StartsWith("UI Looks like: "))
+                        {
+                            string[] split = line.Split('@');
+
+                            if (split.Length == 2)
+                            {
+                                if (uint.TryParse(split[1].Replace("Hz", string.Empty).Trim(), out uint Hz))
+                                    videoController.CurrentRefreshRate = Hz;
+                            }
+                        }
+
+                        if (line.StartsWith("Framebuffer Depth: "))
+                        {
+                            string[] split = line.Replace("Framebuffer Depth: ", string.Empty).Split('-');
+
+                            if (split.Length == 2)
+                            {
+                                if (uint.TryParse(split[0].Trim(), out uint depth))
+                                    videoController.CurrentBitsPerPixel = depth;
+                            }
+                        }
+
+                        if (line.StartsWith("Pixel Depth: "))
+                        {
+                            string[] split = line.Replace("Pixel Depth: ", string.Empty).Split('-');
+
+                            if (split.Length == 2)
+                            {
+                                if (uint.TryParse(split[0].Trim(), out uint depth))
+                                    videoController.CurrentBitsPerPixel = depth;
+                            }
                         }
                     }
                 },

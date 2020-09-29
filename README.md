@@ -103,7 +103,7 @@ How to use:
 
                 Console.WriteLine();
 
-                foreach (var address in HardwareInfo.GetLocalIPv4Address())
+                foreach (var address in HardwareInfo.GetLocalIPv4Addresses())
                     Console.WriteLine(address);
 
                 Console.ReadLine();

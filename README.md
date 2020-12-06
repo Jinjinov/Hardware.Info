@@ -112,6 +112,9 @@ How to use:
 
 Version history:
 
+- 0.1.1.1:
+    - Added Battery.DesignCapacity in Linux
+    - Added Battery.FullChargeCapacity in Linux
 - 0.1.1.0:
     - Added Battery.BatteryStatusDescription in Linux
 - 0.1.0.1:

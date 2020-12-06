@@ -44,15 +44,33 @@ namespace Hardware.Info.Linux
         {
             List<Battery> batteryList = new List<Battery>();
 
-            Battery battery = new Battery();
-
             // https://stackoverflow.com/questions/26888636/how-to-calculate-the-time-remaining-until-the-end-of-the-battery-charge
 
             // https://stackoverflow.com/questions/4858657/how-can-i-obtain-battery-level-inside-a-linux-kernel-module
 
             // /sys/class/power_supply/BAT0/charge_now
-
             // /sys/class/power_supply/BAT0/charge_full
+
+            // /sys/class/power_supply/BAT0/name = BAT0
+            // /sys/class/power_supply/BAT0/status = Charging / Discharging
+            // /sys/class/power_supply/BAT0/present = 1
+            // /sys/class/power_supply/BAT0/technology = Li-ion
+            // /sys/class/power_supply/BAT0/cycle_count = 0
+            // /sys/class/power_supply/BAT0/voltage_min_design = 112530000
+            // /sys/class/power_supply/BAT0/power_now = 21240000
+            // /sys/class/power_supply/BAT0/energy_full_design = 50610000
+            // /sys/class/power_supply/BAT0/energy_full = 50610000
+            // /sys/class/power_supply/BAT0/energy_now  = 22460000
+            // /sys/class/power_supply/BAT0/capacity = 44                   // 44 % full        // 50610000 / 22460000 = 0,4437858130804189
+            // /sys/class/power_supply/BAT0/capacity_level = Normal
+            // /sys/class/power_supply/BAT0/model_name = 
+            // /sys/class/power_supply/BAT0/manufacturer = Sony Corp.
+            // /sys/class/power_supply/BAT0/serial_number = 
+
+            Battery battery = new Battery
+            {
+                BatteryStatusDescription = TryReadFileText("/sys/class/power_supply/BAT0/status")
+            };
 
             batteryList.Add(battery);
 

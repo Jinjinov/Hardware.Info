@@ -32,21 +32,28 @@ namespace Hardware.Info
         // Remaining time to charge the battery fully in minutes at the current charging rate and usage.
         public UInt32 TimeToFullCharge { get; internal set; }
 
-        public string BatteryStatusDescription => BatteryStatus switch
+        private string batteryStatusDescription = string.Empty;
+
+        public string BatteryStatusDescription
         {
-            1 => "The battery is discharging",
-            2 => "The system has access to AC so no battery is being discharged. However, the battery is not necessarily charging.",
-            3 => "Fully Charged",
-            4 => "Low",
-            5 => "Critical",
-            6 => "Charging",
-            7 => "Charging and High",
-            8 => "Charging and Low",
-            9 => "Charging and Critical",
-            10 => "No battery is installed",
-            11 => "Partially Charged",
-            _ => string.Empty
-        };
+            get => !string.IsNullOrEmpty(batteryStatusDescription) ? batteryStatusDescription : BatteryStatus switch
+            {
+                1 => "The battery is discharging",
+                2 => "The system has access to AC so no battery is being discharged. However, the battery is not necessarily charging.",
+                3 => "Fully Charged",
+                4 => "Low",
+                5 => "Critical",
+                6 => "Charging",
+                7 => "Charging and High",
+                8 => "Charging and Low",
+                9 => "Charging and Critical",
+                10 => "No battery is installed",
+                11 => "Partially Charged",
+                _ => string.Empty
+            };
+
+            internal set => batteryStatusDescription = value;
+        }
 
         public override string ToString()
         {

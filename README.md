@@ -112,6 +112,8 @@ How to use:
 
 Version history:
 
+- 0.1.1.0:
+    - Added Battery.BatteryStatusDescription in Linux
 - 0.1.0.1:
     - Added Monitor info in macOS
     - Added VideoController info in macOS

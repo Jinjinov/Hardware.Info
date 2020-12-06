@@ -67,8 +67,16 @@ namespace Hardware.Info.Linux
             // /sys/class/power_supply/BAT0/manufacturer = Sony Corp.
             // /sys/class/power_supply/BAT0/serial_number = 
 
+            string energy_full_design = TryReadFileText("/sys/class/power_supply/BAT0/energy_full_design");
+            string energy_full = TryReadFileText("/sys/class/power_supply/BAT0/energy_full");
+
+            uint.TryParse(energy_full_design, out uint designCapacity);
+            uint.TryParse(energy_full, out uint fullChargeCapacity);
+
             Battery battery = new Battery
             {
+                DesignCapacity = designCapacity,
+                FullChargeCapacity = fullChargeCapacity,
                 BatteryStatusDescription = TryReadFileText("/sys/class/power_supply/BAT0/status")
             };
 

@@ -67,17 +67,32 @@ namespace Hardware.Info.Linux
             // /sys/class/power_supply/BAT0/manufacturer = Sony Corp.
             // /sys/class/power_supply/BAT0/serial_number = 
 
+            string power_now = TryReadFileText("/sys/class/power_supply/BAT0/power_now");
             string energy_full_design = TryReadFileText("/sys/class/power_supply/BAT0/energy_full_design");
             string energy_full = TryReadFileText("/sys/class/power_supply/BAT0/energy_full");
+            string energy_now = TryReadFileText("/sys/class/power_supply/BAT0/energy_now");
 
+            uint.TryParse(power_now, out uint powerNow);
             uint.TryParse(energy_full_design, out uint designCapacity);
             uint.TryParse(energy_full, out uint fullChargeCapacity);
+            uint.TryParse(energy_now, out uint energyNow);
+
+            if (powerNow == 0)
+                powerNow = 1;
 
             Battery battery = new Battery
             {
                 DesignCapacity = designCapacity,
                 FullChargeCapacity = fullChargeCapacity,
-                BatteryStatusDescription = TryReadFileText("/sys/class/power_supply/BAT0/status")
+                BatteryStatusDescription = TryReadFileText("/sys/class/power_supply/BAT0/status"),
+
+                EstimatedRunTime = energyNow / powerNow, // current remaining life in minutes
+                ExpectedLife = fullChargeCapacity / powerNow, // total expected lifetime in minutes
+
+                //TimeOnBattery = 1, // Elapsed time in seconds since the computer last switched to battery power
+
+                MaxRechargeTime = fullChargeCapacity / powerNow, // total time, in minutes, to fully charge the battery
+                TimeToFullCharge = (fullChargeCapacity - energyNow) / powerNow // Remaining time to charge the battery fully in minutes
             };
 
             batteryList.Add(battery);

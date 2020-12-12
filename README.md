@@ -112,6 +112,11 @@ How to use:
 
 Version history:
 
+- 1.0.0.0:
+    - Added Battery.ExpectedLife in Linux
+    - Added Battery.EstimatedRunTime in Linux
+    - Added Battery.MaxRechargeTime in Linux
+    - Added Battery.TimeToFullCharge in Linux
 - 0.1.1.1:
     - Added Battery.DesignCapacity in Linux
     - Added Battery.FullChargeCapacity in Linux

@@ -6,7 +6,7 @@ How to use:
 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
-        <PackageReference Include="Hardware.Info" Version="0.1.1.0" />
+        <PackageReference Include="Hardware.Info" Version="0.1.1.1" />
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
 

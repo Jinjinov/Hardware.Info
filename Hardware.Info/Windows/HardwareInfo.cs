@@ -81,6 +81,7 @@ namespace Hardware.Info.Windows
                     FullChargeCapacity = GetPropertyValue<uint>(mo["FullChargeCapacity"]),
                     DesignCapacity = GetPropertyValue<uint>(mo["DesignCapacity"]),
                     BatteryStatus = GetPropertyValue<ushort>(mo["BatteryStatus"]),
+                    EstimatedChargeRemaining = GetPropertyValue<ushort>(mo["EstimatedChargeRemaining"]),
                     EstimatedRunTime = GetPropertyValue<uint>(mo["EstimatedRunTime"]),
                     ExpectedLife = GetPropertyValue<uint>(mo["ExpectedLife"]),
                     MaxRechargeTime = GetPropertyValue<uint>(mo["MaxRechargeTime"]),

@@ -6,7 +6,7 @@ How to use:
 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
-        <PackageReference Include="Hardware.Info" Version="1.0.0.0" />
+        <PackageReference Include="Hardware.Info" Version="1.0.0.1" />
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
 
@@ -112,6 +112,9 @@ How to use:
 
 Version history:
 
+- 1.0.0.1:
+    - Added Battery.EstimatedChargeRemaining in Windows - by [@reptail]( https://github.com/reptail )
+    - Added Battery.EstimatedChargeRemaining in Linux - by [@reptail]( https://github.com/reptail )
 - 1.0.0.0:
     - Added Battery.ExpectedLife in Linux
     - Added Battery.EstimatedRunTime in Linux

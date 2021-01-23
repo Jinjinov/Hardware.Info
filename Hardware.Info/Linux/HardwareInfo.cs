@@ -80,6 +80,9 @@ namespace Hardware.Info.Linux
             if (powerNow == 0)
                 powerNow = 1;
 
+            if (fullChargeCapacity == 0)
+                fullChargeCapacity = 1;
+
             Battery battery = new Battery
             {
                 DesignCapacity = designCapacity,

@@ -113,8 +113,7 @@ How to use:
 Version history:
 
 - 1.0.0.1:
-    - Added Battery.EstimatedChargeRemaining in Windows - by [@reptail]( https://github.com/reptail )
-    - Added Battery.EstimatedChargeRemaining in Linux - by [@reptail]( https://github.com/reptail )
+    - Added Battery.EstimatedChargeRemaining in Windows, Linux - by [@reptail]( https://github.com/reptail )
 - 1.0.0.0:
     - Added Battery.ExpectedLife in Linux
     - Added Battery.EstimatedRunTime in Linux

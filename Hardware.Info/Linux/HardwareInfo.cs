@@ -86,6 +86,7 @@ namespace Hardware.Info.Linux
                 FullChargeCapacity = fullChargeCapacity,
                 BatteryStatusDescription = TryReadFileText("/sys/class/power_supply/BAT0/status"),
 
+                EstimatedChargeRemaining = (ushort)(energyNow * 100 / fullChargeCapacity), // current charge remaining in percentage
                 EstimatedRunTime = energyNow / powerNow, // current remaining life in minutes
                 ExpectedLife = fullChargeCapacity / powerNow, // total expected lifetime in minutes
 

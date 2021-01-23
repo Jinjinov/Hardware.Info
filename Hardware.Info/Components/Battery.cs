@@ -14,6 +14,9 @@ namespace Hardware.Info
 
         public UInt16 BatteryStatus { get; internal set; }
 
+        // Estimate of the percentage of full charge remaining
+        public UInt16 EstimatedChargeRemaining { get; internal set; }
+
         // Estimate in minutes of the time to battery charge depletion under the present load conditions if the utility power is off, or lost and remains off, or a laptop is disconnected from a power source.
         public UInt32 EstimatedRunTime { get; internal set; }
 
@@ -61,6 +64,7 @@ namespace Hardware.Info
                 "FullChargeCapacity: " + FullChargeCapacity + Environment.NewLine +
                 "DesignCapacity: " + DesignCapacity + Environment.NewLine +
                 "BatteryStatusDescription: " + BatteryStatusDescription + Environment.NewLine +
+                "EstimatedChargeRemaining: " + EstimatedChargeRemaining + Environment.NewLine +
                 "EstimatedRunTime: " + EstimatedRunTime + Environment.NewLine +
                 "ExpectedLife: " + ExpectedLife + Environment.NewLine +
                 "MaxRechargeTime: " + MaxRechargeTime + Environment.NewLine +

@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 namespace Hardware.Info
 {
@@ -17,12 +18,15 @@ namespace Hardware.Info
         public string ProcessorId { get; internal set; } = string.Empty;
         public Boolean VirtualizationFirmwareEnabled { get; internal set; }
         public Boolean VMMonitorModeExtensions { get; internal set; }
+        public UInt64 TotalCpuUsage { get; internal set; }
+        public List<CpuCore> CoresUsage { get; internal set; } = new List<CpuCore>();
 
         public override string ToString()
         {
             return
                 "Caption: " + Caption + Environment.NewLine +
                 "CurrentClockSpeed: " + CurrentClockSpeed + Environment.NewLine +
+                "TotalCpuUsage: " + TotalCpuUsage + Environment.NewLine +
                 "Description: " + Description + Environment.NewLine +
                 "L2CacheSize: " + L2CacheSize + Environment.NewLine +
                 "L3CacheSize: " + L3CacheSize + Environment.NewLine +

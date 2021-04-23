@@ -143,13 +143,45 @@ namespace Hardware.Info.Windows
                     NumberOfLogicalProcessors = GetPropertyValue<uint>(mo["NumberOfLogicalProcessors"]),
                     ProcessorId = GetPropertyString(mo["ProcessorId"]),
                     VirtualizationFirmwareEnabled = GetPropertyValue<bool>(mo["VirtualizationFirmwareEnabled"]),
-                    VMMonitorModeExtensions = GetPropertyValue<bool>(mo["VMMonitorModeExtensions"])
+                    VMMonitorModeExtensions = GetPropertyValue<bool>(mo["VMMonitorModeExtensions"]),
+                    TotalCpuUsage = GetTotalCpuUsage(),
+                    CoresUsage = GetTotalCpuCoreUsage()
                 };
 
                 cpuList.Add(cpu);
             }
 
             return cpuList;
+        }
+
+        private static UInt64 GetTotalCpuUsage()
+        {
+            using var win32PerfFormattedDataPerfOsProcessor = new ManagementObjectSearcher("SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name = '_Total'");
+
+            foreach (var queryObj in win32PerfFormattedDataPerfOsProcessor.Get())
+            {
+                return GetPropertyValue<ulong>(queryObj["PercentProcessorTime"]);
+            }
+
+            return 0;
+        }
+
+        private static List<CpuCore> GetTotalCpuCoreUsage()
+        {
+            var cpuUsage = new List<CpuCore>();
+            using var win32PerfFormattedDataPerfOsProcessor =  new ManagementObjectSearcher("SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name != '_Total'");
+
+            foreach (var cpuCore in win32PerfFormattedDataPerfOsProcessor.Get())
+            {
+                var core = new CpuCore
+                {
+                    Name = GetPropertyString(cpuCore["Name"]),
+                    CoreUsage = GetPropertyValue<ulong>(cpuCore["PercentProcessorTime"])
+                };
+                cpuUsage.Add(core);
+            }
+
+            return cpuUsage;
         }
 
         public override List<Drive> GetDriveList()
@@ -354,6 +386,13 @@ namespace Hardware.Info.Windows
                     Speed = GetPropertyValue<ulong>(mo["Speed"])
                 };
 
+                using ManagementObjectSearcher searcher = new ManagementObjectSearcher($"SELECT * FROM Win32_PerfFormattedData_Tcpip_NetworkAdapter WHERE Name = '{networkAdapter.Name.Replace("(", "[").Replace(")", "]")}'");
+                foreach (var mObject in searcher.Get())
+                {
+                    networkAdapter.SendThroughPut = GetPropertyValue<ulong>(mObject["BytesSentPersec"]);
+                    networkAdapter.ReceiveThroughPut = GetPropertyValue<ulong>(mObject["BytesReceivedPersec"]);
+                }
+                
                 IPAddress address;
                 foreach (ManagementObject configuration in mo.GetRelated("Win32_NetworkAdapterConfiguration"))
                 {
@@ -465,6 +504,49 @@ namespace Hardware.Info.Windows
             }
 
             return videoControllerList;
+        }
+
+        public List<Service> GetServiceList()
+        {
+            var services = new List<Service>();
+            using var win32Service = new ManagementObjectSearcher("SELECT * FROM Win32_Service");
+
+            foreach (var queryObject in win32Service.Get())
+            {
+                var service = new Service();
+                var processId = GetPropertyValue<uint>(queryObject["ProcessId"]);
+                var state = GetPropertyString(queryObject["State"]);
+                service.Name = GetPropertyString(queryObject["Name"]);
+                service.State = state switch
+                {
+                    "Stopped" => ServiceState.Stopped,
+                    "Start Pending" => ServiceState.StartPending,
+                    "Stop Pending" => ServiceState.StopPending,
+                    "Running" => ServiceState.Running,
+                    "Continue Pending" => ServiceState.ContinuePending,
+                    "Pause Pending" => ServiceState.PausePending,
+                    "Paused" => ServiceState.Paused,
+                    "Unknown" => ServiceState.Unknown,
+                    _ => service.State
+                };
+
+                if (service.State == ServiceState.Running)
+                {
+                    using var win32PerfFormattedDataPerfProcProcess = new ManagementObjectSearcher(
+                        $"SELECT * FROM Win32_PerfFormattedData_PerfProc_Process WHERE IDProcess = {processId}");
+
+                    foreach (var queryObj in win32PerfFormattedDataPerfProcProcess.Get())
+                    {
+                        service.CpuUsage = GetPropertyValue<ulong>(queryObj["PercentProcessorTime"]);
+                        service.MemoryPrivateBytes = GetPropertyValue<ulong>(queryObj["PrivateBytes"]);
+                        service.MemoryWorkingSet = GetPropertyValue<ulong>(queryObj["WorkingSet"]);
+                    }
+                }
+
+                services.Add(service);
+            }
+            
+            return services;
         }
     }
 }

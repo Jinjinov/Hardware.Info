@@ -448,5 +448,10 @@ namespace Hardware.Info.Linux
 
             return videoControllerList;
         }
+
+        public List<Service> GetServiceList()
+        {
+            return new List<Service>();
+        }
     }
 }

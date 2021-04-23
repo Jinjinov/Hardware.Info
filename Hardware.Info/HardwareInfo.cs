@@ -25,7 +25,6 @@ namespace Hardware.Info
         public List<Printer> PrinterList { get; private set; } = new List<Printer>();
         public List<SoundDevice> SoundDeviceList { get; private set; } = new List<SoundDevice>();
         public List<VideoController> VideoControllerList { get; private set; } = new List<VideoController>();
-        public List<Service> Services { get; private set; } = new List<Service>();
 
         private readonly IHardwareInfo hardwareInfo = null!;
 
@@ -64,7 +63,6 @@ namespace Hardware.Info
             RefreshPrinterList();
             RefreshSoundDeviceList();
             RefreshVideoControllerList();
-            RefreshServiceList();
         }
 
         public void RefreshMemoryStatus() => MemoryStatus = hardwareInfo.GetMemoryStatus();
@@ -82,7 +80,6 @@ namespace Hardware.Info
         public void RefreshPrinterList() => PrinterList = hardwareInfo.GetPrinterList();
         public void RefreshSoundDeviceList() => SoundDeviceList = hardwareInfo.GetSoundDeviceList();
         public void RefreshVideoControllerList() => VideoControllerList = hardwareInfo.GetVideoControllerList();
-        public void RefreshServiceList() => Services = hardwareInfo.GetServiceList();
 
         #region Static
 

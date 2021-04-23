@@ -1107,10 +1107,5 @@ Graphics/Displays:
 
             return videoControllerList;
         }
-
-        public List<Service> GetServiceList()
-        {
-            return new List<Service>();
-        }
     }
 }

@@ -505,48 +505,5 @@ namespace Hardware.Info.Windows
 
             return videoControllerList;
         }
-
-        public List<Service> GetServiceList()
-        {
-            var services = new List<Service>();
-            using var win32Service = new ManagementObjectSearcher("SELECT * FROM Win32_Service");
-
-            foreach (var queryObject in win32Service.Get())
-            {
-                var service = new Service();
-                var processId = GetPropertyValue<uint>(queryObject["ProcessId"]);
-                var state = GetPropertyString(queryObject["State"]);
-                service.Name = GetPropertyString(queryObject["Name"]);
-                service.State = state switch
-                {
-                    "Stopped" => ServiceState.Stopped,
-                    "Start Pending" => ServiceState.StartPending,
-                    "Stop Pending" => ServiceState.StopPending,
-                    "Running" => ServiceState.Running,
-                    "Continue Pending" => ServiceState.ContinuePending,
-                    "Pause Pending" => ServiceState.PausePending,
-                    "Paused" => ServiceState.Paused,
-                    "Unknown" => ServiceState.Unknown,
-                    _ => service.State
-                };
-
-                if (service.State == ServiceState.Running)
-                {
-                    using var win32PerfFormattedDataPerfProcProcess = new ManagementObjectSearcher(
-                        $"SELECT * FROM Win32_PerfFormattedData_PerfProc_Process WHERE IDProcess = {processId}");
-
-                    foreach (var queryObj in win32PerfFormattedDataPerfProcProcess.Get())
-                    {
-                        service.CpuUsage = GetPropertyValue<ulong>(queryObj["PercentProcessorTime"]);
-                        service.MemoryPrivateBytes = GetPropertyValue<ulong>(queryObj["PrivateBytes"]);
-                        service.MemoryWorkingSet = GetPropertyValue<ulong>(queryObj["WorkingSet"]);
-                    }
-                }
-
-                services.Add(service);
-            }
-            
-            return services;
-        }
     }
 }

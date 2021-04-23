@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Hardware.Info
+namespace Service.Info
 {
     public class Service
     {

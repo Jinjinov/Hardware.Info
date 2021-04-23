@@ -105,9 +105,6 @@ namespace Hardware.Info.Test
 
             foreach (var address in HardwareInfo.GetLocalIPv4Addresses())
                 Console.WriteLine(address);
-
-            foreach (var service in hardwareInfo.Services)
-                Console.WriteLine(service);
             
             Console.ReadLine();
         }

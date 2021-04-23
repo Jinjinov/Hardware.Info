@@ -19,6 +19,5 @@ namespace Hardware.Info
         List<Printer> GetPrinterList();
         List<SoundDevice> GetSoundDeviceList();
         List<VideoController> GetVideoControllerList();
-        List<Service> GetServiceList();
     }
 }

@@ -1,4 +1,4 @@
-﻿namespace Hardware.Info
+﻿namespace Service.Info
 {
     public enum ServiceState
     {

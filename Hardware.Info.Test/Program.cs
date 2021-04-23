@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Service.Info;
+using System;
 using System.Net.NetworkInformation;
 
 namespace Hardware.Info.Test
@@ -6,6 +7,7 @@ namespace Hardware.Info.Test
     class Program
     {
         static readonly HardwareInfo hardwareInfo = new HardwareInfo();
+        static readonly ServiceInfo serviceInfo = new ServiceInfo();
 
         static void Main(string[] _)
         {
@@ -25,7 +27,11 @@ namespace Hardware.Info.Test
             //hardwareInfo.RefreshVideoControllerList();
 
             hardwareInfo.RefreshAll();
+            serviceInfo.RefreshAll();
 
+            foreach (var service in serviceInfo.Services)
+                Console.WriteLine(service);
+            
             Console.WriteLine(hardwareInfo.MemoryStatus);
 
             foreach (var hardware in hardwareInfo.BatteryList)

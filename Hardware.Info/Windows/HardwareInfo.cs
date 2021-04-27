@@ -143,13 +143,45 @@ namespace Hardware.Info.Windows
                     NumberOfLogicalProcessors = GetPropertyValue<uint>(mo["NumberOfLogicalProcessors"]),
                     ProcessorId = GetPropertyString(mo["ProcessorId"]),
                     VirtualizationFirmwareEnabled = GetPropertyValue<bool>(mo["VirtualizationFirmwareEnabled"]),
-                    VMMonitorModeExtensions = GetPropertyValue<bool>(mo["VMMonitorModeExtensions"])
+                    VMMonitorModeExtensions = GetPropertyValue<bool>(mo["VMMonitorModeExtensions"]),
+                    TotalCpuUsage = GetTotalCpuUsage(),
+                    CoresUsage = GetTotalCpuCoreUsage()
                 };
 
                 cpuList.Add(cpu);
             }
 
             return cpuList;
+        }
+
+        private static UInt64 GetTotalCpuUsage()
+        {
+            using var win32PerfFormattedDataPerfOsProcessor = new ManagementObjectSearcher("SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name = '_Total'");
+
+            foreach (var queryObj in win32PerfFormattedDataPerfOsProcessor.Get())
+            {
+                return GetPropertyValue<ulong>(queryObj["PercentProcessorTime"]);
+            }
+
+            return 0;
+        }
+
+        private static List<CpuCore> GetTotalCpuCoreUsage()
+        {
+            var cpuUsage = new List<CpuCore>();
+            using var win32PerfFormattedDataPerfOsProcessor =  new ManagementObjectSearcher("SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name != '_Total'");
+
+            foreach (var cpuCore in win32PerfFormattedDataPerfOsProcessor.Get())
+            {
+                var core = new CpuCore
+                {
+                    Name = GetPropertyString(cpuCore["Name"]),
+                    CoreUsage = GetPropertyValue<ulong>(cpuCore["PercentProcessorTime"])
+                };
+                cpuUsage.Add(core);
+            }
+
+            return cpuUsage;
         }
 
         public override List<Drive> GetDriveList()
@@ -354,6 +386,13 @@ namespace Hardware.Info.Windows
                     Speed = GetPropertyValue<ulong>(mo["Speed"])
                 };
 
+                using ManagementObjectSearcher searcher = new ManagementObjectSearcher($"SELECT * FROM Win32_PerfFormattedData_Tcpip_NetworkAdapter WHERE Name = '{networkAdapter.Name.Replace("(", "[").Replace(")", "]")}'");
+                foreach (var mObject in searcher.Get())
+                {
+                    networkAdapter.SendThroughPut = GetPropertyValue<ulong>(mObject["BytesSentPersec"]);
+                    networkAdapter.ReceiveThroughPut = GetPropertyValue<ulong>(mObject["BytesReceivedPersec"]);
+                }
+                
                 IPAddress address;
                 foreach (ManagementObject configuration in mo.GetRelated("Win32_NetworkAdapterConfiguration"))
                 {

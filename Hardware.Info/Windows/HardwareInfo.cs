@@ -144,8 +144,8 @@ namespace Hardware.Info.Windows
                     ProcessorId = GetPropertyString(mo["ProcessorId"]),
                     VirtualizationFirmwareEnabled = GetPropertyValue<bool>(mo["VirtualizationFirmwareEnabled"]),
                     VMMonitorModeExtensions = GetPropertyValue<bool>(mo["VMMonitorModeExtensions"]),
-                    TotalCpuUsage = GetTotalCpuUsage(),
-                    CoresUsage = GetTotalCpuCoreUsage()
+                    PercentProcessorTime = GetTotalCpuUsage(),
+                    CpuCoreList = GetCpuCoreList()
                 };
 
                 cpuList.Add(cpu);
@@ -156,32 +156,34 @@ namespace Hardware.Info.Windows
 
         private static UInt64 GetTotalCpuUsage()
         {
-            using var win32PerfFormattedDataPerfOsProcessor = new ManagementObjectSearcher("SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name = '_Total'");
+            using ManagementObjectSearcher mos = new ManagementObjectSearcher("SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name = '_Total'");
 
-            foreach (var queryObj in win32PerfFormattedDataPerfOsProcessor.Get())
+            foreach (ManagementObject mo in mos.Get())
             {
-                return GetPropertyValue<ulong>(queryObj["PercentProcessorTime"]);
+                return GetPropertyValue<ulong>(mo["PercentProcessorTime"]);
             }
 
             return 0;
         }
 
-        private static List<CpuCore> GetTotalCpuCoreUsage()
+        private static List<CpuCore> GetCpuCoreList()
         {
-            var cpuUsage = new List<CpuCore>();
-            using var win32PerfFormattedDataPerfOsProcessor =  new ManagementObjectSearcher("SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name != '_Total'");
+            List<CpuCore> cpuCoreList = new List<CpuCore>();
 
-            foreach (var cpuCore in win32PerfFormattedDataPerfOsProcessor.Get())
+            using ManagementObjectSearcher mos = new ManagementObjectSearcher("SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name != '_Total'");
+
+            foreach (ManagementObject mo in mos.Get())
             {
-                var core = new CpuCore
+                CpuCore core = new CpuCore
                 {
-                    Name = GetPropertyString(cpuCore["Name"]),
-                    CoreUsage = GetPropertyValue<ulong>(cpuCore["PercentProcessorTime"])
+                    Name = GetPropertyString(mo["Name"]),
+                    PercentProcessorTime = GetPropertyValue<ulong>(mo["PercentProcessorTime"])
                 };
-                cpuUsage.Add(core);
+
+                cpuCoreList.Add(core);
             }
 
-            return cpuUsage;
+            return cpuCoreList;
         }
 
         public override List<Drive> GetDriveList()
@@ -386,11 +388,11 @@ namespace Hardware.Info.Windows
                     Speed = GetPropertyValue<ulong>(mo["Speed"])
                 };
 
-                using ManagementObjectSearcher searcher = new ManagementObjectSearcher($"SELECT * FROM Win32_PerfFormattedData_Tcpip_NetworkAdapter WHERE Name = '{networkAdapter.Name.Replace("(", "[").Replace(")", "]")}'");
-                foreach (var mObject in searcher.Get())
+                using ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher($"SELECT * FROM Win32_PerfFormattedData_Tcpip_NetworkAdapter WHERE Name = '{networkAdapter.Name.Replace("(", "[").Replace(")", "]")}'");
+                foreach (ManagementObject managementObject in managementObjectSearcher.Get())
                 {
-                    networkAdapter.SendThroughPut = GetPropertyValue<ulong>(mObject["BytesSentPersec"]);
-                    networkAdapter.ReceiveThroughPut = GetPropertyValue<ulong>(mObject["BytesReceivedPersec"]);
+                    networkAdapter.BytesSentPersec = GetPropertyValue<ulong>(managementObject["BytesSentPersec"]);
+                    networkAdapter.BytesReceivedPersec = GetPropertyValue<ulong>(managementObject["BytesReceivedPersec"]);
                 }
                 
                 IPAddress address;

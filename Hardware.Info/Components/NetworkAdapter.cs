@@ -15,8 +15,8 @@ namespace Hardware.Info
         public string NetConnectionID { get; internal set; } = string.Empty;
         public string ProductName { get; internal set; } = string.Empty;
         public UInt64 Speed { get; internal set; }
-        public UInt64 SendThroughPut { get; internal set; }
-        public UInt64 ReceiveThroughPut { get; internal set; }
+        public UInt64 BytesSentPersec { get; internal set; }
+        public UInt64 BytesReceivedPersec { get; internal set; }
 
         public List<IPAddress> DefaultIPGatewayList { get; internal set; } = new List<IPAddress>();
         public IPAddress DHCPServer { get; internal set; } = IPAddress.None;
@@ -36,8 +36,8 @@ namespace Hardware.Info
                 "NetConnectionID: " + NetConnectionID + Environment.NewLine +
                 "ProductName: " + ProductName + Environment.NewLine +
                 "Speed: " + Speed + Environment.NewLine +
-                "SendThroughPut: " + SendThroughPut + Environment.NewLine +
-                "ReceiveThroughPut: " + ReceiveThroughPut + Environment.NewLine;
+                "BytesSentPersec: " + BytesSentPersec + Environment.NewLine +
+                "BytesReceivedPersec: " + BytesReceivedPersec + Environment.NewLine;
         }
     }
 }

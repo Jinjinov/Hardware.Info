@@ -34,14 +34,12 @@ namespace Hardware.Info.Test
             foreach (var hardware in hardwareInfo.BiosList)
                 Console.WriteLine(hardware);
 
-            foreach (var hardware in hardwareInfo.CpuList)
+            foreach (var cpu in hardwareInfo.CpuList)
             {
-                Console.WriteLine(hardware);
-                foreach (var cpuCore in hardware.CoresUsage)
-                {
-                    Console.WriteLine(cpuCore.Name);
-                    Console.WriteLine(cpuCore.CoreUsage);
-                }
+                Console.WriteLine(cpu);
+
+                foreach (var cpuCore in cpu.CpuCoreList)
+                    Console.WriteLine(cpuCore);
             }
 
             foreach (var drive in hardwareInfo.DriveList)
@@ -105,7 +103,7 @@ namespace Hardware.Info.Test
 
             foreach (var address in HardwareInfo.GetLocalIPv4Addresses())
                 Console.WriteLine(address);
-            
+
             Console.ReadLine();
         }
     }

@@ -185,24 +185,14 @@ namespace Hardware.Info.Linux
                 }
             }
 
-            cpu.PercentProcessorTime = GetTotalCpuUsage();
-
-            for (var i = 0; i < cpu.NumberOfLogicalProcessors; i++)
-            {
-                CpuCore core = new CpuCore
-                {
-                    Name = i.ToString(), 
-                    PercentProcessorTime = GetCpuCoreUsage(i)
-                };
-                cpu.CpuCoreList.Add(core);
-            }
-
+            GetCpuUsage(cpu);
+            
             cpuList.Add(cpu);
 
             return cpuList;
         }
 
-        private static UInt64 GetTotalCpuUsage()
+        private static void GetCpuUsage(CPU cpu)
         { 
             // Column Name    Description
             // 1   user Time spent with normal processing in user mode.
@@ -221,81 +211,53 @@ namespace Hardware.Info.Linux
             // cpu1 227756034 9239849 30760881 424439349 196694821 0 7517172 0 0
             // cpu2 86902920 6411506 12412331 769921453 17877927 0 4809331 0 0
             // ... 
-
-            ulong totalCpuUsage = 0;
-
-            var cpuUsageLineLast = TryReadFileLines("/proc/stat").FirstOrDefault();
-            Task.Delay(500).Wait();
-            var cpuUsageLineNow = TryReadFileLines("/proc/stat").FirstOrDefault();
-
-            if (!string.IsNullOrWhiteSpace(cpuUsageLineLast) && !string.IsNullOrWhiteSpace(cpuUsageLineNow))
-            {
-                char[] charSeparators = new char[] { ' ' };
-                // Get all columns but skip the first (which is the "cpu" string) 
-                var cpuSumLine = cpuUsageLineNow.Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
-                cpuSumLine.RemoveAt(0);
-
-                // Get all columns but skip the first (which is the "cpu" string) 
-                var cpuLastSumLine = cpuUsageLineLast.Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
-                cpuLastSumLine.RemoveAt(0);
-
-                ulong cpuSum = 0;
-                cpuSumLine.ForEach(s => cpuSum += Convert.ToUInt64(s));
-
-                ulong cpuLastSum = 0;
-                cpuLastSumLine.ForEach(s => cpuLastSum += Convert.ToUInt64(s));
-
-                // Get the delta between two reads 
-                var cpuDelta = cpuSum - cpuLastSum;
-                // Get the idle time Delta 
-                var cpuIdle = Convert.ToUInt64(cpuSumLine[3]) - Convert.ToUInt64(cpuLastSumLine[3]);
-                // Calc percentage 
-                var cpuUsed = cpuDelta - cpuIdle;
-                totalCpuUsage = 100 * cpuUsed / cpuDelta;
-            }
             
-            return totalCpuUsage;
-        }
-
-        private static UInt64 GetCpuCoreUsage(int core)
-        {
-            // description see GetTotalCpuUsage()
-
-            ulong totalCpuCoreUsage = 0;
-
-            var cpuUsageLineLast = TryReadFileLines("/proc/stat").FirstOrDefault(s => s.StartsWith($"cpu{core}"));
+            var cpuUsageLineLast = TryReadFileLines("/proc/stat");
             Task.Delay(500).Wait();
-            var cpuUsageLineNow = TryReadFileLines("/proc/stat").FirstOrDefault(s => s.StartsWith($"cpu{core}"));
-
-            if (!string.IsNullOrWhiteSpace(cpuUsageLineLast) && !string.IsNullOrWhiteSpace(cpuUsageLineNow))
+            var cpuUsageLineNow = TryReadFileLines("/proc/stat");
+            
+            if (cpuUsageLineLast.Length > 0 && cpuUsageLineNow.Length > 0)
             {
-                char[] charSeparators = new char[] { ' ' };
-                // Get all columns but skip the first (which is the "cpu" string) 
-                var cpuSumLine = cpuUsageLineNow.Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
-                cpuSumLine.RemoveAt(0);
-
-                // Get all columns but skip the first (which is the "cpu" string) 
-                var cpuLastSumLine = cpuUsageLineLast.Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
-                cpuLastSumLine.RemoveAt(0);
-
-                ulong cpuSum = 0;
-                cpuSumLine.ForEach(s => cpuSum += Convert.ToUInt64(s));
-
-                ulong cpuLastSum = 0;
-                cpuLastSumLine.ForEach(s => cpuLastSum += Convert.ToUInt64(s));
-
-                // Get the delta between two reads 
-                var cpuDelta = cpuSum - cpuLastSum;
-                // Get the idle time Delta 
-                var cpuIdle = Convert.ToUInt64(cpuSumLine[3]) - Convert.ToUInt64(cpuLastSumLine[3]);
-                // Calc percentage 
-                var cpuUsed = cpuDelta - cpuIdle;
-                totalCpuCoreUsage = 100 * cpuUsed / cpuDelta;
+                cpu.PercentProcessorTime = GetCpuPercentage(cpuUsageLineLast.First(), cpuUsageLineNow.First());
+                
+                for (var i = 0; i < cpu.NumberOfLogicalProcessors; i++)
+                {
+                    CpuCore core = new CpuCore
+                    {
+                        Name = i.ToString(),
+                        PercentProcessorTime = GetCpuPercentage(cpuUsageLineLast.First(s => s.StartsWith($"cpu{i}")), cpuUsageLineNow.First(s => s.StartsWith($"cpu{i}")))
+                    };
+                    cpu.CpuCoreList.Add(core);
+                }
             }
-
-            return totalCpuCoreUsage;
         }
 
+        private static UInt64 GetCpuPercentage(string cpuStatLast, string cpuStatNow)
+        {
+            char[] charSeparators = new char[] { ' ' };
+            // Get all columns but skip the first (which is the "cpu" string) 
+            var cpuSumLine = cpuStatNow.Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
+            cpuSumLine.RemoveAt(0);
+
+            // Get all columns but skip the first (which is the "cpu" string) 
+            var cpuLastSumLine = cpuStatLast.Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
+            cpuLastSumLine.RemoveAt(0);
+
+            ulong cpuSum = 0;
+            cpuSumLine.ForEach(s => cpuSum += Convert.ToUInt64(s));
+
+            ulong cpuLastSum = 0;
+            cpuLastSumLine.ForEach(s => cpuLastSum += Convert.ToUInt64(s));
+
+            // Get the delta between two reads 
+            var cpuDelta = cpuSum - cpuLastSum;
+            // Get the idle time Delta 
+            var cpuIdle = Convert.ToUInt64(cpuSumLine[3]) - Convert.ToUInt64(cpuLastSumLine[3]);
+            // Calc percentage 
+            var cpuUsed = cpuDelta - cpuIdle;
+            return 100 * cpuUsed / cpuDelta;
+        }
+        
         public override List<Drive> GetDriveList()
         {
             List<Drive> driveList = new List<Drive>();

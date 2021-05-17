@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Text.RegularExpressions;
+using System.Threading.Tasks;
 
 // https://www.binarytides.com/linux-commands-hardware-info/
 
@@ -125,7 +126,7 @@ namespace Hardware.Info.Linux
             List<CPU> cpuList = new List<CPU>();
 
             string[] lines = TryReadFileLines("/proc/cpuinfo");
-
+            
             Regex vendorIdRegex = new Regex(@"^vendor_id\s+:\s+(.+)");
             Regex modelNameRegex = new Regex(@"^model name\s+:\s+(.+)");
             Regex cpuSpeedRegex = new Regex(@"^cpu MHz\s+:\s+(.+)");
@@ -184,11 +185,79 @@ namespace Hardware.Info.Linux
                 }
             }
 
+            GetCpuUsage(cpu);
+            
             cpuList.Add(cpu);
 
             return cpuList;
         }
 
+        private static void GetCpuUsage(CPU cpu)
+        { 
+            // Column Name    Description
+            // 1   user Time spent with normal processing in user mode.
+            // 2   nice Time spent with niced processes in user mode.
+            // 3   system Time spent running in kernel mode.
+            // 4   idle Time spent in vacations twiddling thumbs.
+            // 5   iowait Time spent waiting for I / O to completed.This is considered idle time too.
+            // 6   irq Time spent serving hardware interrupts.See the description of the intr line for more details.
+            // 7   softirq Time spent serving software interrupts.
+            // 8   steal   Time stolen by other operating systems running in a virtual environment.
+            // 9	guest Time spent for running a virtual CPU or guest OS under the control of the kernel.
+
+            // > cat /proc/stat 
+            // cpu 1279636934 73759586 192327563 12184330186 543227057 56603 68503253 0 0
+            // cpu0 297522664 8968710 49227610 418508635 72446546 56602 24904144 0 0
+            // cpu1 227756034 9239849 30760881 424439349 196694821 0 7517172 0 0
+            // cpu2 86902920 6411506 12412331 769921453 17877927 0 4809331 0 0
+            // ... 
+            
+            var cpuUsageLineLast = TryReadFileLines("/proc/stat");
+            Task.Delay(500).Wait();
+            var cpuUsageLineNow = TryReadFileLines("/proc/stat");
+            
+            if (cpuUsageLineLast.Length > 0 && cpuUsageLineNow.Length > 0)
+            {
+                cpu.PercentProcessorTime = GetCpuPercentage(cpuUsageLineLast.First(), cpuUsageLineNow.First());
+                
+                for (var i = 0; i < cpu.NumberOfLogicalProcessors; i++)
+                {
+                    CpuCore core = new CpuCore
+                    {
+                        Name = i.ToString(),
+                        PercentProcessorTime = GetCpuPercentage(cpuUsageLineLast.First(s => s.StartsWith($"cpu{i}")), cpuUsageLineNow.First(s => s.StartsWith($"cpu{i}")))
+                    };
+                    cpu.CpuCoreList.Add(core);
+                }
+            }
+        }
+
+        private static UInt64 GetCpuPercentage(string cpuStatLast, string cpuStatNow)
+        {
+            char[] charSeparators = new char[] { ' ' };
+            // Get all columns but skip the first (which is the "cpu" string) 
+            var cpuSumLine = cpuStatNow.Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
+            cpuSumLine.RemoveAt(0);
+
+            // Get all columns but skip the first (which is the "cpu" string) 
+            var cpuLastSumLine = cpuStatLast.Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
+            cpuLastSumLine.RemoveAt(0);
+
+            ulong cpuSum = 0;
+            cpuSumLine.ForEach(s => cpuSum += Convert.ToUInt64(s));
+
+            ulong cpuLastSum = 0;
+            cpuLastSumLine.ForEach(s => cpuLastSum += Convert.ToUInt64(s));
+
+            // Get the delta between two reads 
+            var cpuDelta = cpuSum - cpuLastSum;
+            // Get the idle time Delta 
+            var cpuIdle = Convert.ToUInt64(cpuSumLine[3]) - Convert.ToUInt64(cpuLastSumLine[3]);
+            // Calc percentage 
+            var cpuUsed = cpuDelta - cpuIdle;
+            return 100 * cpuUsed / cpuDelta;
+        }
+        
         public override List<Drive> GetDriveList()
         {
             List<Drive> driveList = new List<Drive>();

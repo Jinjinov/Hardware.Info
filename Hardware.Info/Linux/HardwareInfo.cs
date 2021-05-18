@@ -444,24 +444,24 @@ namespace Hardware.Info.Linux
 
         public override List<NetworkAdapter> GetNetworkAdapterList()
         {
-            var networkAdapters =  base.GetNetworkAdapterList();
-            var charSeparators = new char[] { ' ' };
+            List<NetworkAdapter> networkAdapterList =  base.GetNetworkAdapterList();
 
-            foreach (var networkAdapter in networkAdapters)
+            char[] charSeparators = new char[] { ' ' };
+
+            foreach (NetworkAdapter networkAdapter in networkAdapterList)
             {
-                var networkAdapterUsageLast = TryReadFileLines("/proc/net/dev").FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
+                List<string>? networkAdapterUsageLast = TryReadFileLines("/proc/net/dev").FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
                 Task.Delay(1000).Wait();
-                var networkAdapterUsageNow = TryReadFileLines("/proc/net/dev").FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
+                List<string>? networkAdapterUsageNow = TryReadFileLines("/proc/net/dev").FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
 
-                if (networkAdapterUsageLast != null && networkAdapterUsageLast.Count > 0 &&
-                    networkAdapterUsageNow != null && networkAdapterUsageNow.Count > 0)
+                if (networkAdapterUsageLast != null && networkAdapterUsageLast.Count > 0 && networkAdapterUsageNow != null && networkAdapterUsageNow.Count > 0)
                 {
                     networkAdapter.BytesReceivedPersec = Convert.ToUInt64(networkAdapterUsageNow[1]) - Convert.ToUInt64(networkAdapterUsageLast[1]);
                     networkAdapter.BytesSentPersec = Convert.ToUInt64(networkAdapterUsageNow[9]) - Convert.ToUInt64(networkAdapterUsageLast[9]);
                 }
             }
 
-            return networkAdapters;
+            return networkAdapterList;
         }
 
         public List<Printer> GetPrinterList()

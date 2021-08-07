@@ -6,7 +6,7 @@ How to use:
 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
-        <PackageReference Include="Hardware.Info" Version="1.0.1.1" />
+        <PackageReference Include="Hardware.Info" Version="1.1.0.0" />
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
 
@@ -48,6 +48,8 @@ How to use:
                     foreach (var cpuCore in cpu.CpuCoreList)
                         Console.WriteLine(cpuCore);
                 }
+
+                Console.ReadLine();
 
                 foreach (var drive in hardwareInfo.DriveList)
                 {
@@ -117,43 +119,45 @@ How to use:
 
 Version history:
 
+- 1.1.0.0:
+    - Fixed reading `MemAvailable` instead of `MemFree` in Linux - by [@schotime]( https://github.com/schotime )
 - 1.0.1.1:
-    - Added CpuCore info in Linux - by [@isenmann]( https://github.com/isenmann )
-    - Added CPU.PercentProcessorTime, CPU.CpuCoreList in Linux - by [@isenmann]( https://github.com/isenmann )
+    - Added `CpuCore` info in Linux - by [@isenmann]( https://github.com/isenmann )
+    - Added `CPU.PercentProcessorTime`, `CPU.CpuCoreList` in Linux - by [@isenmann]( https://github.com/isenmann )
 - 1.0.1.0:
-    - Added CpuCore info in Windows - by [@isenmann]( https://github.com/isenmann )
-    - Added CPU.PercentProcessorTime, CPU.CpuCoreList in Windows - by [@isenmann]( https://github.com/isenmann )
-    - Added NetworkAdapter.BytesSentPersec, NetworkAdapter.BytesReceivedPersec in Windows - by [@isenmann]( https://github.com/isenmann )
+    - Added `CpuCore` info in Windows - by [@isenmann]( https://github.com/isenmann )
+    - Added `CPU.PercentProcessorTime`, `CPU.CpuCoreList` in Windows - by [@isenmann]( https://github.com/isenmann )
+    - Added `NetworkAdapter.BytesSentPersec`, `NetworkAdapter.BytesReceivedPersec` in Windows - by [@isenmann]( https://github.com/isenmann )
 - 1.0.0.1:
-    - Added Battery.EstimatedChargeRemaining in Windows, Linux - by [@reptail]( https://github.com/reptail )
+    - Added `Battery.EstimatedChargeRemaining` in Windows, Linux - by [@reptail]( https://github.com/reptail )
 - 1.0.0.0:
-    - Added Battery.ExpectedLife in Linux
-    - Added Battery.EstimatedRunTime in Linux
-    - Added Battery.MaxRechargeTime in Linux
-    - Added Battery.TimeToFullCharge in Linux
+    - Added `Battery.ExpectedLife` in Linux
+    - Added `Battery.EstimatedRunTime` in Linux
+    - Added `Battery.MaxRechargeTime` in Linux
+    - Added `Battery.TimeToFullCharge` in Linux
 - 0.1.1.1:
-    - Added Battery.DesignCapacity in Linux
-    - Added Battery.FullChargeCapacity in Linux
+    - Added `Battery.DesignCapacity` in Linux
+    - Added `Battery.FullChargeCapacity` in Linux
 - 0.1.1.0:
-    - Added Battery.BatteryStatusDescription in Linux
+    - Added `Battery.BatteryStatusDescription` in Linux
 - 0.1.0.1:
-    - Added Monitor info in macOS
-    - Added VideoController info in macOS
+    - Added `Monitor` info in macOS
+    - Added `VideoController` info in macOS
 - 0.1.0.0:
-    - Added CPU.L2CacheSize in macOS
-    - Added CPU.L3CacheSize in macOS
-    - Added Memory info in macOS
+    - Added `CPU.L2CacheSize` in macOS
+    - Added `CPU.L3CacheSize` in macOS
+    - Added `Memory` info in macOS
 - 0.0.1.1:
-    - Added BIOS.ReleaseDate in Linux
-    - Added CPU.Manufacturer in Linux
-    - Added CPU.L3CacheSize in Linux
-    - Added Motherboard.SerialNumber in Linux
-    - Fixed NetworkAdapter info in Linux
-    - Fixed GetLocalIPv4Addresses() in macOS
+    - Added `BIOS.ReleaseDate` in Linux
+    - Added `CPU.Manufacturer` in Linux
+    - Added `CPU.L3CacheSize` in Linux
+    - Added `Motherboard.SerialNumber` in Linux
+    - Fixed `NetworkAdapter` info in Linux
+    - Fixed `GetLocalIPv4Addresses()` in macOS
 - 0.0.1.0:
-    - Added GetLocalIPv4Addresses() in Windows, macOS, Linux
-    - Added SerialNumber in Motherboard
-    - Added Drive, NetworkAdapter info in macOS, Linux
+    - Added `GetLocalIPv4Addresses()` in Windows, macOS, Linux
+    - Added `Motherboard.SerialNumber` in Windows
+    - Added `Drive`, `NetworkAdapter` info in macOS, Linux
 - 0.0.0.1:
     - All hardware info in Windows
     - CPU, RAM info in macOS, Linux

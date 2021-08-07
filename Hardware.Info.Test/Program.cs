@@ -42,6 +42,8 @@ namespace Hardware.Info.Test
                     Console.WriteLine(cpuCore);
             }
 
+            Console.ReadLine();
+
             foreach (var drive in hardwareInfo.DriveList)
             {
                 Console.WriteLine(drive);

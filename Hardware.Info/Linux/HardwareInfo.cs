@@ -17,7 +17,7 @@ namespace Hardware.Info.Linux
             string[] meminfo = TryReadFileLines("/proc/meminfo");
 
             memoryStatus.TotalPhysical = GetBytesFromLine(meminfo, "MemTotal:");
-            memoryStatus.AvailablePhysical = GetBytesFromLine(meminfo, "MemFree:");
+            memoryStatus.AvailablePhysical = GetBytesFromLine(meminfo, "MemAvailable:");
             memoryStatus.TotalVirtual = GetBytesFromLine(meminfo, "SwapTotal:");
             memoryStatus.AvailableVirtual = GetBytesFromLine(meminfo, "SwapFree:");
 

@@ -162,7 +162,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
     - All hardware info in Windows
     - CPU, RAM info in macOS, Linux
 
-## Benchmark
+## Benchmarks
 
 |                     Method |               Mean |            Error |           StdDev |
 |--------------------------- |-------------------:|-----------------:|-----------------:|

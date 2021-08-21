@@ -1,9 +1,7 @@
 ﻿using BenchmarkDotNet.Attributes;
 using BenchmarkDotNet.Running;
-using System;
-using System.Net.NetworkInformation;
 
-namespace Hardware.Info.Test
+namespace Hardware.Info.Benchmark
 {
     public class Benchmarks
     {
@@ -43,7 +41,7 @@ namespace Hardware.Info.Test
     {
         static void Main(string[] _)
         {
-            var summary = BenchmarkRunner.Run(typeof(Program).Assembly);
+            BenchmarkRunner.Run(typeof(Program).Assembly);
         }
     }
 }

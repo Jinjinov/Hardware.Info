@@ -5,7 +5,9 @@ VisualStudioVersion = 16.0.30104.148
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hardware.Info", "Hardware.Info\Hardware.Info.csproj", "{A3F91D8E-1DF9-471C-9BBE-99A76881A419}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hardware.Info.Test", "Hardware.Info.Test\Hardware.Info.Test.csproj", "{37D3CEB9-DB5B-4424-A033-52F8AB5C8F62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hardware.Info.Test", "Hardware.Info.Test\Hardware.Info.Test.csproj", "{37D3CEB9-DB5B-4424-A033-52F8AB5C8F62}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hardware.Info.Benchmark", "Hardware.Info.Benchmark\Hardware.Info.Benchmark.csproj", "{1E3DFEB6-2E9B-4BA3-B7FF-4AC79D62F014}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -21,6 +23,10 @@ Global
 		{37D3CEB9-DB5B-4424-A033-52F8AB5C8F62}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{37D3CEB9-DB5B-4424-A033-52F8AB5C8F62}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{37D3CEB9-DB5B-4424-A033-52F8AB5C8F62}.Release|Any CPU.Build.0 = Release|Any CPU
+		{1E3DFEB6-2E9B-4BA3-B7FF-4AC79D62F014}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{1E3DFEB6-2E9B-4BA3-B7FF-4AC79D62F014}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{1E3DFEB6-2E9B-4BA3-B7FF-4AC79D62F014}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{1E3DFEB6-2E9B-4BA3-B7FF-4AC79D62F014}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

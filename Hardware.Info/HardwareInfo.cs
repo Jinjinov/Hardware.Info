@@ -28,11 +28,11 @@ namespace Hardware.Info
 
         private readonly IHardwareInfo hardwareInfo = null!;
 
-        public HardwareInfo()
+        public HardwareInfo(bool useAsteriskInWMI = true, TimeSpan? timeoutInWMI = null)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                hardwareInfo = new Hardware.Info.Windows.HardwareInfo();
+                hardwareInfo = new Hardware.Info.Windows.HardwareInfo(timeoutInWMI) { UseAsteriskInWMI = useAsteriskInWMI };
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) // Environment.OSVersion.Platform == PlatformID.MacOSX)

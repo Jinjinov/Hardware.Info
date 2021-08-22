@@ -162,6 +162,12 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
     - All hardware info in Windows
     - CPU, RAM info in macOS, Linux
 
+## Known issues
+
+Hardware.Info uses WMI (Windows Management Instrumentation) on Windows OS. For certain queries WMI takes 21 seconds to initialize the first time you use it, after that all subsequent queries will execute immediately. If WMI isn't used for 15 minutes it will have to be initialized again the next time you use it.
+
+The 21 second initialization delay is caused by RPC that WMI uses internally. In RPC [documentation](https://docs.microsoft.com/en-us/windows/win32/services/services-and-rpc-tcp) it says that the RPC/TCP time-out interval is defined with a `SCMApiConnectionParam` registry value located at `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control` and that the default value is set to 21,000 (21 seconds).
+
 ## Benchmarks
 
 |                     Method |               Mean |            Error |           StdDev |

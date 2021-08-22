@@ -121,7 +121,7 @@ namespace Hardware.Info.Linux
             return biosList;
         }
 
-        public List<CPU> GetCpuList()
+        public List<CPU> GetCpuList(bool includePercentProcessorTime = true)
         {
             List<CPU> cpuList = new List<CPU>();
 
@@ -185,8 +185,11 @@ namespace Hardware.Info.Linux
                 }
             }
 
-            GetCpuUsage(cpu);
-            
+            if (includePercentProcessorTime)
+            {
+                GetCpuUsage(cpu);
+            }
+
             cpuList.Add(cpu);
 
             return cpuList;
@@ -442,22 +445,25 @@ namespace Hardware.Info.Linux
             return mouseList;
         }
 
-        public override List<NetworkAdapter> GetNetworkAdapterList()
+        public override List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)
         {
-            List<NetworkAdapter> networkAdapterList =  base.GetNetworkAdapterList();
+            List<NetworkAdapter> networkAdapterList = base.GetNetworkAdapterList(includeBytesPersec, includeNetworkAdapterConfiguration);
 
-            char[] charSeparators = new char[] { ' ' };
-
-            foreach (NetworkAdapter networkAdapter in networkAdapterList)
+            if (includeBytesPersec)
             {
-                List<string>? networkAdapterUsageLast = TryReadFileLines("/proc/net/dev").FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
-                Task.Delay(1000).Wait();
-                List<string>? networkAdapterUsageNow = TryReadFileLines("/proc/net/dev").FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
+                char[] charSeparators = new char[] { ' ' };
 
-                if (networkAdapterUsageLast != null && networkAdapterUsageLast.Count > 0 && networkAdapterUsageNow != null && networkAdapterUsageNow.Count > 0)
+                foreach (NetworkAdapter networkAdapter in networkAdapterList)
                 {
-                    networkAdapter.BytesReceivedPersec = Convert.ToUInt64(networkAdapterUsageNow[1]) - Convert.ToUInt64(networkAdapterUsageLast[1]);
-                    networkAdapter.BytesSentPersec = Convert.ToUInt64(networkAdapterUsageNow[9]) - Convert.ToUInt64(networkAdapterUsageLast[9]);
+                    List<string>? networkAdapterUsageLast = TryReadFileLines("/proc/net/dev").FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    Task.Delay(1000).Wait();
+                    List<string>? networkAdapterUsageNow = TryReadFileLines("/proc/net/dev").FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
+
+                    if (networkAdapterUsageLast != null && networkAdapterUsageLast.Count > 0 && networkAdapterUsageNow != null && networkAdapterUsageNow.Count > 0)
+                    {
+                        networkAdapter.BytesReceivedPersec = Convert.ToUInt64(networkAdapterUsageNow[1]) - Convert.ToUInt64(networkAdapterUsageLast[1]);
+                        networkAdapter.BytesSentPersec = Convert.ToUInt64(networkAdapterUsageNow[9]) - Convert.ToUInt64(networkAdapterUsageLast[9]);
+                    }
                 }
             }
 

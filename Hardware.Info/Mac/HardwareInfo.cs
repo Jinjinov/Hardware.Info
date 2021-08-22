@@ -270,7 +270,7 @@ Hardware:
       Hardware UUID: F6D9C340-725A-224A-8855-99AB8348F745
         /**/
 
-        public List<CPU> GetCpuList()
+        public List<CPU> GetCpuList(bool includePercentProcessorTime = true)
         {
             List<CPU> cpuList = new List<CPU>();
 
@@ -800,7 +800,7 @@ USB:
             return mouseList;
         }
 
-        public override List<NetworkAdapter> GetNetworkAdapterList()
+        public override List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)
         {
             /*
             SPNetworkDataType
@@ -848,7 +848,7 @@ Network:
       Service Order: 0
             /**/
 
-            return base.GetNetworkAdapterList();
+            return base.GetNetworkAdapterList(includeBytesPersec, includeNetworkAdapterConfiguration);
         }
 
         public List<Printer> GetPrinterList()

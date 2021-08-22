@@ -69,14 +69,14 @@ namespace Hardware.Info
 
         public void RefreshBatteryList() => BatteryList = hardwareInfo.GetBatteryList();
         public void RefreshBIOSList() => BiosList = hardwareInfo.GetBiosList();
-        public void RefreshCPUList() => CpuList = hardwareInfo.GetCpuList();
+        public void RefreshCPUList(bool includePercentProcessorTime = true) => CpuList = hardwareInfo.GetCpuList(includePercentProcessorTime);
         public void RefreshDriveList() => DriveList = hardwareInfo.GetDriveList();
         public void RefreshKeyboardList() => KeyboardList = hardwareInfo.GetKeyboardList();
         public void RefreshMemoryList() => MemoryList = hardwareInfo.GetMemoryList();
         public void RefreshMonitorList() => MonitorList = hardwareInfo.GetMonitorList();
         public void RefreshMotherboardList() => MotherboardList = hardwareInfo.GetMotherboardList();
         public void RefreshMouseList() => MouseList = hardwareInfo.GetMouseList();
-        public void RefreshNetworkAdapterList() => NetworkAdapterList = hardwareInfo.GetNetworkAdapterList();
+        public void RefreshNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true) => NetworkAdapterList = hardwareInfo.GetNetworkAdapterList(includeBytesPersec, includeNetworkAdapterConfiguration);
         public void RefreshPrinterList() => PrinterList = hardwareInfo.GetPrinterList();
         public void RefreshSoundDeviceList() => SoundDeviceList = hardwareInfo.GetSoundDeviceList();
         public void RefreshVideoControllerList() => VideoControllerList = hardwareInfo.GetVideoControllerList();

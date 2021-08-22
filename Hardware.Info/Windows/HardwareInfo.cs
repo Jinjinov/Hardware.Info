@@ -121,9 +121,36 @@ namespace Hardware.Info.Windows
             return biosList;
         }
 
-        public List<CPU> GetCpuList()
+        public List<CPU> GetCpuList(bool includePercentProcessorTime = true)
         {
             List<CPU> cpuList = new List<CPU>();
+
+            List<CpuCore> cpuCoreList = new List<CpuCore>();
+
+            ulong percentProcessorTime = 0ul;
+
+            if (includePercentProcessorTime)
+            {
+                using ManagementObjectSearcher percentProcessorTimeMOS = new ManagementObjectSearcher("SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name != '_Total'");
+
+                foreach (ManagementObject mo in percentProcessorTimeMOS.Get())
+                {
+                    CpuCore core = new CpuCore
+                    {
+                        Name = GetPropertyString(mo["Name"]),
+                        PercentProcessorTime = GetPropertyValue<ulong>(mo["PercentProcessorTime"])
+                    };
+
+                    cpuCoreList.Add(core);
+                }
+
+                using ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher("SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name = '_Total'");
+
+                foreach (ManagementObject mo in managementObjectSearcher.Get())
+                {
+                    percentProcessorTime = GetPropertyValue<ulong>(mo["PercentProcessorTime"]);
+                }
+            }
 
             using ManagementObjectSearcher mos = new ManagementObjectSearcher("SELECT * FROM Win32_Processor");
 
@@ -144,46 +171,14 @@ namespace Hardware.Info.Windows
                     ProcessorId = GetPropertyString(mo["ProcessorId"]),
                     VirtualizationFirmwareEnabled = GetPropertyValue<bool>(mo["VirtualizationFirmwareEnabled"]),
                     VMMonitorModeExtensions = GetPropertyValue<bool>(mo["VMMonitorModeExtensions"]),
-                    PercentProcessorTime = GetTotalCpuUsage(),
-                    CpuCoreList = GetCpuCoreList()
+                    PercentProcessorTime = percentProcessorTime,
+                    CpuCoreList = cpuCoreList
                 };
 
                 cpuList.Add(cpu);
             }
 
             return cpuList;
-        }
-
-        private static UInt64 GetTotalCpuUsage()
-        {
-            using ManagementObjectSearcher mos = new ManagementObjectSearcher("SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name = '_Total'");
-
-            foreach (ManagementObject mo in mos.Get())
-            {
-                return GetPropertyValue<ulong>(mo["PercentProcessorTime"]);
-            }
-
-            return 0;
-        }
-
-        private static List<CpuCore> GetCpuCoreList()
-        {
-            List<CpuCore> cpuCoreList = new List<CpuCore>();
-
-            using ManagementObjectSearcher mos = new ManagementObjectSearcher("SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name != '_Total'");
-
-            foreach (ManagementObject mo in mos.Get())
-            {
-                CpuCore core = new CpuCore
-                {
-                    Name = GetPropertyString(mo["Name"]),
-                    PercentProcessorTime = GetPropertyValue<ulong>(mo["PercentProcessorTime"])
-                };
-
-                cpuCoreList.Add(core);
-            }
-
-            return cpuCoreList;
         }
 
         public override List<Drive> GetDriveList()
@@ -367,7 +362,7 @@ namespace Hardware.Info.Windows
             return mouseList;
         }
 
-        public override List<NetworkAdapter> GetNetworkAdapterList()
+        public override List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)
         {
             List<NetworkAdapter> networkAdapterList = new List<NetworkAdapter>();
 
@@ -388,34 +383,40 @@ namespace Hardware.Info.Windows
                     Speed = GetPropertyValue<ulong>(mo["Speed"])
                 };
 
-                using ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher($"SELECT * FROM Win32_PerfFormattedData_Tcpip_NetworkAdapter WHERE Name = '{networkAdapter.Name.Replace("(", "[").Replace(")", "]")}'");
-                foreach (ManagementObject managementObject in managementObjectSearcher.Get())
+                if (includeBytesPersec)
                 {
-                    networkAdapter.BytesSentPersec = GetPropertyValue<ulong>(managementObject["BytesSentPersec"]);
-                    networkAdapter.BytesReceivedPersec = GetPropertyValue<ulong>(managementObject["BytesReceivedPersec"]);
+                    using ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher($"SELECT * FROM Win32_PerfFormattedData_Tcpip_NetworkAdapter WHERE Name = '{networkAdapter.Name.Replace("(", "[").Replace(")", "]")}'");
+                    foreach (ManagementObject managementObject in managementObjectSearcher.Get())
+                    {
+                        networkAdapter.BytesSentPersec = GetPropertyValue<ulong>(managementObject["BytesSentPersec"]);
+                        networkAdapter.BytesReceivedPersec = GetPropertyValue<ulong>(managementObject["BytesReceivedPersec"]);
+                    }
                 }
-                
-                IPAddress address;
-                foreach (ManagementObject configuration in mo.GetRelated("Win32_NetworkAdapterConfiguration"))
+
+                if (includeNetworkAdapterConfiguration)
                 {
-                    foreach (string str in GetPropertyArray<string>(configuration["DefaultIPGateway"]))
-                        if (IPAddress.TryParse(str, out address))
-                            networkAdapter.DefaultIPGatewayList.Add(address);
+                    IPAddress address;
+                    foreach (ManagementObject configuration in mo.GetRelated("Win32_NetworkAdapterConfiguration"))
+                    {
+                        foreach (string str in GetPropertyArray<string>(configuration["DefaultIPGateway"]))
+                            if (IPAddress.TryParse(str, out address))
+                                networkAdapter.DefaultIPGatewayList.Add(address);
 
-                    if (IPAddress.TryParse(GetPropertyString(configuration["DHCPServer"]), out address))
-                        networkAdapter.DHCPServer = address;
+                        if (IPAddress.TryParse(GetPropertyString(configuration["DHCPServer"]), out address))
+                            networkAdapter.DHCPServer = address;
 
-                    foreach (string str in GetPropertyArray<string>(configuration["DNSServerSearchOrder"]))
-                        if (IPAddress.TryParse(str, out address))
-                            networkAdapter.DNSServerSearchOrderList.Add(address);
+                        foreach (string str in GetPropertyArray<string>(configuration["DNSServerSearchOrder"]))
+                            if (IPAddress.TryParse(str, out address))
+                                networkAdapter.DNSServerSearchOrderList.Add(address);
 
-                    foreach (string str in GetPropertyArray<string>(configuration["IPAddress"]))
-                        if (IPAddress.TryParse(str, out address))
-                            networkAdapter.IPAddressList.Add(address);
+                        foreach (string str in GetPropertyArray<string>(configuration["IPAddress"]))
+                            if (IPAddress.TryParse(str, out address))
+                                networkAdapter.IPAddressList.Add(address);
 
-                    foreach (string str in GetPropertyArray<string>(configuration["IPSubnet"]))
-                        if (IPAddress.TryParse(str, out address))
-                            networkAdapter.IPSubnetList.Add(address);
+                        foreach (string str in GetPropertyArray<string>(configuration["IPSubnet"]))
+                            if (IPAddress.TryParse(str, out address))
+                                networkAdapter.IPSubnetList.Add(address);
+                    }
                 }
 
                 networkAdapterList.Add(networkAdapter);

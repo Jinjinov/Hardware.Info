@@ -95,7 +95,7 @@ namespace Hardware.Info
             return driveList;
         }
 
-        public virtual List<NetworkAdapter> GetNetworkAdapterList()
+        public virtual List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)
         {
             List<NetworkAdapter> networkAdapterList = new List<NetworkAdapter>();
 
@@ -113,11 +113,14 @@ namespace Hardware.Info
                     networkAdapter.Speed = (ulong)networkInterface.Speed;
                 }
 
-                foreach (UnicastIPAddressInformation addressInformation in networkInterface.GetIPProperties().UnicastAddresses)
+                if (includeNetworkAdapterConfiguration)
                 {
-                    if (addressInformation.Address.AddressFamily == AddressFamily.InterNetwork)
+                    foreach (UnicastIPAddressInformation addressInformation in networkInterface.GetIPProperties().UnicastAddresses)
                     {
-                        networkAdapter.IPAddressList.Add(addressInformation.Address);
+                        if (addressInformation.Address.AddressFamily == AddressFamily.InterNetwork)
+                        {
+                            networkAdapter.IPAddressList.Add(addressInformation.Address);
+                        }
                     }
                 }
 

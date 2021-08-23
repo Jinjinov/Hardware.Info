@@ -6,7 +6,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
-        <PackageReference Include="Hardware.Info" Version="1.1.0.0" />
+        <PackageReference Include="Hardware.Info" Version="1.1.0.1" />
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
 
@@ -117,8 +117,33 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
             }
         }
 
+## Settings
+
+### Constructor settings:
+
+```
+HardwareInfo(bool useAsteriskInWMI = true, TimeSpan? timeoutInWMI = null)
+```
+
+The construcotr accepts two settings for WMI:
+- `useAsteriskInWMI` causes WMI queries to use `SELECT * FROM` instead of `SELECT` with a list of property names. This is slower, but safer, more compatible with older Windows (XP, Vista, 7, 8) where a certain WMI property might be missing and throw an exception when queried by name. The default value is `true`.
+- `timeoutInWMI` sets the `Timeout` property of the `EnumerationOptions` in the `ManagementObjectSearcher` that executes the query. The default value is `EnumerationOptions.InfiniteTimeout`. Changing this could cause the query to return empty results in certain cases.
+
+### Refresh methods settings:
+
+```
+RefreshCPUList(bool includePercentProcessorTime = true)
+
+RefreshNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)
+```
+
+In these two methods you can exclude some slow queries by setting the parameters to `false`.
+
 ## Version history:
 
+- 1.1.0.1:
+    - Added two settings for WMI queries in Windows
+    - Added three settings to exclude slow queries in Windows, macOS, Linux
 - 1.1.0.0:
     - Fixed reading `MemAvailable` instead of `MemFree` in Linux - by [@schotime]( https://github.com/schotime )
 - 1.0.1.1:

@@ -4,22 +4,22 @@ namespace Hardware.Info
 {
     public class VideoController
     {
-        public UInt32 AdapterRAM { get; internal set; }
-        public string Caption { get; internal set; } = string.Empty;
-        public UInt32 CurrentBitsPerPixel { get; internal set; }
-        public UInt32 CurrentHorizontalResolution { get; internal set; }
-        public UInt64 CurrentNumberOfColors { get; internal set; }
-        public UInt32 CurrentRefreshRate { get; internal set; }
-        public UInt32 CurrentVerticalResolution { get; internal set; }
-        public string Description { get; internal set; } = string.Empty;
-        public string DriverDate { get; internal set; } = string.Empty;
-        public string DriverVersion { get; internal set; } = string.Empty;
-        public string Manufacturer { get; internal set; } = string.Empty;
-        public UInt32 MaxRefreshRate { get; internal set; }
-        public UInt32 MinRefreshRate { get; internal set; }
-        public string Name { get; internal set; } = string.Empty;
-        public string VideoModeDescription { get; internal set; } = string.Empty;
-        public string VideoProcessor { get; internal set; } = string.Empty;
+        public UInt32 AdapterRAM { get; set; }
+        public string Caption { get; set; } = string.Empty;
+        public UInt32 CurrentBitsPerPixel { get; set; }
+        public UInt32 CurrentHorizontalResolution { get; set; }
+        public UInt64 CurrentNumberOfColors { get; set; }
+        public UInt32 CurrentRefreshRate { get; set; }
+        public UInt32 CurrentVerticalResolution { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public string DriverDate { get; set; } = string.Empty;
+        public string DriverVersion { get; set; } = string.Empty;
+        public string Manufacturer { get; set; } = string.Empty;
+        public UInt32 MaxRefreshRate { get; set; }
+        public UInt32 MinRefreshRate { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public string VideoModeDescription { get; set; } = string.Empty;
+        public string VideoProcessor { get; set; } = string.Empty;
 
         public override string ToString()
         {

@@ -4,8 +4,8 @@ namespace Hardware.Info
 {
     public class CpuCore
     {
-        public string Name { get; internal set; } = string.Empty;
-        public UInt64 PercentProcessorTime { get; internal set; }
+        public string Name { get; set; } = string.Empty;
+        public UInt64 PercentProcessorTime { get; set; }
 
         public override string ToString()
         {

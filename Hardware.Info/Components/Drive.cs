@@ -5,15 +5,15 @@ namespace Hardware.Info
 {
     public class Volume
     {
-        public string Caption { get; internal set; } = string.Empty;
-        public Boolean Compressed { get; internal set; }
-        public string Description { get; internal set; } = string.Empty;
-        public string FileSystem { get; internal set; } = string.Empty;
-        public UInt64 FreeSpace { get; internal set; }
-        public string Name { get; internal set; } = string.Empty;
-        public UInt64 Size { get; internal set; }
-        public string VolumeName { get; internal set; } = string.Empty;
-        public string VolumeSerialNumber { get; internal set; } = string.Empty;
+        public string Caption { get; set; } = string.Empty;
+        public Boolean Compressed { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public string FileSystem { get; set; } = string.Empty;
+        public UInt64 FreeSpace { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public UInt64 Size { get; set; }
+        public string VolumeName { get; set; } = string.Empty;
+        public string VolumeSerialNumber { get; set; } = string.Empty;
 
         public override string ToString()
         {
@@ -32,18 +32,18 @@ namespace Hardware.Info
 
     public class Partition
     {
-        public List<Volume> VolumeList { get; internal set; } = new List<Volume>();
+        public List<Volume> VolumeList { get; set; } = new List<Volume>();
 
-        public Boolean Bootable { get; internal set; }
-        public Boolean BootPartition { get; internal set; }
-        public string Caption { get; internal set; } = string.Empty;
-        public string Description { get; internal set; } = string.Empty;
-        public UInt32 DiskIndex { get; internal set; }
-        public UInt32 Index { get; internal set; }
-        public string Name { get; internal set; } = string.Empty;
-        public Boolean PrimaryPartition { get; internal set; }
-        public UInt64 Size { get; internal set; }
-        public UInt64 StartingOffset { get; internal set; }
+        public Boolean Bootable { get; set; }
+        public Boolean BootPartition { get; set; }
+        public string Caption { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public UInt32 DiskIndex { get; set; }
+        public UInt32 Index { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public Boolean PrimaryPartition { get; set; }
+        public UInt64 Size { get; set; }
+        public UInt64 StartingOffset { get; set; }
 
         public override string ToString()
         {
@@ -63,18 +63,18 @@ namespace Hardware.Info
 
     public class Drive
     {
-        public List<Partition> PartitionList { get; internal set; } = new List<Partition>();
+        public List<Partition> PartitionList { get; set; } = new List<Partition>();
 
-        public string Caption { get; internal set; } = string.Empty;
-        public string Description { get; internal set; } = string.Empty;
-        public string FirmwareRevision { get; internal set; } = string.Empty;
-        public UInt32 Index { get; internal set; }
-        public string Manufacturer { get; internal set; } = string.Empty;
-        public string Model { get; internal set; } = string.Empty;
-        public string Name { get; internal set; } = string.Empty;
-        public UInt32 Partitions { get; internal set; }
-        public string SerialNumber { get; internal set; } = string.Empty;
-        public UInt64 Size { get; internal set; }
+        public string Caption { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string FirmwareRevision { get; set; } = string.Empty;
+        public UInt32 Index { get; set; }
+        public string Manufacturer { get; set; } = string.Empty;
+        public string Model { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public UInt32 Partitions { get; set; }
+        public string SerialNumber { get; set; } = string.Empty;
+        public UInt64 Size { get; set; }
 
         public override string ToString()
         {

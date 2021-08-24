@@ -4,14 +4,14 @@ namespace Hardware.Info
 {
     public class BIOS
     {
-        public string Caption { get; internal set; } = string.Empty;
-        public string Description { get; internal set; } = string.Empty;
-        public string Manufacturer { get; internal set; } = string.Empty;
-        public string Name { get; internal set; } = string.Empty;
-        public string ReleaseDate { get; internal set; } = string.Empty;
-        public string SerialNumber { get; internal set; } = string.Empty;
-        public string SoftwareElementID { get; internal set; } = string.Empty;
-        public string Version { get; internal set; } = string.Empty;
+        public string Caption { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string Manufacturer { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public string ReleaseDate { get; set; } = string.Empty;
+        public string SerialNumber { get; set; } = string.Empty;
+        public string SoftwareElementID { get; set; } = string.Empty;
+        public string Version { get; set; } = string.Empty;
 
         public override string ToString()
         {

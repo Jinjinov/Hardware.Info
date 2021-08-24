@@ -4,13 +4,13 @@ namespace Hardware.Info
 {
     public class Monitor
     {
-        public string Caption { get; internal set; } = string.Empty;
-        public string Description { get; internal set; } = string.Empty;
-        public string MonitorManufacturer { get; internal set; } = string.Empty;
-        public string MonitorType { get; internal set; } = string.Empty;
-        public string Name { get; internal set; } = string.Empty;
-        public UInt32 PixelsPerXLogicalInch { get; internal set; }
-        public UInt32 PixelsPerYLogicalInch { get; internal set; }
+        public string Caption { get; set; } = string.Empty;
+        public string Description { get; set; } = string.Empty;
+        public string MonitorManufacturer { get; set; } = string.Empty;
+        public string MonitorType { get; set; } = string.Empty;
+        public string Name { get; set; } = string.Empty;
+        public UInt32 PixelsPerXLogicalInch { get; set; }
+        public UInt32 PixelsPerYLogicalInch { get; set; }
 
         public override string ToString()
         {

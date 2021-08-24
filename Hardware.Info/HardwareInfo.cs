@@ -26,23 +26,23 @@ namespace Hardware.Info
         public List<SoundDevice> SoundDeviceList { get; private set; } = new List<SoundDevice>();
         public List<VideoController> VideoControllerList { get; private set; } = new List<VideoController>();
 
-        private readonly IHardwareInfo hardwareInfo = null!;
+        private readonly IHardwareInfoRetrieval _hardwareInfoRetrieval = null!;
 
         public HardwareInfo(bool useAsteriskInWMI = true, TimeSpan? timeoutInWMI = null)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                hardwareInfo = new Hardware.Info.Windows.HardwareInfo(timeoutInWMI) { UseAsteriskInWMI = useAsteriskInWMI };
+                _hardwareInfoRetrieval = new Hardware.Info.Windows.HardwareInfoRetrieval(timeoutInWMI) { UseAsteriskInWMI = useAsteriskInWMI };
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) // Environment.OSVersion.Platform == PlatformID.MacOSX)
             {
-                hardwareInfo = new Hardware.Info.Mac.HardwareInfo();
+                _hardwareInfoRetrieval = new Hardware.Info.Mac.HardwareInfoRetrieval();
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) // Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                hardwareInfo = new Hardware.Info.Linux.HardwareInfo();
+                _hardwareInfoRetrieval = new Hardware.Info.Linux.HardwareInfoRetrieval();
             }
         }
 
@@ -65,21 +65,21 @@ namespace Hardware.Info
             RefreshVideoControllerList();
         }
 
-        public void RefreshMemoryStatus() => MemoryStatus = hardwareInfo.GetMemoryStatus();
+        public void RefreshMemoryStatus() => MemoryStatus = _hardwareInfoRetrieval.GetMemoryStatus();
 
-        public void RefreshBatteryList() => BatteryList = hardwareInfo.GetBatteryList();
-        public void RefreshBIOSList() => BiosList = hardwareInfo.GetBiosList();
-        public void RefreshCPUList(bool includePercentProcessorTime = true) => CpuList = hardwareInfo.GetCpuList(includePercentProcessorTime);
-        public void RefreshDriveList() => DriveList = hardwareInfo.GetDriveList();
-        public void RefreshKeyboardList() => KeyboardList = hardwareInfo.GetKeyboardList();
-        public void RefreshMemoryList() => MemoryList = hardwareInfo.GetMemoryList();
-        public void RefreshMonitorList() => MonitorList = hardwareInfo.GetMonitorList();
-        public void RefreshMotherboardList() => MotherboardList = hardwareInfo.GetMotherboardList();
-        public void RefreshMouseList() => MouseList = hardwareInfo.GetMouseList();
-        public void RefreshNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true) => NetworkAdapterList = hardwareInfo.GetNetworkAdapterList(includeBytesPersec, includeNetworkAdapterConfiguration);
-        public void RefreshPrinterList() => PrinterList = hardwareInfo.GetPrinterList();
-        public void RefreshSoundDeviceList() => SoundDeviceList = hardwareInfo.GetSoundDeviceList();
-        public void RefreshVideoControllerList() => VideoControllerList = hardwareInfo.GetVideoControllerList();
+        public void RefreshBatteryList() => BatteryList = _hardwareInfoRetrieval.GetBatteryList();
+        public void RefreshBIOSList() => BiosList = _hardwareInfoRetrieval.GetBiosList();
+        public void RefreshCPUList(bool includePercentProcessorTime = true) => CpuList = _hardwareInfoRetrieval.GetCpuList(includePercentProcessorTime);
+        public void RefreshDriveList() => DriveList = _hardwareInfoRetrieval.GetDriveList();
+        public void RefreshKeyboardList() => KeyboardList = _hardwareInfoRetrieval.GetKeyboardList();
+        public void RefreshMemoryList() => MemoryList = _hardwareInfoRetrieval.GetMemoryList();
+        public void RefreshMonitorList() => MonitorList = _hardwareInfoRetrieval.GetMonitorList();
+        public void RefreshMotherboardList() => MotherboardList = _hardwareInfoRetrieval.GetMotherboardList();
+        public void RefreshMouseList() => MouseList = _hardwareInfoRetrieval.GetMouseList();
+        public void RefreshNetworkAdapterList(bool includeBytesPerSec = true, bool includeNetworkAdapterConfiguration = true) => NetworkAdapterList = _hardwareInfoRetrieval.GetNetworkAdapterList(includeBytesPerSec, includeNetworkAdapterConfiguration);
+        public void RefreshPrinterList() => PrinterList = _hardwareInfoRetrieval.GetPrinterList();
+        public void RefreshSoundDeviceList() => SoundDeviceList = _hardwareInfoRetrieval.GetSoundDeviceList();
+        public void RefreshVideoControllerList() => VideoControllerList = _hardwareInfoRetrieval.GetVideoControllerList();
 
         #region Static
 

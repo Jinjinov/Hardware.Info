@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace Hardware.Info
 {
-    public class HardwareInfo
+    public class HardwareInfo : IHardwareInfo
     {
         public MemoryStatus MemoryStatus { get; private set; } = new MemoryStatus();
 

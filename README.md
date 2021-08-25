@@ -12,7 +12,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 
         class Program
         {
-            static readonly HardwareInfo hardwareInfo = new HardwareInfo();
+            static readonly IHardwareInfo hardwareInfo = new HardwareInfo();
 
             static void Main(string[] _)
             {

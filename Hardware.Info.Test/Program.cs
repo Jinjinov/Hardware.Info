@@ -5,7 +5,7 @@ namespace Hardware.Info.Test
 {
     class Program
     {
-        static readonly HardwareInfo hardwareInfo = new HardwareInfo();
+        static readonly IHardwareInfo hardwareInfo = new HardwareInfo();
 
         static void Main(string[] _)
         {

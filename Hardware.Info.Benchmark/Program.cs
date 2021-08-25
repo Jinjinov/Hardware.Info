@@ -5,7 +5,7 @@ namespace Hardware.Info.Benchmark
 {
     public class Benchmarks
     {
-        readonly HardwareInfo hardwareInfo = new HardwareInfo();
+        readonly IHardwareInfo hardwareInfo = new HardwareInfo();
 
         [Benchmark]
         public void RefreshMemoryStatus() => hardwareInfo.RefreshMemoryStatus();

@@ -25,14 +25,14 @@ namespace Hardware.Info.Windows
         }
     }
 
-    internal class HardwareInfo : HardwareInfoBase, IHardwareInfo
+    internal class HardwareInfoRetrieval : HardwareInfoBase, IHardwareInfoRetrieval
     {
         public bool UseAsteriskInWMI { get; set; }
 
         readonly string _managementScope = "root\\cimv2";
         readonly EnumerationOptions _enumerationOptions = new EnumerationOptions() { ReturnImmediately = true, Rewindable = false, Timeout = EnumerationOptions.InfiniteTimeout };
 
-        public HardwareInfo(TimeSpan? enumerationOptionsTimeout = null)
+        public HardwareInfoRetrieval(TimeSpan? enumerationOptionsTimeout = null)
         {
             if (enumerationOptionsTimeout == null)
                 enumerationOptionsTimeout = EnumerationOptions.InfiniteTimeout;

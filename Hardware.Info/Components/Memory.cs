@@ -32,12 +32,12 @@ namespace Hardware.Info
 
 	public class Memory
     {
-        public UInt64 Capacity { get; internal set; }
-		public FormFactor FormFactor { get; internal set; }
-		public string Manufacturer { get; internal set; } = string.Empty;
-        public string PartNumber { get; internal set; } = string.Empty;
-        public string SerialNumber { get; internal set; } = string.Empty;
-        public UInt32 Speed { get; internal set; }
+        public UInt64 Capacity { get; set; }
+		public FormFactor FormFactor { get; set; }
+		public string Manufacturer { get; set; } = string.Empty;
+        public string PartNumber { get; set; } = string.Empty;
+        public string SerialNumber { get; set; } = string.Empty;
+        public UInt32 Speed { get; set; }
 
         public override string ToString()
         {

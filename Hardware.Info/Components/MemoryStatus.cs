@@ -4,13 +4,13 @@ namespace Hardware.Info
 {
     public class MemoryStatus
     {
-        public ulong TotalPhysical { get; internal set; }
-        public ulong AvailablePhysical { get; internal set; }
-        public ulong TotalPageFile { get; internal set; }
-        public ulong AvailablePageFile { get; internal set; }
-        public ulong TotalVirtual { get; internal set; }
-        public ulong AvailableVirtual { get; internal set; }
-        public ulong AvailableExtendedVirtual { get; internal set; }
+        public ulong TotalPhysical { get; set; }
+        public ulong AvailablePhysical { get; set; }
+        public ulong TotalPageFile { get; set; }
+        public ulong AvailablePageFile { get; set; }
+        public ulong TotalVirtual { get; set; }
+        public ulong AvailableVirtual { get; set; }
+        public ulong AvailableExtendedVirtual { get; set; }
 
         public override string ToString()
         {

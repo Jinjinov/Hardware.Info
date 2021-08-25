@@ -8,7 +8,7 @@ using System.Threading.Tasks;
 
 namespace Hardware.Info.Linux
 {
-    internal class HardwareInfo : HardwareInfoBase, IHardwareInfo
+    internal class HardwareInfoRetrieval : HardwareInfoBase, IHardwareInfoRetrieval
     {
         private readonly MemoryStatus memoryStatus = new MemoryStatus();
 

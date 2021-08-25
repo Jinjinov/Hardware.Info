@@ -5,21 +5,21 @@ namespace Hardware.Info
 {
     public class CPU
     {
-        public string Caption { get; internal set; } = string.Empty;
-        public UInt32 CurrentClockSpeed { get; internal set; }
-        public string Description { get; internal set; } = string.Empty;
-        public UInt32 L2CacheSize { get; internal set; }
-        public UInt32 L3CacheSize { get; internal set; }
-        public string Manufacturer { get; internal set; } = string.Empty;
-        public UInt32 MaxClockSpeed { get; internal set; }
-        public string Name { get; internal set; } = string.Empty;
-        public UInt32 NumberOfCores { get; internal set; }
-        public UInt32 NumberOfLogicalProcessors { get; internal set; }
-        public string ProcessorId { get; internal set; } = string.Empty;
-        public Boolean VirtualizationFirmwareEnabled { get; internal set; }
-        public Boolean VMMonitorModeExtensions { get; internal set; }
-        public UInt64 PercentProcessorTime { get; internal set; }
-        public List<CpuCore> CpuCoreList { get; internal set; } = new List<CpuCore>();
+        public string Caption { get; set; } = string.Empty;
+        public UInt32 CurrentClockSpeed { get; set; }
+        public string Description { get; set; } = string.Empty;
+        public UInt32 L2CacheSize { get; set; }
+        public UInt32 L3CacheSize { get; set; }
+        public string Manufacturer { get; set; } = string.Empty;
+        public UInt32 MaxClockSpeed { get; set; }
+        public string Name { get; set; } = string.Empty;
+        public UInt32 NumberOfCores { get; set; }
+        public UInt32 NumberOfLogicalProcessors { get; set; }
+        public string ProcessorId { get; set; } = string.Empty;
+        public Boolean VirtualizationFirmwareEnabled { get; set; }
+        public Boolean VMMonitorModeExtensions { get; set; }
+        public UInt64 PercentProcessorTime { get; set; }
+        public List<CpuCore> CpuCoreList { get; set; } = new List<CpuCore>();
 
         public override string ToString()
         {

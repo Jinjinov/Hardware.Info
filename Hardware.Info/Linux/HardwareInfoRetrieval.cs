@@ -10,18 +10,18 @@ namespace Hardware.Info.Linux
 {
     internal class HardwareInfoRetrieval : HardwareInfoBase, IHardwareInfoRetrieval
     {
-        private readonly MemoryStatus memoryStatus = new MemoryStatus();
+        private readonly MemoryStatus _memoryStatus = new MemoryStatus();
 
         public MemoryStatus GetMemoryStatus()
         {
             string[] meminfo = TryReadFileLines("/proc/meminfo");
 
-            memoryStatus.TotalPhysical = GetBytesFromLine(meminfo, "MemTotal:");
-            memoryStatus.AvailablePhysical = GetBytesFromLine(meminfo, "MemAvailable:");
-            memoryStatus.TotalVirtual = GetBytesFromLine(meminfo, "SwapTotal:");
-            memoryStatus.AvailableVirtual = GetBytesFromLine(meminfo, "SwapFree:");
+            _memoryStatus.TotalPhysical = GetBytesFromLine(meminfo, "MemTotal:");
+            _memoryStatus.AvailablePhysical = GetBytesFromLine(meminfo, "MemAvailable:");
+            _memoryStatus.TotalVirtual = GetBytesFromLine(meminfo, "SwapTotal:");
+            _memoryStatus.AvailableVirtual = GetBytesFromLine(meminfo, "SwapFree:");
 
-            return memoryStatus;
+            return _memoryStatus;
         }
 
         private ulong GetBytesFromLine(string[] meminfo, string token)

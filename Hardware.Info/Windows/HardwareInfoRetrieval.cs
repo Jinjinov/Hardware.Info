@@ -27,10 +27,14 @@ namespace Hardware.Info.Windows
 
     internal class HardwareInfoRetrieval : HardwareInfoBase, IHardwareInfoRetrieval
     {
+        private readonly MEMORYSTATUSEX _memoryStatusEx = new MEMORYSTATUSEX();
+
+        private readonly MemoryStatus _memoryStatus = new MemoryStatus();
+
         public bool UseAsteriskInWMI { get; set; }
 
-        readonly string _managementScope = "root\\cimv2";
-        readonly EnumerationOptions _enumerationOptions = new EnumerationOptions() { ReturnImmediately = true, Rewindable = false, Timeout = EnumerationOptions.InfiniteTimeout };
+        private readonly string _managementScope = "root\\cimv2";
+        private readonly EnumerationOptions _enumerationOptions = new EnumerationOptions() { ReturnImmediately = true, Rewindable = false, Timeout = EnumerationOptions.InfiniteTimeout };
 
         public HardwareInfoRetrieval(TimeSpan? enumerationOptionsTimeout = null)
         {
@@ -40,28 +44,24 @@ namespace Hardware.Info.Windows
             _enumerationOptions = new EnumerationOptions() { ReturnImmediately = true, Rewindable = false, Timeout = enumerationOptionsTimeout.Value };
         }
 
-        readonly MEMORYSTATUSEX memoryStatusEx = new MEMORYSTATUSEX();
-
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]
         static extern bool GlobalMemoryStatusEx([In, Out] MEMORYSTATUSEX lpBuffer);
 
-        readonly MemoryStatus memoryStatus = new MemoryStatus();
-
         public MemoryStatus GetMemoryStatus()
         {
-            if (GlobalMemoryStatusEx(memoryStatusEx))
+            if (GlobalMemoryStatusEx(_memoryStatusEx))
             {
-                memoryStatus.TotalPhysical = memoryStatusEx.ullTotalPhys;
-                memoryStatus.AvailablePhysical = memoryStatusEx.ullAvailPhys;
-                memoryStatus.TotalPageFile = memoryStatusEx.ullTotalPageFile;
-                memoryStatus.AvailablePageFile = memoryStatusEx.ullAvailPageFile;
-                memoryStatus.TotalVirtual = memoryStatusEx.ullTotalVirtual;
-                memoryStatus.AvailableVirtual = memoryStatusEx.ullAvailVirtual;
-                memoryStatus.AvailableExtendedVirtual = memoryStatusEx.ullAvailExtendedVirtual;
+                _memoryStatus.TotalPhysical = _memoryStatusEx.ullTotalPhys;
+                _memoryStatus.AvailablePhysical = _memoryStatusEx.ullAvailPhys;
+                _memoryStatus.TotalPageFile = _memoryStatusEx.ullTotalPageFile;
+                _memoryStatus.AvailablePageFile = _memoryStatusEx.ullAvailPageFile;
+                _memoryStatus.TotalVirtual = _memoryStatusEx.ullTotalVirtual;
+                _memoryStatus.AvailableVirtual = _memoryStatusEx.ullAvailVirtual;
+                _memoryStatus.AvailableExtendedVirtual = _memoryStatusEx.ullAvailExtendedVirtual;
             }
 
-            return memoryStatus;
+            return _memoryStatus;
         }
 
         public static T GetPropertyValue<T>(object obj) where T : struct

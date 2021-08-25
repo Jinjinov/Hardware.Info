@@ -83,17 +83,17 @@ namespace Hardware.Info
 
         #region Static
 
-        private static bool pingInProgress;
-        private static Action<bool>? OnPingComplete;
+        private static bool _pingInProgress;
+        private static Action<bool>? _onPingComplete;
 
         public static void Ping(string hostNameOrAddress, Action<bool> onPingComplete)
         {
-            if (pingInProgress)
+            if (_pingInProgress)
                 return;
 
-            pingInProgress = true;
+            _pingInProgress = true;
 
-            OnPingComplete = onPingComplete;
+            _onPingComplete = onPingComplete;
 
             using Ping pingSender = new Ping();
             pingSender.PingCompleted += new PingCompletedEventHandler(PingCompleted);
@@ -109,7 +109,7 @@ namespace Hardware.Info
 
         private static void PingCompleted(object sender, PingCompletedEventArgs e)
         {
-            pingInProgress = false;
+            _pingInProgress = false;
 
             bool success = true;
 
@@ -126,7 +126,7 @@ namespace Hardware.Info
             else if (reply.Status != IPStatus.Success)
                 success = false;
 
-            OnPingComplete?.Invoke(success);
+            _onPingComplete?.Invoke(success);
         }
 
         public static IEnumerable<IPAddress> GetLocalIPv4Addresses()

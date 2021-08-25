@@ -6,7 +6,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
-        <PackageReference Include="Hardware.Info" Version="1.1.0.1" />
+        <PackageReference Include="Hardware.Info" Version="1.1.1.0" />
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
 
@@ -141,6 +141,8 @@ In these two methods you can exclude some slow queries by setting the parameters
 
 ## Version history:
 
+- 1.1.1.0:
+    - Added `IHardwareInfo` so that `HardwareInfo` can be mocked - by [@240026763]( https://github.com/240026763 )
 - 1.1.0.1:
     - Added two settings for WMI queries in Windows
     - Added three settings to exclude slow queries in Windows, macOS, Linux

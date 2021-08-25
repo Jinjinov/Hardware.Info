@@ -5,6 +5,7 @@ namespace Hardware.Info
     public interface IHardwareInfo
     {
         MemoryStatus MemoryStatus { get; }
+
         List<Battery> BatteryList { get; }
         List<BIOS> BiosList { get; }
         List<CPU> CpuList { get; }
@@ -18,8 +19,11 @@ namespace Hardware.Info
         List<Printer> PrinterList { get; }
         List<SoundDevice> SoundDeviceList { get; }
         List<VideoController> VideoControllerList { get; }
+
         void RefreshAll();
+
         void RefreshMemoryStatus();
+
         void RefreshBatteryList();
         void RefreshBIOSList();
         void RefreshCPUList(bool includePercentProcessorTime = true);

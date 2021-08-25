@@ -18,10 +18,10 @@ namespace Hardware.Info.Mac
 {
     internal class HardwareInfoRetrieval : HardwareInfoBase, IHardwareInfoRetrieval
     {
+        private readonly MemoryStatus _memoryStatus = new MemoryStatus();
+
         [DllImport("libc")]
         static extern int sysctlbyname(string name, out IntPtr oldp, ref IntPtr oldlenp, IntPtr newp, IntPtr newlen);
-
-        private readonly MemoryStatus memoryStatus = new MemoryStatus();
 
         /*
         public HardwareInfoRetrieval()
@@ -176,10 +176,10 @@ namespace Hardware.Info.Mac
 
             if (sysctlbyname("hw.memsize", out IntPtr lineSize, ref SizeOfLineSize, IntPtr.Zero, IntPtr.Zero) == 0)
             {
-                memoryStatus.TotalPhysical = (ulong)lineSize.ToInt64();
+                _memoryStatus.TotalPhysical = (ulong)lineSize.ToInt64();
             }
 
-            return memoryStatus;
+            return _memoryStatus;
         }
 
         public List<Battery> GetBatteryList()

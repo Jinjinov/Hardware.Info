@@ -153,7 +153,7 @@ Setting `includePercentProcessorTime` and `includeBytesPersec` to `false` will e
 - cause a 21 second delay the first time they are called in Windows
 - cause a 1 second delay every time they are called in Linux
 
-Setting `includeNetworkAdapterConfiguration` to `false` doesn't have a significant impact.
+Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact on performance.
 
 ## Benchmarks
 

@@ -117,6 +117,16 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
             }
         }
 
+## Known issues
+
+### 21 second delay in Windows
+
+Hardware.Info uses WMI (Windows Management Instrumentation) on Windows OS. For certain queries WMI takes 21 seconds to initialize the first time you use it, after that all subsequent queries will execute immediately. If WMI isn't used for 15 minutes it will have to be initialized again the next time you use it.
+
+The 21 second initialization delay is caused by RPC that WMI uses internally. In RPC [documentation](https://docs.microsoft.com/en-us/windows/win32/services/services-and-rpc-tcp) it says that the RPC/TCP time-out interval is defined with a `SCMApiConnectionParam` registry value located at `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control` and that the default value is set to 21,000 (21 seconds).
+
+You can avoid the 21 second delay by excluding the queries that cause it (see Settings).
+
 ## Settings
 
 ### Constructor settings:
@@ -131,13 +141,38 @@ The construcotr accepts two settings for WMI:
 
 ### Refresh methods settings:
 
+In these two methods you can exclude some slow queries by setting the parameters to `false`:
+
 ```
 RefreshCPUList(bool includePercentProcessorTime = true)
 
 RefreshNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)
 ```
 
-In these two methods you can exclude some slow queries by setting the parameters to `false`.
+Setting `includePercentProcessorTime` and `includeBytesPersec` to `false` will exclude the queries that:
+- cause a 21 second delay the first time they are called in Windows
+- cause a 1 second delay every time they are called in Linux
+
+Setting `includeNetworkAdapterConfiguration` to `false` doesn't have a significant impact.
+
+## Benchmarks
+
+|                     Method |               Mean |            Error |           StdDev |
+|--------------------------- |-------------------:|-----------------:|-----------------:|
+|        RefreshMemoryStatus |           947.8 ns |          3.77 ns |          3.53 ns |
+|         RefreshBatteryList |     1,811,885.7 ns |     12,921.05 ns |     11,454.17 ns |
+|            RefreshBIOSList |     2,086,001.0 ns |     23,896.69 ns |     22,352.98 ns |
+|             RefreshCPUList | 1,543,579,005.2 ns |  2,405,376.47 ns |  2,132,303.59 ns |
+|           RefreshDriveList |   409,137,516.3 ns |  8,612,410.99 ns | 25,258,710.57 ns |
+|        RefreshKeyboardList |     5,568,039.5 ns |     44,228.57 ns |     41,371.43 ns |
+|          RefreshMemoryList |     2,120,024.5 ns |     26,103.39 ns |     24,417.13 ns |
+|         RefreshMonitorList |     5,669,237.8 ns |     50,801.76 ns |     45,034.44 ns |
+|     RefreshMotherboardList |     1,965,222.9 ns |     14,387.30 ns |     13,457.89 ns |
+|           RefreshMouseList |     6,003,924.9 ns |     60,725.05 ns |     50,708.17 ns |
+|  RefreshNetworkAdapterList | 1,412,244,738.6 ns | 14,681,615.28 ns | 12,259,813.69 ns |
+|         RefreshPrinterList |    28,244,822.2 ns |    143,359.60 ns |    134,098.66 ns |
+|     RefreshSoundDeviceList |     3,608,577.5 ns |     68,688.62 ns |     73,496.06 ns |
+| RefreshVideoControllerList |    11,568,549.2 ns |     54,666.07 ns |     48,460.05 ns |
 
 ## Version history:
 
@@ -188,28 +223,3 @@ In these two methods you can exclude some slow queries by setting the parameters
 - 0.0.0.1:
     - All hardware info in Windows
     - CPU, RAM info in macOS, Linux
-
-## Known issues
-
-Hardware.Info uses WMI (Windows Management Instrumentation) on Windows OS. For certain queries WMI takes 21 seconds to initialize the first time you use it, after that all subsequent queries will execute immediately. If WMI isn't used for 15 minutes it will have to be initialized again the next time you use it.
-
-The 21 second initialization delay is caused by RPC that WMI uses internally. In RPC [documentation](https://docs.microsoft.com/en-us/windows/win32/services/services-and-rpc-tcp) it says that the RPC/TCP time-out interval is defined with a `SCMApiConnectionParam` registry value located at `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control` and that the default value is set to 21,000 (21 seconds).
-
-## Benchmarks
-
-|                     Method |               Mean |            Error |           StdDev |
-|--------------------------- |-------------------:|-----------------:|-----------------:|
-|        RefreshMemoryStatus |           947.8 ns |          3.77 ns |          3.53 ns |
-|         RefreshBatteryList |     1,811,885.7 ns |     12,921.05 ns |     11,454.17 ns |
-|            RefreshBIOSList |     2,086,001.0 ns |     23,896.69 ns |     22,352.98 ns |
-|             RefreshCPUList | 1,543,579,005.2 ns |  2,405,376.47 ns |  2,132,303.59 ns |
-|           RefreshDriveList |   409,137,516.3 ns |  8,612,410.99 ns | 25,258,710.57 ns |
-|        RefreshKeyboardList |     5,568,039.5 ns |     44,228.57 ns |     41,371.43 ns |
-|          RefreshMemoryList |     2,120,024.5 ns |     26,103.39 ns |     24,417.13 ns |
-|         RefreshMonitorList |     5,669,237.8 ns |     50,801.76 ns |     45,034.44 ns |
-|     RefreshMotherboardList |     1,965,222.9 ns |     14,387.30 ns |     13,457.89 ns |
-|           RefreshMouseList |     6,003,924.9 ns |     60,725.05 ns |     50,708.17 ns |
-|  RefreshNetworkAdapterList | 1,412,244,738.6 ns | 14,681,615.28 ns | 12,259,813.69 ns |
-|         RefreshPrinterList |    28,244,822.2 ns |    143,359.60 ns |    134,098.66 ns |
-|     RefreshSoundDeviceList |     3,608,577.5 ns |     68,688.62 ns |     73,496.06 ns |
-| RefreshVideoControllerList |    11,568,549.2 ns |     54,666.07 ns |     48,460.05 ns |

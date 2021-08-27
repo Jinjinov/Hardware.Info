@@ -119,7 +119,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 
 ## Known issues
 
-### 21 second delay in Windows
+### 21 second delay on first use in Windows
 
 Hardware.Info uses WMI (Windows Management Instrumentation) on Windows OS. For certain queries WMI takes 21 seconds to initialize the first time you use it, after that all subsequent queries will execute immediately. If WMI isn't used for 15 minutes it will have to be initialized again the next time you use it.
 
@@ -156,6 +156,8 @@ Setting `includePercentProcessorTime` and `includeBytesPersec` to `false` will e
 Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact on performance.
 
 ## Benchmarks
+
+### Windows 8.1 (Intel i5-2500, 8 GB RAM):
 
 |                     Method |               Mean |            Error |           StdDev |
 |--------------------------- |-------------------:|-----------------:|-----------------:|

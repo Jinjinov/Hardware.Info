@@ -6,7 +6,9 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
-        <PackageReference Include="Hardware.Info" Version="1.1.1.0" />
+        <ItemGroup>
+            <PackageReference Include="Hardware.Info" Version="1.1.1.0" />
+        </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
 

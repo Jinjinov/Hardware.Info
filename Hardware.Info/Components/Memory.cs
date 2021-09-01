@@ -38,16 +38,22 @@ namespace Hardware.Info
         public string PartNumber { get; set; } = string.Empty;
         public string SerialNumber { get; set; } = string.Empty;
         public UInt32 Speed { get; set; }
+		public string BankLabel { get; set; } = string.Empty;
+		public UInt32 MaxVoltage { get; set; }
+		public UInt32 MinVoltage { get; set; }
 
         public override string ToString()
         {
-            return
-                "Capacity: " + Capacity + Environment.NewLine +
+			return
+				"Capacity: " + Capacity + Environment.NewLine +
 				"FormFactor: " + FormFactor + Environment.NewLine +
 				"Manufacturer: " + Manufacturer + Environment.NewLine +
-                "PartNumber: " + PartNumber + Environment.NewLine +
-                "SerialNumber: " + SerialNumber + Environment.NewLine +
-                "Speed: " + Speed + Environment.NewLine;
+				"PartNumber: " + PartNumber + Environment.NewLine +
+				"SerialNumber: " + SerialNumber + Environment.NewLine +
+				"Speed: " + Speed + Environment.NewLine +
+				"BankLabel: " + BankLabel + Environment.NewLine +
+				"MaxVoltage: " + MaxVoltage + Environment.NewLine +
+				"MinVoltage: " + MinVoltage + Environment.NewLine;
         }
     }
 }

@@ -315,7 +315,10 @@ namespace Hardware.Info.Windows
                     Manufacturer = GetPropertyString(mo["Manufacturer"]),
                     PartNumber = GetPropertyString(mo["PartNumber"]),
                     SerialNumber = GetPropertyString(mo["SerialNumber"]),
-                    Speed = GetPropertyValue<uint>(mo["Speed"])
+                    Speed = GetPropertyValue<uint>(mo["Speed"]),
+                    BankLabel = GetPropertyString(mo["BankLabel"]),
+                    MaxVoltage = GetPropertyValue<uint>(mo["MaxVoltage"]),
+                    MinVoltage = GetPropertyValue<uint>(mo["MinVoltage"])
                 };
 
                 memoryList.Add(memory);

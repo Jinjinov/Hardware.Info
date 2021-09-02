@@ -479,30 +479,24 @@ namespace Hardware.Info.Windows
                                                   : "SELECT Caption, Default, Description, HorizontalResolution, Local, Name, Network, Shared, VerticalResolution FROM Win32_Printer";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
 
-            try
+            foreach (ManagementObject mo in mos.Get())
             {
-                foreach (ManagementObject mo in mos.Get())
+                Printer printer = new Printer
                 {
-                    Printer printer = new Printer
-                    {
-                        Caption = GetPropertyString(mo["Caption"]),
-                        Default = GetPropertyValue<bool>(mo["Default"]),
-                        Description = GetPropertyString(mo["Description"]),
-                        HorizontalResolution = GetPropertyValue<uint>(mo["HorizontalResolution"]),
-                        Local = GetPropertyValue<bool>(mo["Local"]),
-                        Name = GetPropertyString(mo["Name"]),
-                        Network = GetPropertyValue<bool>(mo["Network"]),
-                        Shared = GetPropertyValue<bool>(mo["Shared"]),
-                        VerticalResolution = GetPropertyValue<uint>(mo["VerticalResolution"])
-                    };
+                    Caption = GetPropertyString(mo["Caption"]),
+                    Default = GetPropertyValue<bool>(mo["Default"]),
+                    Description = GetPropertyString(mo["Description"]),
+                    HorizontalResolution = GetPropertyValue<uint>(mo["HorizontalResolution"]),
+                    Local = GetPropertyValue<bool>(mo["Local"]),
+                    Name = GetPropertyString(mo["Name"]),
+                    Network = GetPropertyValue<bool>(mo["Network"]),
+                    Shared = GetPropertyValue<bool>(mo["Shared"]),
+                    VerticalResolution = GetPropertyValue<uint>(mo["VerticalResolution"])
+                };
 
-                    printerList.Add(printer);
-                }
+                printerList.Add(printer);
             }
-            catch
-            {
-                Console.WriteLine("Printer: You Don't Have Right Permission to Access PrintSpooler or Something Went Wrong with Printer or Your Device Doesn't Have Printer Connected");
-            }
+
 
             return printerList;
         }

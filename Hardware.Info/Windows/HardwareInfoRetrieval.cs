@@ -174,7 +174,7 @@ namespace Hardware.Info.Windows
             }
 
             string query = UseAsteriskInWMI ? "SELECT * FROM Win32_Processor"
-                                            : "SELECT Caption, CurrentClockSpeed, Description, L2CacheSize, L3CacheSize, Manufacturer, MaxClockSpeed, Name, NumberOfCores, NumberOfLogicalProcessors, ProcessorId, VirtualizationFirmwareEnabled, VMMonitorModeExtensions FROM Win32_Processor";
+                                            : "SELECT Caption, CurrentClockSpeed, Description, L2CacheSize, L3CacheSize, Manufacturer, MaxClockSpeed, Name, NumberOfCores, NumberOfLogicalProcessors, ProcessorId, VirtualizationFirmwareEnabled, VMMonitorModeExtensions, SecondLevelAddressTranslationExtensions, SocketDesignation FROM Win32_Processor";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, query, _enumerationOptions);
 
             foreach (ManagementObject mo in mos.Get())
@@ -192,6 +192,8 @@ namespace Hardware.Info.Windows
                     NumberOfCores = GetPropertyValue<uint>(mo["NumberOfCores"]),
                     NumberOfLogicalProcessors = GetPropertyValue<uint>(mo["NumberOfLogicalProcessors"]),
                     ProcessorId = GetPropertyString(mo["ProcessorId"]),
+                    SLAT = GetPropertyValue<bool>(mo["SecondLevelAddressTranslationExtensions"]),
+                    SocketDesignation = GetPropertyString(mo["SocketDesignation"]),
                     VirtualizationFirmwareEnabled = GetPropertyValue<bool>(mo["VirtualizationFirmwareEnabled"]),
                     VMMonitorModeExtensions = GetPropertyValue<bool>(mo["VMMonitorModeExtensions"]),
                     PercentProcessorTime = percentProcessorTime,
@@ -303,7 +305,7 @@ namespace Hardware.Info.Windows
             List<Memory> memoryList = new List<Memory>();
 
             string queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_PhysicalMemory"
-                                                  : "SELECT Capacity, FormFactor, Manufacturer, PartNumber, SerialNumber, Speed FROM Win32_PhysicalMemory";
+                                                  : "SELECT Capacity, FormFactor, Manufacturer, PartNumber, SerialNumber, Speed, BankLabel, MaxVoltage, MinVoltage FROM Win32_PhysicalMemory";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
 
             foreach (ManagementObject mo in mos.Get())
@@ -477,22 +479,29 @@ namespace Hardware.Info.Windows
                                                   : "SELECT Caption, Default, Description, HorizontalResolution, Local, Name, Network, Shared, VerticalResolution FROM Win32_Printer";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
 
-            foreach (ManagementObject mo in mos.Get())
+            try
             {
-                Printer printer = new Printer
+                foreach (ManagementObject mo in mos.Get())
                 {
-                    Caption = GetPropertyString(mo["Caption"]),
-                    Default = GetPropertyValue<bool>(mo["Default"]),
-                    Description = GetPropertyString(mo["Description"]),
-                    HorizontalResolution = GetPropertyValue<uint>(mo["HorizontalResolution"]),
-                    Local = GetPropertyValue<bool>(mo["Local"]),
-                    Name = GetPropertyString(mo["Name"]),
-                    Network = GetPropertyValue<bool>(mo["Network"]),
-                    Shared = GetPropertyValue<bool>(mo["Shared"]),
-                    VerticalResolution = GetPropertyValue<uint>(mo["VerticalResolution"])
-                };
+                    Printer printer = new Printer
+                    {
+                        Caption = GetPropertyString(mo["Caption"]),
+                        Default = GetPropertyValue<bool>(mo["Default"]),
+                        Description = GetPropertyString(mo["Description"]),
+                        HorizontalResolution = GetPropertyValue<uint>(mo["HorizontalResolution"]),
+                        Local = GetPropertyValue<bool>(mo["Local"]),
+                        Name = GetPropertyString(mo["Name"]),
+                        Network = GetPropertyValue<bool>(mo["Network"]),
+                        Shared = GetPropertyValue<bool>(mo["Shared"]),
+                        VerticalResolution = GetPropertyValue<uint>(mo["VerticalResolution"])
+                    };
 
-                printerList.Add(printer);
+                    printerList.Add(printer);
+                }
+            }
+            catch
+            {
+                Console.WriteLine("Printer: You Don't Have Right Permission to Access PrintSpooler or Something Went Wrong with Printer or Your Device Doesn't Have Printer Connected");
             }
 
             return printerList;

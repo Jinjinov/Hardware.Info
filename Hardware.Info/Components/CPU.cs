@@ -16,6 +16,8 @@ namespace Hardware.Info
         public UInt32 NumberOfCores { get; set; }
         public UInt32 NumberOfLogicalProcessors { get; set; }
         public string ProcessorId { get; set; } = string.Empty;
+        public Boolean SLAT { get; set; }
+        public string SocketDesignation { get; set; } = string.Empty;
         public Boolean VirtualizationFirmwareEnabled { get; set; }
         public Boolean VMMonitorModeExtensions { get; set; }
         public UInt64 PercentProcessorTime { get; set; }
@@ -36,6 +38,8 @@ namespace Hardware.Info
                 "NumberOfCores: " + NumberOfCores + Environment.NewLine +
                 "NumberOfLogicalProcessors: " + NumberOfLogicalProcessors + Environment.NewLine +
                 "ProcessorId: " + ProcessorId + Environment.NewLine +
+                "SLAT: " + SLAT + Environment.NewLine +
+                "SocketDesignation: " + SocketDesignation + Environment.NewLine +
                 "VirtualizationFirmwareEnabled: " + VirtualizationFirmwareEnabled + Environment.NewLine +
                 "VMMonitorModeExtensions: " + VMMonitorModeExtensions + Environment.NewLine;
         }

@@ -479,24 +479,44 @@ namespace Hardware.Info.Windows
                                                   : "SELECT Caption, Default, Description, HorizontalResolution, Local, Name, Network, Shared, VerticalResolution FROM Win32_Printer";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
 
-            foreach (ManagementObject mo in mos.Get())
+            try
+            {
+                foreach (ManagementObject mo in mos.Get())
+                {
+                    Printer printer = new Printer
+                    {
+                        Caption = GetPropertyString(mo["Caption"]),
+                        Default = GetPropertyValue<bool>(mo["Default"]),
+                        Description = GetPropertyString(mo["Description"]),
+                        HorizontalResolution = GetPropertyValue<uint>(mo["HorizontalResolution"]),
+                        Local = GetPropertyValue<bool>(mo["Local"]),
+                        Name = GetPropertyString(mo["Name"]),
+                        Network = GetPropertyValue<bool>(mo["Network"]),
+                        Shared = GetPropertyValue<bool>(mo["Shared"]),
+                        VerticalResolution = GetPropertyValue<uint>(mo["VerticalResolution"])
+                    };
+
+                    printerList.Add(printer);
+                }
+
+            }
+            catch (ManagementException e)
             {
                 Printer printer = new Printer
                 {
-                    Caption = GetPropertyString(mo["Caption"]),
-                    Default = GetPropertyValue<bool>(mo["Default"]),
-                    Description = GetPropertyString(mo["Description"]),
-                    HorizontalResolution = GetPropertyValue<uint>(mo["HorizontalResolution"]),
-                    Local = GetPropertyValue<bool>(mo["Local"]),
-                    Name = GetPropertyString(mo["Name"]),
-                    Network = GetPropertyValue<bool>(mo["Network"]),
-                    Shared = GetPropertyValue<bool>(mo["Shared"]),
-                    VerticalResolution = GetPropertyValue<uint>(mo["VerticalResolution"])
+                    Caption = $"{e.Message}|| You Don't Have Right Permission to Access PrintSpooler or Your Device Doesn't Have Printer Connected",
+                    Default = false,
+                    Description = "",
+                    HorizontalResolution = 0,
+                    Local = false,
+                    Name = "",
+                    Network = false,
+                    Shared = false,
+                    VerticalResolution = 0
                 };
 
                 printerList.Add(printer);
             }
-
 
             return printerList;
         }

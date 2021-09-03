@@ -85,7 +85,7 @@ namespace Hardware.Info.Windows
         {
             List<Battery> batteryList = new List<Battery>();
 
-            string queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_Battery" 
+            string queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_Battery"
                                                   : "SELECT FullChargeCapacity, DesignCapacity, BatteryStatus, EstimatedChargeRemaining, EstimatedRunTime, ExpectedLife, MaxRechargeTime, TimeOnBattery, TimeToFullCharge FROM Win32_Battery";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
 
@@ -286,7 +286,7 @@ namespace Hardware.Info.Windows
 
             foreach (ManagementObject mo in mos.Get())
             {
-                Keyboard keyboard= new Keyboard
+                Keyboard keyboard = new Keyboard
                 {
                     Caption = GetPropertyString(mo["Caption"]),
                     Description = GetPropertyString(mo["Description"]),
@@ -496,7 +496,6 @@ namespace Hardware.Info.Windows
 
                 printerList.Add(printer);
             }
-
 
             return printerList;
         }

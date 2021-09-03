@@ -85,7 +85,7 @@ namespace Hardware.Info.Windows
         {
             List<Battery> batteryList = new List<Battery>();
 
-            string queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_Battery" 
+            string queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_Battery"
                                                   : "SELECT FullChargeCapacity, DesignCapacity, BatteryStatus, EstimatedChargeRemaining, EstimatedRunTime, ExpectedLife, MaxRechargeTime, TimeOnBattery, TimeToFullCharge FROM Win32_Battery";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
 
@@ -174,7 +174,7 @@ namespace Hardware.Info.Windows
             }
 
             string query = UseAsteriskInWMI ? "SELECT * FROM Win32_Processor"
-                                            : "SELECT Caption, CurrentClockSpeed, Description, L2CacheSize, L3CacheSize, Manufacturer, MaxClockSpeed, Name, NumberOfCores, NumberOfLogicalProcessors, ProcessorId, VirtualizationFirmwareEnabled, VMMonitorModeExtensions FROM Win32_Processor";
+                                            : "SELECT Caption, CurrentClockSpeed, Description, L2CacheSize, L3CacheSize, Manufacturer, MaxClockSpeed, Name, NumberOfCores, NumberOfLogicalProcessors, ProcessorId, VirtualizationFirmwareEnabled, VMMonitorModeExtensions, SecondLevelAddressTranslationExtensions, SocketDesignation FROM Win32_Processor";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, query, _enumerationOptions);
 
             foreach (ManagementObject mo in mos.Get())
@@ -192,6 +192,8 @@ namespace Hardware.Info.Windows
                     NumberOfCores = GetPropertyValue<uint>(mo["NumberOfCores"]),
                     NumberOfLogicalProcessors = GetPropertyValue<uint>(mo["NumberOfLogicalProcessors"]),
                     ProcessorId = GetPropertyString(mo["ProcessorId"]),
+                    SecondLevelAddressTranslationExtensions = GetPropertyValue<bool>(mo["SecondLevelAddressTranslationExtensions"]),
+                    SocketDesignation = GetPropertyString(mo["SocketDesignation"]),
                     VirtualizationFirmwareEnabled = GetPropertyValue<bool>(mo["VirtualizationFirmwareEnabled"]),
                     VMMonitorModeExtensions = GetPropertyValue<bool>(mo["VMMonitorModeExtensions"]),
                     PercentProcessorTime = percentProcessorTime,
@@ -284,7 +286,7 @@ namespace Hardware.Info.Windows
 
             foreach (ManagementObject mo in mos.Get())
             {
-                Keyboard keyboard= new Keyboard
+                Keyboard keyboard = new Keyboard
                 {
                     Caption = GetPropertyString(mo["Caption"]),
                     Description = GetPropertyString(mo["Description"]),
@@ -303,7 +305,7 @@ namespace Hardware.Info.Windows
             List<Memory> memoryList = new List<Memory>();
 
             string queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_PhysicalMemory"
-                                                  : "SELECT Capacity, FormFactor, Manufacturer, PartNumber, SerialNumber, Speed FROM Win32_PhysicalMemory";
+                                                  : "SELECT Capacity, FormFactor, Manufacturer, PartNumber, SerialNumber, Speed, BankLabel, MaxVoltage, MinVoltage FROM Win32_PhysicalMemory";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
 
             foreach (ManagementObject mo in mos.Get())

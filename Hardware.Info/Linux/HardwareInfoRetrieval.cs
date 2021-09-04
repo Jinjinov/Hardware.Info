@@ -218,11 +218,11 @@ namespace Hardware.Info.Linux
             string[] cpuUsageLineLast = TryReadFileLines("/proc/stat");
             Task.Delay(500).Wait();
             string[] cpuUsageLineNow = TryReadFileLines("/proc/stat");
-            
+
             if (cpuUsageLineLast.Length > 0 && cpuUsageLineNow.Length > 0)
             {
                 cpu.PercentProcessorTime = GetCpuPercentage(cpuUsageLineLast.First(), cpuUsageLineNow.First());
-                
+
                 for (int i = 0; i < cpu.NumberOfLogicalProcessors; i++)
                 {
                     CpuCore core = new CpuCore
@@ -263,7 +263,7 @@ namespace Hardware.Info.Linux
 
             return 100 * cpuUsed / cpuDelta;
         }
-        
+
         public override List<Drive> GetDriveList()
         {
             List<Drive> driveList = new List<Drive>();

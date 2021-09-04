@@ -501,8 +501,8 @@ Memory:
           Serial Number: -
             /**/
 
-            StartProcess("system_profiler", "SPMemoryDataType", 
-                standardOutput => 
+            StartProcess("system_profiler", "SPMemoryDataType",
+                standardOutput =>
                 {
                     string line = standardOutput.Trim();
 
@@ -569,7 +569,7 @@ Memory:
                             memory.SerialNumber = line.Replace("Serial Number: ", string.Empty);
                         }
                     }
-                }, 
+                },
                 standardError => { });
 
             if (memory != null)

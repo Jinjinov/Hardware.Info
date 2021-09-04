@@ -38,7 +38,7 @@ namespace Hardware.Info
                 "NumberOfCores: " + NumberOfCores + Environment.NewLine +
                 "NumberOfLogicalProcessors: " + NumberOfLogicalProcessors + Environment.NewLine +
                 "ProcessorId: " + ProcessorId + Environment.NewLine +
-                "SLAT: " + SecondLevelAddressTranslationExtensions + Environment.NewLine +
+                "SecondLevelAddressTranslationExtensions: " + SecondLevelAddressTranslationExtensions + Environment.NewLine +
                 "SocketDesignation: " + SocketDesignation + Environment.NewLine +
                 "VirtualizationFirmwareEnabled: " + VirtualizationFirmwareEnabled + Environment.NewLine +
                 "VMMonitorModeExtensions: " + VMMonitorModeExtensions + Environment.NewLine;

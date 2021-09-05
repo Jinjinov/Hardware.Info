@@ -174,7 +174,7 @@ namespace Hardware.Info.Windows
             }
 
             string query = UseAsteriskInWMI ? "SELECT * FROM Win32_Processor"
-                                            : "SELECT Caption, CurrentClockSpeed, Description, L2CacheSize, L3CacheSize, Manufacturer, MaxClockSpeed, Name, NumberOfCores, NumberOfLogicalProcessors, ProcessorId, VirtualizationFirmwareEnabled, VMMonitorModeExtensions, SecondLevelAddressTranslationExtensions, SocketDesignation FROM Win32_Processor";
+                                            : "SELECT Caption, CurrentClockSpeed, Description, L2CacheSize, L3CacheSize, Manufacturer, MaxClockSpeed, Name, NumberOfCores, NumberOfLogicalProcessors, ProcessorId, SecondLevelAddressTranslationExtensions, SocketDesignation, VirtualizationFirmwareEnabled, VMMonitorModeExtensions FROM Win32_Processor";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, query, _enumerationOptions);
 
             foreach (ManagementObject mo in mos.Get())
@@ -305,23 +305,28 @@ namespace Hardware.Info.Windows
             List<Memory> memoryList = new List<Memory>();
 
             string queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_PhysicalMemory"
-                                                  : "SELECT Capacity, FormFactor, Manufacturer, PartNumber, SerialNumber, Speed, BankLabel, MaxVoltage, MinVoltage FROM Win32_PhysicalMemory";
+                                                  : Environment.OSVersion.Version.Major < 10 ? "SELECT BankLabel, Capacity, FormFactor, Manufacturer, PartNumber, SerialNumber, Speed FROM Win32_PhysicalMemory"
+                                                                                             : "SELECT BankLabel, Capacity, FormFactor, Manufacturer, MaxVoltage, MinVoltage, PartNumber, SerialNumber, Speed FROM Win32_PhysicalMemory";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
 
             foreach (ManagementObject mo in mos.Get())
             {
                 Memory memory = new Memory
                 {
+                    BankLabel = GetPropertyString(mo["BankLabel"]),
                     Capacity = GetPropertyValue<ulong>(mo["Capacity"]),
                     FormFactor = (FormFactor)GetPropertyValue<ushort>(mo["FormFactor"]),
                     Manufacturer = GetPropertyString(mo["Manufacturer"]),
                     PartNumber = GetPropertyString(mo["PartNumber"]),
                     SerialNumber = GetPropertyString(mo["SerialNumber"]),
-                    Speed = GetPropertyValue<uint>(mo["Speed"]),
-                    BankLabel = GetPropertyString(mo["BankLabel"]),
-                    MaxVoltage = GetPropertyValue<uint>(mo["MaxVoltage"]),
-                    MinVoltage = GetPropertyValue<uint>(mo["MinVoltage"])
+                    Speed = GetPropertyValue<uint>(mo["Speed"])
                 };
+
+                if (Environment.OSVersion.Version.Major >= 10)
+                {
+                    memory.MaxVoltage = GetPropertyValue<uint>(mo["MaxVoltage"]);
+                    memory.MinVoltage = GetPropertyValue<uint>(mo["MinVoltage"]);
+                }
 
                 memoryList.Add(memory);
             }

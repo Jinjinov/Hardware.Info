@@ -32,28 +32,28 @@ namespace Hardware.Info
 
     public class Memory
     {
+        public string BankLabel { get; set; } = string.Empty;
         public UInt64 Capacity { get; set; }
         public FormFactor FormFactor { get; set; }
         public string Manufacturer { get; set; } = string.Empty;
+        public UInt32 MaxVoltage { get; set; }
+        public UInt32 MinVoltage { get; set; }
         public string PartNumber { get; set; } = string.Empty;
         public string SerialNumber { get; set; } = string.Empty;
         public UInt32 Speed { get; set; }
-        public string BankLabel { get; set; } = string.Empty;
-        public UInt32 MaxVoltage { get; set; }
-        public UInt32 MinVoltage { get; set; }
 
         public override string ToString()
         {
             return
+                "BankLabel: " + BankLabel + Environment.NewLine +
                 "Capacity: " + Capacity + Environment.NewLine +
                 "FormFactor: " + FormFactor + Environment.NewLine +
                 "Manufacturer: " + Manufacturer + Environment.NewLine +
+                "MaxVoltage: " + MaxVoltage + Environment.NewLine +
+                "MinVoltage: " + MinVoltage + Environment.NewLine +
                 "PartNumber: " + PartNumber + Environment.NewLine +
                 "SerialNumber: " + SerialNumber + Environment.NewLine +
-                "Speed: " + Speed + Environment.NewLine +
-                "BankLabel: " + BankLabel + Environment.NewLine +
-                "MaxVoltage: " + MaxVoltage + Environment.NewLine +
-                "MinVoltage: " + MinVoltage + Environment.NewLine;
+                "Speed: " + Speed + Environment.NewLine;
         }
     }
 }

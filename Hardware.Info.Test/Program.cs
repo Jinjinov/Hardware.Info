@@ -5,26 +5,26 @@ namespace Hardware.Info.Test
 {
     class Program
     {
-        static readonly IHardwareInfo hardwareInfo = new HardwareInfo();
+        static readonly IHardwareInfo hardwareInfo = new HardwareInfo(useAsteriskInWMI: false);
 
         static void Main(string[] _)
         {
-            //hardwareInfo.RefreshMemoryStatus();
-            //hardwareInfo.RefreshBatteryList();
-            //hardwareInfo.RefreshBIOSList();
-            //hardwareInfo.RefreshCPUList();
-            //hardwareInfo.RefreshDriveList();
-            //hardwareInfo.RefreshKeyboardList();
-            //hardwareInfo.RefreshMemoryList();
-            //hardwareInfo.RefreshMonitorList();
-            //hardwareInfo.RefreshMotherboardList();
-            //hardwareInfo.RefreshMouseList();
-            //hardwareInfo.RefreshNetworkAdapterList();
-            //hardwareInfo.RefreshPrinterList();
-            //hardwareInfo.RefreshSoundDeviceList();
-            //hardwareInfo.RefreshVideoControllerList();
+            hardwareInfo.RefreshMemoryStatus();
+            hardwareInfo.RefreshBatteryList();
+            hardwareInfo.RefreshBIOSList();
+            hardwareInfo.RefreshCPUList(includePercentProcessorTime: false);
+            hardwareInfo.RefreshDriveList();
+            hardwareInfo.RefreshKeyboardList();
+            hardwareInfo.RefreshMemoryList();
+            hardwareInfo.RefreshMonitorList();
+            hardwareInfo.RefreshMotherboardList();
+            hardwareInfo.RefreshMouseList();
+            hardwareInfo.RefreshNetworkAdapterList(includeBytesPerSec: false, includeNetworkAdapterConfiguration: true);
+            hardwareInfo.RefreshPrinterList();
+            hardwareInfo.RefreshSoundDeviceList();
+            hardwareInfo.RefreshVideoControllerList();
 
-            hardwareInfo.RefreshAll();
+            //hardwareInfo.RefreshAll();
 
             Console.WriteLine(hardwareInfo.MemoryStatus);
 

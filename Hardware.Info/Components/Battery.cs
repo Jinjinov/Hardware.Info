@@ -4,35 +4,54 @@ namespace Hardware.Info
 {
     public class Battery
     {
-        // Full charge capacity of the battery in milliwatt-hours. 
-        // Comparison of the value to the DesignCapacity property determines when the battery requires replacement. 
-        // A battery's end of life is typically when the FullChargeCapacity property falls below 80% of the DesignCapacity property.
+        /// <summary>
+        /// Full charge capacity of the battery in milliwatt-hours. 
+        /// Comparison of the value to the DesignCapacity property determines when the battery requires replacement. 
+        /// A battery's end of life is typically when the FullChargeCapacity property falls below 80% of the DesignCapacity property.
+        /// </summary>
         public UInt32 FullChargeCapacity { get; set; }
 
-        // Design capacity of the battery in milliwatt-hours.
+        /// <summary>
+        /// Design capacity of the battery in milliwatt-hours.
+        /// </summary>
         public UInt32 DesignCapacity { get; set; }
 
+        /// <summary>
+        /// Status of the battery.
+        /// </summary>
         public UInt16 BatteryStatus { get; set; }
 
-        // Estimate of the percentage of full charge remaining
+        /// <summary>
+        /// Estimate of the percentage of full charge remaining
+        /// </summary>
         public UInt16 EstimatedChargeRemaining { get; set; }
 
-        // Estimate in minutes of the time to battery charge depletion under the present load conditions if the utility power is off, or lost and remains off, or a laptop is disconnected from a power source.
+        /// <summary>
+        /// Estimate in minutes of the time to battery charge depletion under the present load conditions if the utility power is off, or lost and remains off, or a laptop is disconnected from a power source.
+        /// </summary>
         public UInt32 EstimatedRunTime { get; set; }
 
-        // Battery's expected lifetime in minutes, assuming that the battery is fully charged. 
-        // The property represents the total expected life of the battery, not its current remaining life, which is indicated by the EstimatedRunTime property.
+        /// <summary>
+        /// Battery's expected lifetime in minutes, assuming that the battery is fully charged. 
+        /// The property represents the total expected life of the battery, not its current remaining life, which is indicated by the EstimatedRunTime property.
+        /// </summary>
         public UInt32 ExpectedLife { get; set; }
 
-        // Maximum time, in minutes, to fully charge the battery. 
-        // The property represents the time to recharge a fully depleted battery, not the current remaining charge time, which is indicated in the TimeToFullCharge property.
+        /// <summary>
+        /// Maximum time, in minutes, to fully charge the battery. 
+        /// The property represents the time to recharge a fully depleted battery, not the current remaining charge time, which is indicated in the TimeToFullCharge property.
+        /// </summary>
         public UInt32 MaxRechargeTime { get; set; }
 
-        // Elapsed time in seconds since the computer system's UPS last switched to battery power, or the time since the system or UPS was last restarted, whichever is less. 
-        // If the battery is "on line", 0 (zero) is returned.
+        /// <summary>
+        /// Elapsed time in seconds since the computer system's UPS last switched to battery power, or the time since the system or UPS was last restarted, whichever is less. 
+        /// If the battery is "on line", 0 (zero) is returned.
+        /// </summary>
         public UInt32 TimeOnBattery { get; set; }
 
-        // Remaining time to charge the battery fully in minutes at the current charging rate and usage.
+        /// <summary>
+        /// Remaining time to charge the battery fully in minutes at the current charging rate and usage.
+        /// </summary>
         public UInt32 TimeToFullCharge { get; set; }
 
         private string _batteryStatusDescription = string.Empty;

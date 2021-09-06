@@ -1,7 +1,12 @@
 ﻿using System;
 
+// https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-battery
+
 namespace Hardware.Info
 {
+    /// <summary>
+    /// WMI class: Win32_Battery
+    /// </summary>
     public class Battery
     {
         /// <summary>

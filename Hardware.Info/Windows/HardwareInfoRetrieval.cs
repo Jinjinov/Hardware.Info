@@ -1,8 +1,11 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Management;
 using System.Net;
 using System.Runtime.InteropServices;
+
+// https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-osversioninfoexa
 
 namespace Hardware.Info.Windows
 {
@@ -36,12 +39,16 @@ namespace Hardware.Info.Windows
         private readonly string _managementScope = "root\\cimv2";
         private readonly EnumerationOptions _enumerationOptions = new EnumerationOptions() { ReturnImmediately = true, Rewindable = false, Timeout = EnumerationOptions.InfiniteTimeout };
 
+        private readonly Version? _osVersion;
+
         public HardwareInfoRetrieval(TimeSpan? enumerationOptionsTimeout = null)
         {
             if (enumerationOptionsTimeout == null)
                 enumerationOptionsTimeout = EnumerationOptions.InfiniteTimeout;
 
             _enumerationOptions = new EnumerationOptions() { ReturnImmediately = true, Rewindable = false, Timeout = enumerationOptionsTimeout.Value };
+
+            _osVersion = GetOsVersionByWmi() ?? GetOsVersionByRtlGetVersion();
         }
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
@@ -62,6 +69,59 @@ namespace Hardware.Info.Windows
             }
 
             return _memoryStatus;
+        }
+
+        [DllImport("ntdll.dll", SetLastError = true)]
+        private static extern int RtlGetVersion([In, Out] ref OSVERSIONINFOEX lpVersionInformation);
+
+        [StructLayout(LayoutKind.Sequential)]
+        private struct OSVERSIONINFOEX
+        {
+            public uint dwOSVersionInfoSize;
+            public uint dwMajorVersion;
+            public uint dwMinorVersion;
+            public uint dwBuildNumber;
+            public uint dwPlatformId;
+
+            [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+            public string szCSDVersion;
+
+            public ushort wServicePackMajor;
+            public ushort wServicePackMinor;
+            public ushort wSuiteMask;
+            public byte wProductType;
+            public byte wReserved;
+        }
+
+        public static Version? GetOsVersionByRtlGetVersion()
+        {
+            var info = new OSVERSIONINFOEX();
+            info.dwOSVersionInfoSize = (uint)Marshal.SizeOf(info);
+
+            var result = RtlGetVersion(ref info);
+
+            return (result == 0) // STATUS_SUCCESS
+                ? new Version((int)info.dwMajorVersion, (int)info.dwMinorVersion, (int)info.dwBuildNumber)
+                : null;
+        }
+
+        public static Version? GetOsVersionByWmi()
+        {
+            using (var searcher = new ManagementObjectSearcher(new SelectQuery("Win32_OperatingSystem")))
+            {
+                var os = searcher.Get().Cast<ManagementObject>().FirstOrDefault();
+                var properties = os?.Properties.Cast<PropertyData>().ToArray();
+
+                var osTypeValue = (ushort)(properties?.SingleOrDefault(x => (x.Name == "OSType") && (x.Type == CimType.UInt16))?.Value ?? 0);
+                if (osTypeValue == 18) // WINNT
+                {
+                    var versionValue = properties?.SingleOrDefault(x => x.Name == "Version")?.Value as string;
+                    if (versionValue != null)
+                        return new Version(versionValue);
+                }
+
+                return null;
+            }
         }
 
         public static T GetPropertyValue<T>(object obj) where T : struct
@@ -173,8 +233,11 @@ namespace Hardware.Info.Windows
                 }
             }
 
+            bool isAtLeastWin8 = (_osVersion?.Major == 6 && _osVersion?.Minor >= 2) || (_osVersion?.Major > 6);
+
             string query = UseAsteriskInWMI ? "SELECT * FROM Win32_Processor"
-                                            : "SELECT Caption, CurrentClockSpeed, Description, L2CacheSize, L3CacheSize, Manufacturer, MaxClockSpeed, Name, NumberOfCores, NumberOfLogicalProcessors, ProcessorId, SecondLevelAddressTranslationExtensions, SocketDesignation, VirtualizationFirmwareEnabled, VMMonitorModeExtensions FROM Win32_Processor";
+                                            : isAtLeastWin8 ? "SELECT Caption, CurrentClockSpeed, Description, L2CacheSize, L3CacheSize, Manufacturer, MaxClockSpeed, Name, NumberOfCores, NumberOfLogicalProcessors, ProcessorId, SecondLevelAddressTranslationExtensions, SocketDesignation, VirtualizationFirmwareEnabled, VMMonitorModeExtensions FROM Win32_Processor"
+                                                            : "SELECT Caption, CurrentClockSpeed, Description, L2CacheSize, L3CacheSize, Manufacturer, MaxClockSpeed, Name, NumberOfCores, NumberOfLogicalProcessors, ProcessorId, SocketDesignation FROM Win32_Processor";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, query, _enumerationOptions);
 
             foreach (ManagementObject mo in mos.Get())
@@ -192,13 +255,17 @@ namespace Hardware.Info.Windows
                     NumberOfCores = GetPropertyValue<uint>(mo["NumberOfCores"]),
                     NumberOfLogicalProcessors = GetPropertyValue<uint>(mo["NumberOfLogicalProcessors"]),
                     ProcessorId = GetPropertyString(mo["ProcessorId"]),
-                    SecondLevelAddressTranslationExtensions = GetPropertyValue<bool>(mo["SecondLevelAddressTranslationExtensions"]),
                     SocketDesignation = GetPropertyString(mo["SocketDesignation"]),
-                    VirtualizationFirmwareEnabled = GetPropertyValue<bool>(mo["VirtualizationFirmwareEnabled"]),
-                    VMMonitorModeExtensions = GetPropertyValue<bool>(mo["VMMonitorModeExtensions"]),
                     PercentProcessorTime = percentProcessorTime,
                     CpuCoreList = cpuCoreList
                 };
+
+                if (isAtLeastWin8)
+                {
+                    cpu.SecondLevelAddressTranslationExtensions = GetPropertyValue<bool>(mo["SecondLevelAddressTranslationExtensions"]);
+                    cpu.VirtualizationFirmwareEnabled = GetPropertyValue<bool>(mo["VirtualizationFirmwareEnabled"]);
+                    cpu.VMMonitorModeExtensions = GetPropertyValue<bool>(mo["VMMonitorModeExtensions"]);
+                }
 
                 cpuList.Add(cpu);
             }
@@ -305,8 +372,8 @@ namespace Hardware.Info.Windows
             List<Memory> memoryList = new List<Memory>();
 
             string queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_PhysicalMemory"
-                                                  : Environment.OSVersion.Version.Major < 10 ? "SELECT BankLabel, Capacity, FormFactor, Manufacturer, PartNumber, SerialNumber, Speed FROM Win32_PhysicalMemory"
-                                                                                             : "SELECT BankLabel, Capacity, FormFactor, Manufacturer, MaxVoltage, MinVoltage, PartNumber, SerialNumber, Speed FROM Win32_PhysicalMemory";
+                                                  : _osVersion?.Major >= 10 ? "SELECT BankLabel, Capacity, FormFactor, Manufacturer, MaxVoltage, MinVoltage, PartNumber, SerialNumber, Speed FROM Win32_PhysicalMemory"
+                                                                            : "SELECT BankLabel, Capacity, FormFactor, Manufacturer, PartNumber, SerialNumber, Speed FROM Win32_PhysicalMemory";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
 
             foreach (ManagementObject mo in mos.Get())
@@ -322,7 +389,7 @@ namespace Hardware.Info.Windows
                     Speed = GetPropertyValue<uint>(mo["Speed"])
                 };
 
-                if (Environment.OSVersion.Version.Major >= 10)
+                if (_osVersion?.Major >= 10)
                 {
                     memory.MaxVoltage = GetPropertyValue<uint>(mo["MaxVoltage"]);
                     memory.MinVoltage = GetPropertyValue<uint>(mo["MinVoltage"]);

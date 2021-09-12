@@ -180,22 +180,28 @@ Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact 
 
 ## Version history:
 
+- 1.1.1.1:
+    - Added `Memory.BankLabel`, `Memory.MinVoltage`, `Memory.MaxVoltage` in Windows - by [@AathifMahir](https://github.com/AathifMahir)
+    - Added `CPU.SocketDesignation`, `CPU.SecondLevelAddressTranslationExtensions` in Windows - by [@AathifMahir](https://github.com/AathifMahir)
+    - Added Windows version check for WMI properties that require at least Windows 8
+    - Added Windows version check for WMI properties that require at least Windows 10
+    - Added XML summary for public properties in every class.
 - 1.1.1.0:
-    - Added `IHardwareInfo` so that `HardwareInfo` can be mocked - by [@240026763]( https://github.com/240026763 )
+    - Added `IHardwareInfo` so that `HardwareInfo` can be mocked - by [@240026763](https://github.com/240026763)
 - 1.1.0.1:
     - Added two settings for WMI queries in Windows
     - Added three settings to exclude slow queries in Windows, macOS, Linux
 - 1.1.0.0:
-    - Fixed reading `MemAvailable` instead of `MemFree` in Linux - by [@schotime]( https://github.com/schotime )
+    - Fixed reading `MemAvailable` instead of `MemFree` in Linux - by [@schotime](https://github.com/schotime)
 - 1.0.1.1:
-    - Added `CpuCore` info in Linux - by [@isenmann]( https://github.com/isenmann )
-    - Added `CPU.PercentProcessorTime`, `CPU.CpuCoreList` in Linux - by [@isenmann]( https://github.com/isenmann )
+    - Added `CpuCore` info in Linux - by [@isenmann](https://github.com/isenmann)
+    - Added `CPU.PercentProcessorTime`, `CPU.CpuCoreList` in Linux - by [@isenmann](https://github.com/isenmann)
 - 1.0.1.0:
-    - Added `CpuCore` info in Windows - by [@isenmann]( https://github.com/isenmann )
-    - Added `CPU.PercentProcessorTime`, `CPU.CpuCoreList` in Windows - by [@isenmann]( https://github.com/isenmann )
-    - Added `NetworkAdapter.BytesSentPersec`, `NetworkAdapter.BytesReceivedPersec` in Windows - by [@isenmann]( https://github.com/isenmann )
+    - Added `CpuCore` info in Windows - by [@isenmann](https://github.com/isenmann)
+    - Added `CPU.PercentProcessorTime`, `CPU.CpuCoreList` in Windows - by [@isenmann](https://github.com/isenmann)
+    - Added `NetworkAdapter.BytesSentPersec`, `NetworkAdapter.BytesReceivedPersec` in Windows - by [@isenmann](https://github.com/isenmann)
 - 1.0.0.1:
-    - Added `Battery.EstimatedChargeRemaining` in Windows, Linux - by [@reptail]( https://github.com/reptail )
+    - Added `Battery.EstimatedChargeRemaining` in Windows, Linux - by [@reptail](https://github.com/reptail)
 - 1.0.0.0:
     - Added `Battery.ExpectedLife` in Linux
     - Added `Battery.EstimatedRunTime` in Linux

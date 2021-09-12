@@ -9,6 +9,8 @@ using System.Runtime.InteropServices;
 
 namespace Hardware.Info.Windows
 {
+    // https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/ns-sysinfoapi-memorystatusex
+
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Auto)]
     internal class MEMORYSTATUSEX
     {
@@ -50,6 +52,8 @@ namespace Hardware.Info.Windows
 
             _osVersion = GetOsVersionByWmi() ?? GetOsVersionByRtlGetVersion();
         }
+
+        // https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-globalmemorystatusex
 
         [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
         [return: MarshalAs(UnmanagedType.Bool)]

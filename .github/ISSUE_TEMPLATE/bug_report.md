@@ -31,6 +31,8 @@ Steps to reproduce the behavior:
 2. Add this code '...' in this class '...' to this method '...' in this line '...'
 3. Run the program
 
+If you don't provide C# code to reproduce the problem, the issue will be closed.
+
 ### Exceptions (if any)
 <!-- 
 Include the exception you get when facing this issue

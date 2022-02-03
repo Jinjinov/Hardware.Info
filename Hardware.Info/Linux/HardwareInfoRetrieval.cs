@@ -276,7 +276,9 @@ namespace Hardware.Info.Linux
 
             foreach (string line in lines)
             {
-                if (line.StartsWith("*-"))
+                string trimmed = line.Trim();
+
+                if (trimmed.StartsWith("*-"))
                 {
                     if (disk != null)
                     {
@@ -286,7 +288,7 @@ namespace Hardware.Info.Linux
                     disk = null;
                 }
 
-                if (line.StartsWith("*-disk:"))
+                if (trimmed.StartsWith("*-cdrom") || trimmed.StartsWith("*-disk"))
                 {
                     disk = new Drive();
                     continue;
@@ -294,13 +296,13 @@ namespace Hardware.Info.Linux
 
                 if (disk != null)
                 {
-                    if (line.StartsWith("product:"))
+                    if (trimmed.StartsWith("product:"))
                     {
-                        disk.Model = disk.Caption = line.Replace("product:", string.Empty).Trim();
+                        disk.Model = disk.Caption = trimmed.Replace("product:", string.Empty).Trim();
                     }
-                    else if (line.StartsWith("vendor:"))
+                    else if (trimmed.StartsWith("vendor:"))
                     {
-                        disk.Manufacturer = line.Replace("vendor:", string.Empty).Trim();
+                        disk.Manufacturer = trimmed.Replace("vendor:", string.Empty).Trim();
                     }
                 }
             }
@@ -346,7 +348,7 @@ namespace Hardware.Info.Linux
                 {
                     string relevant = split[1].Trim();
 
-                    if (relevant.Contains("DDR") || relevant.Contains("DIMM"))
+                    if (relevant.Contains("DDR") || relevant.Contains("DIMM") || relevant.Contains("System"))
                     {
                         Memory ram = new Memory();
 

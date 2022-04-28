@@ -68,15 +68,10 @@ namespace Hardware.Info.Linux
             // /sys/class/power_supply/BAT0/manufacturer = Sony Corp.
             // /sys/class/power_supply/BAT0/serial_number = 
 
-            string power_now = TryReadFileText("/sys/class/power_supply/BAT0/power_now");
-            string energy_full_design = TryReadFileText("/sys/class/power_supply/BAT0/energy_full_design");
-            string energy_full = TryReadFileText("/sys/class/power_supply/BAT0/energy_full");
-            string energy_now = TryReadFileText("/sys/class/power_supply/BAT0/energy_now");
-
-            uint.TryParse(power_now, out uint powerNow);
-            uint.TryParse(energy_full_design, out uint designCapacity);
-            uint.TryParse(energy_full, out uint fullChargeCapacity);
-            uint.TryParse(energy_now, out uint energyNow);
+            TryReadIntegerFromFileText(out uint powerNow, "/sys/class/power_supply/BAT0/power_now", "/sys/class/power_supply/BAT0/voltage_now");
+            TryReadIntegerFromFileText(out uint designCapacity, "/sys/class/power_supply/BAT0/energy_full_design", "/sys/class/power_supply/BAT0/charge_full_design");
+            TryReadIntegerFromFileText(out uint fullChargeCapacity, "/sys/class/power_supply/BAT0/energy_full", "/sys/class/power_supply/BAT0/charge_full");
+            TryReadIntegerFromFileText(out uint energyNow, "/sys/class/power_supply/BAT0/energy_now", "/sys/class/power_supply/BAT0/charge_now");
 
             if (powerNow == 0)
                 powerNow = 1;

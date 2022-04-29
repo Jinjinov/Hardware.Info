@@ -14,7 +14,7 @@ namespace Hardware.Info.Linux
 
         public MemoryStatus GetMemoryStatus()
         {
-            string[] meminfo = TryReadFileLines("/proc/meminfo");
+            string[] meminfo = TryReadLinesFromFile("/proc/meminfo");
 
             _memoryStatus.TotalPhysical = GetBytesFromLine(meminfo, "MemTotal:");
             _memoryStatus.AvailablePhysical = GetBytesFromLine(meminfo, "MemAvailable:");
@@ -68,10 +68,10 @@ namespace Hardware.Info.Linux
             // /sys/class/power_supply/BAT0/manufacturer = Sony Corp.
             // /sys/class/power_supply/BAT0/serial_number = 
 
-            TryReadIntegerFromFileText(out uint powerNow, "/sys/class/power_supply/BAT0/power_now", "/sys/class/power_supply/BAT0/voltage_now");
-            TryReadIntegerFromFileText(out uint designCapacity, "/sys/class/power_supply/BAT0/energy_full_design", "/sys/class/power_supply/BAT0/charge_full_design");
-            TryReadIntegerFromFileText(out uint fullChargeCapacity, "/sys/class/power_supply/BAT0/energy_full", "/sys/class/power_supply/BAT0/charge_full");
-            TryReadIntegerFromFileText(out uint energyNow, "/sys/class/power_supply/BAT0/energy_now", "/sys/class/power_supply/BAT0/charge_now");
+            uint powerNow = TryReadIntegerFromFile("/sys/class/power_supply/BAT0/power_now", "/sys/class/power_supply/BAT0/voltage_now");
+            uint designCapacity = TryReadIntegerFromFile("/sys/class/power_supply/BAT0/energy_full_design", "/sys/class/power_supply/BAT0/charge_full_design");
+            uint fullChargeCapacity = TryReadIntegerFromFile("/sys/class/power_supply/BAT0/energy_full", "/sys/class/power_supply/BAT0/charge_full");
+            uint energyNow = TryReadIntegerFromFile("/sys/class/power_supply/BAT0/energy_now", "/sys/class/power_supply/BAT0/charge_now");
 
             if (powerNow == 0)
                 powerNow = 1;
@@ -83,7 +83,7 @@ namespace Hardware.Info.Linux
             {
                 DesignCapacity = designCapacity,
                 FullChargeCapacity = fullChargeCapacity,
-                BatteryStatusDescription = TryReadFileText("/sys/class/power_supply/BAT0/status"),
+                BatteryStatusDescription = TryReadTextFromFile("/sys/class/power_supply/BAT0/status"),
 
                 EstimatedChargeRemaining = (ushort)(energyNow * 100 / fullChargeCapacity), // current charge remaining in percentage
                 EstimatedRunTime = energyNow / powerNow, // current remaining life in minutes
@@ -106,9 +106,9 @@ namespace Hardware.Info.Linux
 
             BIOS bios = new BIOS
             {
-                ReleaseDate = TryReadFileText("/sys/class/dmi/id/bios_date"),
-                Version = TryReadFileText("/sys/class/dmi/id/bios_version"),
-                Manufacturer = TryReadFileText("/sys/class/dmi/id/bios_vendor")
+                ReleaseDate = TryReadTextFromFile("/sys/class/dmi/id/bios_date"),
+                Version = TryReadTextFromFile("/sys/class/dmi/id/bios_version"),
+                Manufacturer = TryReadTextFromFile("/sys/class/dmi/id/bios_vendor")
             };
 
             biosList.Add(bios);
@@ -120,7 +120,7 @@ namespace Hardware.Info.Linux
         {
             List<CPU> cpuList = new List<CPU>();
 
-            string[] lines = TryReadFileLines("/proc/cpuinfo");
+            string[] lines = TryReadLinesFromFile("/proc/cpuinfo");
 
             Regex vendorIdRegex = new Regex(@"^vendor_id\s+:\s+(.+)");
             Regex modelNameRegex = new Regex(@"^model name\s+:\s+(.+)");
@@ -210,9 +210,9 @@ namespace Hardware.Info.Linux
             // cpu2 86902920 6411506 12412331 769921453 17877927 0 4809331 0 0
             // ... 
 
-            string[] cpuUsageLineLast = TryReadFileLines("/proc/stat");
+            string[] cpuUsageLineLast = TryReadLinesFromFile("/proc/stat");
             Task.Delay(500).Wait();
-            string[] cpuUsageLineNow = TryReadFileLines("/proc/stat");
+            string[] cpuUsageLineNow = TryReadLinesFromFile("/proc/stat");
 
             if (cpuUsageLineLast.Length > 0 && cpuUsageLineNow.Length > 0)
             {
@@ -417,9 +417,9 @@ namespace Hardware.Info.Linux
 
             Motherboard motherboard = new Motherboard
             {
-                Product = TryReadFileText("/sys/class/dmi/id/board_name"),
-                Manufacturer = TryReadFileText("/sys/class/dmi/id/board_vendor"),
-                SerialNumber = TryReadFileText("/sys/class/dmi/id/board_serial")
+                Product = TryReadTextFromFile("/sys/class/dmi/id/board_name"),
+                Manufacturer = TryReadTextFromFile("/sys/class/dmi/id/board_vendor"),
+                SerialNumber = TryReadTextFromFile("/sys/class/dmi/id/board_serial")
             };
 
             motherboardList.Add(motherboard);
@@ -452,9 +452,9 @@ namespace Hardware.Info.Linux
 
                 foreach (NetworkAdapter networkAdapter in networkAdapterList)
                 {
-                    List<string>? networkAdapterUsageLast = TryReadFileLines("/proc/net/dev").FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    List<string>? networkAdapterUsageLast = TryReadLinesFromFile("/proc/net/dev").FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
                     Task.Delay(1000).Wait();
-                    List<string>? networkAdapterUsageNow = TryReadFileLines("/proc/net/dev").FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    List<string>? networkAdapterUsageNow = TryReadLinesFromFile("/proc/net/dev").FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
 
                     if (networkAdapterUsageLast != null && networkAdapterUsageLast.Count > 0 && networkAdapterUsageNow != null && networkAdapterUsageNow.Count > 0)
                     {

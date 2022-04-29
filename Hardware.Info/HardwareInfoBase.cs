@@ -40,7 +40,7 @@ namespace Hardware.Info
             }
         }
 
-        internal static string TryReadFileText(string path)
+        internal static string TryReadTextFromFile(string path)
         {
             try
             {
@@ -52,22 +52,22 @@ namespace Hardware.Info
             }
         }
 
-        internal static bool TryReadIntegerFromFileText(out uint value, params string[] possiblePaths)
+        internal static uint TryReadIntegerFromFile(params string[] possiblePaths)
         {
-            foreach(var path in possiblePaths)
+            foreach (string path in possiblePaths)
             {
-                string data = TryReadFileText(path);
-                if(uint.TryParse(data, out uint integer))
+                string text = TryReadTextFromFile(path);
+
+                if (uint.TryParse(text, out uint integer))
                 {
-                    value = integer;
-                    return true;
+                    return integer;
                 }
             }
-            value = 0;
-            return false;
+
+            return 0;
         }
 
-        internal static string[] TryReadFileLines(string path)
+        internal static string[] TryReadLinesFromFile(string path)
         {
             try
             {

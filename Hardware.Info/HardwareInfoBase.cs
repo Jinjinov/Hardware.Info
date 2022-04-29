@@ -52,6 +52,21 @@ namespace Hardware.Info
             }
         }
 
+        internal static bool TryReadIntegerFromFileText(out uint value, params string[] possiblePaths)
+        {
+            foreach(var path in possiblePaths)
+            {
+                string data = TryReadFileText(path);
+                if(uint.TryParse(data, out uint integer))
+                {
+                    value = integer;
+                    return true;
+                }
+            }
+            value = 0;
+            return false;
+        }
+
         internal static string[] TryReadFileLines(string path)
         {
             try

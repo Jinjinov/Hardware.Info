@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading;
 
 // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/sysctlbyname.3.html
@@ -188,17 +189,17 @@ namespace Hardware.Info.Mac
             Battery battery = new Battery();
 
             /* https://www.iphonetricks.org/check-battery-health-on-mac-using-terminal/
-Juliens-MacBook-Pro:~ tadel$ ioreg -l -w0 | grep MaxCapacity | grep -Eo "\d+"
+Juliens-MacBook-Pro:~ tadel$ ioreg -l -w0 | grep ' \"MaxCapacity\" ' | grep -Eo "\d+"
 5034
-Juliens-MacBook-Pro:~ tadel$ ioreg -l -w0 | grep CurrentCapacity | grep -Eo "\d+"
+Juliens-MacBook-Pro:~ tadel$ ioreg -l -w0 | grep ' \"CurrentCapacity\" ' | grep -Eo "\d+"
 4860
-Juliens-MacBook-Pro:~ tadel$ ioreg -l -w0 | grep DesignCapacity | grep -Eo "\d+"
+Juliens-MacBook-Pro:~ tadel$ ioreg -l -w0 | grep ' \"DesignCapacity\" ' | grep -Eo "\d+"
 5770
 Juliens-MacBook-Pro:~ tadel$ ioreg -l -w0 | grep -E ' \"Voltage\" ' | grep -Eo "\d+"
 12054
             */
-            if (uint.TryParse(ReadProcessOutput("ioreg", "-l -w0 | grep DesignCapacity | grep -Eo \"\\d+\""), out var designCapacity)) battery.DesignCapacity = designCapacity;
-            if (uint.TryParse(ReadProcessOutput("ioreg", "-l -w0 | grep MaxCapacity | grep -Eo \"\\d+\""), out var fullChargeCapacity)) battery.FullChargeCapacity = fullChargeCapacity;
+            //if (uint.TryParse(ReadProcessOutput("ioreg", "-l -w0 | grep ' \\\"DesignCapacitys\\\" ' | grep -Eo \"\\d+\""), out var designCapacity)) battery.DesignCapacity = designCapacity;
+            //if (uint.TryParse(ReadProcessOutput("ioreg", "-l -w0 | grep ' \\\"MaxCapacity\\\" ' | grep -Eo \"\\d+\""), out var fullChargeCapacity)) battery.FullChargeCapacity = fullChargeCapacity;
 
             /* https://coderwall.com/p/bechiq/macos-get-battery-percentage-from-command-line
 Juliens-MacBook-Pro:~ tadel$ pmset -g batt
@@ -212,10 +213,16 @@ Juliens-MacBook-Pro:~ tadel$ pmset -g batt
 Now drawing from 'AC Power'
  -InternalBattery-0 (id=3539043)	92%; charging; (no estimate) present: true
             */
-            if (ushort.TryParse(ReadProcessOutput("pmset", "-g batt | grep -Eo \"\\d+%\" | cut -d% -f1"), out var estimatedChargeRemaining)) battery.EstimatedChargeRemaining = estimatedChargeRemaining;
+            var pmsetBattOutput = ReadProcessOutput("pmset", "-g batt");
+
+            // EstimatedChargeRemaining
+            var estimatedChargeRemainingRegex = new Regex("(\\d+)%");
+            if (ushort.TryParse(estimatedChargeRemainingRegex.Match(pmsetBattOutput).Groups[1].Value, out var estimatedChargeRemaining))
+                battery.EstimatedChargeRemaining = estimatedChargeRemaining;
 
             // EstimatedRunTime
-            string remainingTime = ReadProcessOutput("pmset", " -g batt | grep -Eo \"\\d+:\\d+\"");
+            var estimatedRunTimeRegex = new Regex("(\\d+:\\d+)");
+            var remainingTime = estimatedRunTimeRegex.Match(pmsetBattOutput).Groups[1].Value;
             if (remainingTime.Contains(":"))
             {
                 string[] timeParts = remainingTime.Split(':');

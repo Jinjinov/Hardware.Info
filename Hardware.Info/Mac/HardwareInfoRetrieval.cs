@@ -186,57 +186,121 @@ namespace Hardware.Info.Mac
         public List<Battery> GetBatteryList()
         {
             List<Battery> batteryList = new List<Battery>();
+
             Battery battery = new Battery();
 
-            /* https://www.iphonetricks.org/check-battery-health-on-mac-using-terminal/
-Juliens-MacBook-Pro:~ tadel$ ioreg -l -w0 | grep ' \"MaxCapacity\" ' | grep -Eo "\d+"
-5034
-Juliens-MacBook-Pro:~ tadel$ ioreg -l -w0 | grep ' \"CurrentCapacity\" ' | grep -Eo "\d+"
-4860
-Juliens-MacBook-Pro:~ tadel$ ioreg -l -w0 | grep ' \"DesignCapacity\" ' | grep -Eo "\d+"
-5770
-Juliens-MacBook-Pro:~ tadel$ ioreg -l -w0 | grep -E ' \"Voltage\" ' | grep -Eo "\d+"
-12054
-            */
-            //if (uint.TryParse(ReadProcessOutput("ioreg", "-l -w0 | grep ' \\\"DesignCapacitys\\\" ' | grep -Eo \"\\d+\""), out var designCapacity)) battery.DesignCapacity = designCapacity;
-            //if (uint.TryParse(ReadProcessOutput("ioreg", "-l -w0 | grep ' \\\"MaxCapacity\\\" ' | grep -Eo \"\\d+\""), out var fullChargeCapacity)) battery.FullChargeCapacity = fullChargeCapacity;
+            // https://stackoverflow.com/questions/29278961/check-mac-battery-percentage-in-swift
 
-            /* https://coderwall.com/p/bechiq/macos-get-battery-percentage-from-command-line
-Juliens-MacBook-Pro:~ tadel$ pmset -g batt
-Now drawing from 'Battery Power'
- -InternalBattery-0 (id=3539043)	96%; discharging; 5:03 remaining present: true
-Juliens-MacBook-Pro:~ tadel$ pmset -g batt | grep -Eo "\d+%" | cut -d% -f1
-96
-Juliens-MacBook-Pro:~ tadel$ pmset -g batt | grep -Eo "\d+:\d+"
-6:23
-Juliens-MacBook-Pro:~ tadel$ pmset -g batt
-Now drawing from 'AC Power'
- -InternalBattery-0 (id=3539043)	92%; charging; (no estimate) present: true
-            */
-            var pmsetBattOutput = ReadProcessOutput("pmset", "-g batt");
+            // https://developer.apple.com/documentation/iokit/iopowersources_h
 
-            // EstimatedChargeRemaining
-            var estimatedChargeRemainingRegex = new Regex("(\\d+)%");
-            if (ushort.TryParse(estimatedChargeRemainingRegex.Match(pmsetBattOutput).Groups[1].Value, out var estimatedChargeRemaining))
-                battery.EstimatedChargeRemaining = estimatedChargeRemaining;
+            /*
+            SPPowerDataType
+Power:
 
-            // EstimatedRunTime
-            var estimatedRunTimeRegex = new Regex("(\\d+:\\d+)");
-            var remainingTime = estimatedRunTimeRegex.Match(pmsetBattOutput).Groups[1].Value;
-            if (remainingTime.Contains(":"))
+    System Power Settings:
+
+      AC Power:
+          System Sleep Timer (Minutes): 10
+          Disk Sleep Timer (Minutes): 10
+          Display Sleep Timer (Minutes): 10
+          Sleep on Power Button: Yes
+          Current Power Source: Yes
+          Hibernate Mode: 0
+          Standby Delay: 4200
+          Standby Enabled: 1
+
+    Hardware Configuration:
+
+      UPS Installed: No
+
+      Model Information:
+          Serial Number: W01396THJD3LA
+          Manufacturer: SMP
+          Device Name: bq20z451
+          Pack Lot Code: 0
+          PCB Lot Code: 0
+          Firmware Version: 201
+          Hardware Revision: 000a
+          Cell Revision: 165
+      Charge Information:
+          Charge Remaining (mAh): 5013
+          Fully Charged: Yes
+          Charging: No
+          Full Charge Capacity (mAh): 5086
+      Health Information:
+          Cycle Count: 72
+          Condition: Normal
+      Battery Installed: Yes
+      Amperage (mA): -300
+      Voltage (mV): 12303
+            /**/
+
+            // https://www.iphonetricks.org/check-battery-health-on-mac-using-terminal/
+            /* 
+            Juliens-MacBook-Pro:~ tadel$ ioreg -l -w0 | grep ' \"MaxCapacity\" ' | grep -Eo "\d+"
+            5034
+            Juliens-MacBook-Pro:~ tadel$ ioreg -l -w0 | grep ' \"CurrentCapacity\" ' | grep -Eo "\d+"
+            4860
+            Juliens-MacBook-Pro:~ tadel$ ioreg -l -w0 | grep ' \"DesignCapacity\" ' | grep -Eo "\d+"
+            5770
+            Juliens-MacBook-Pro:~ tadel$ ioreg -l -w0 | grep -E ' \"Voltage\" ' | grep -Eo "\d+"
+            12054
+            /**/
+
+            /*
+            string processOutput = ReadProcessOutput("ioreg", "-l -w0 | grep ' \\\"DesignCapacity\\\" ' | grep -Eo \"\\d+\"");
+
+            if (uint.TryParse(processOutput, out uint designCapacity))
+                battery.DesignCapacity = designCapacity;
+
+            processOutput = ReadProcessOutput("ioreg", "-l -w0 | grep ' \\\"MaxCapacity\\\" ' | grep -Eo \"\\d+\"");
+
+            if (uint.TryParse(processOutput, out uint fullChargeCapacity))
+                battery.FullChargeCapacity = fullChargeCapacity;
+            /**/
+
+            // https://coderwall.com/p/bechiq/macos-get-battery-percentage-from-command-line
+            /* 
+            Juliens-MacBook-Pro:~ tadel$ pmset -g batt
+            Now drawing from 'Battery Power'
+             -InternalBattery-0 (id=3539043)	96%; discharging; 5:03 remaining present: true
+            Juliens-MacBook-Pro:~ tadel$ pmset -g batt | grep -Eo "\d+%" | cut -d% -f1
+            96
+            Juliens-MacBook-Pro:~ tadel$ pmset -g batt | grep -Eo "\d+:\d+"
+            6:23
+            Juliens-MacBook-Pro:~ tadel$ pmset -g batt
+            Now drawing from 'AC Power'
+             -InternalBattery-0 (id=3539043)	92%; charging; (no estimate) present: true
+            /**/
+
+            string processOutput = ReadProcessOutput("pmset", "-g batt");
+
+            Regex estimatedChargeRemainingRegex = new Regex("(\\d+)%");
+            Match match = estimatedChargeRemainingRegex.Match(processOutput);
+
+            if (match.Success && match.Groups.Count > 1)
             {
-                string[] timeParts = remainingTime.Split(':');
-
-                if (timeParts.Length == 2)
+                if (ushort.TryParse(match.Groups[1].Value, out ushort estimatedChargeRemaining))
                 {
-                    int hours = int.Parse(timeParts[0]);
-                    int minutes = int.Parse(timeParts[1]);
+                    battery.EstimatedChargeRemaining = estimatedChargeRemaining;
+                }
+            }
 
-                    battery.EstimatedRunTime = (ushort)(hours * 60 + minutes);
+            Regex estimatedRunTimeRegex = new Regex("(\\d+:\\d+)");
+            match = estimatedRunTimeRegex.Match(processOutput);
+
+            if (match.Success && match.Groups.Count > 1)
+            {
+                string[] estimatedRunTime = match.Groups[1].Value.Split(':');
+
+                if (estimatedRunTime.Length == 2 && uint.TryParse(estimatedRunTime[0], out uint hours) && uint.TryParse(estimatedRunTime[1], out uint minutes))
+                {
+                    battery.EstimatedRunTime = hours * 60 + minutes;
                 }
             }
 
             batteryList.Add(battery);
+
             return batteryList;
         }
 

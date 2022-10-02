@@ -23,6 +23,12 @@ namespace Hardware.Info.Mac
 
         public OS GetOperatingSystem()
         {
+            _os.Name = ReadProcessOutput("sw_vers", "-productName");
+            _os.VersionString = ReadProcessOutput("sw_vers", "-productVersion");
+
+            if (Version.TryParse(_os.VersionString, out Version version))
+                _os.Version = version;
+
             return _os;
         }
 

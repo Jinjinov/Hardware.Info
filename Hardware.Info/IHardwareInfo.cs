@@ -4,6 +4,7 @@ namespace Hardware.Info
 {
     public interface IHardwareInfo
     {
+        OS OperatingSystem { get; }
         MemoryStatus MemoryStatus { get; }
 
         List<Battery> BatteryList { get; }
@@ -22,6 +23,7 @@ namespace Hardware.Info
 
         void RefreshAll();
 
+        void RefreshOperatingSystem();
         void RefreshMemoryStatus();
 
         void RefreshBatteryList();

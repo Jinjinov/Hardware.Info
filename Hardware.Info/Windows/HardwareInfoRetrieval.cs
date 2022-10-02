@@ -1,6 +1,5 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Management;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -36,12 +35,12 @@ namespace Hardware.Info.Windows
 
         private readonly MemoryStatus _memoryStatus = new MemoryStatus();
 
+        private readonly OS _os = new OS();
+
         public bool UseAsteriskInWMI { get; set; }
 
         private readonly string _managementScope = "root\\cimv2";
         private readonly EnumerationOptions _enumerationOptions = new EnumerationOptions() { ReturnImmediately = true, Rewindable = false, Timeout = EnumerationOptions.InfiniteTimeout };
-
-        private readonly Version? _osVersion;
 
         public HardwareInfoRetrieval(TimeSpan? enumerationOptionsTimeout = null)
         {
@@ -50,29 +49,7 @@ namespace Hardware.Info.Windows
 
             _enumerationOptions = new EnumerationOptions() { ReturnImmediately = true, Rewindable = false, Timeout = enumerationOptionsTimeout.Value };
 
-            _osVersion = GetOsVersionByWmi() ?? GetOsVersionByRtlGetVersion();
-        }
-
-        // https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-globalmemorystatusex
-
-        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
-        [return: MarshalAs(UnmanagedType.Bool)]
-        static extern bool GlobalMemoryStatusEx([In, Out] MEMORYSTATUSEX lpBuffer);
-
-        public MemoryStatus GetMemoryStatus()
-        {
-            if (GlobalMemoryStatusEx(_memoryStatusEx))
-            {
-                _memoryStatus.TotalPhysical = _memoryStatusEx.ullTotalPhys;
-                _memoryStatus.AvailablePhysical = _memoryStatusEx.ullAvailPhys;
-                _memoryStatus.TotalPageFile = _memoryStatusEx.ullTotalPageFile;
-                _memoryStatus.AvailablePageFile = _memoryStatusEx.ullAvailPageFile;
-                _memoryStatus.TotalVirtual = _memoryStatusEx.ullTotalVirtual;
-                _memoryStatus.AvailableVirtual = _memoryStatusEx.ullAvailVirtual;
-                _memoryStatus.AvailableExtendedVirtual = _memoryStatusEx.ullAvailExtendedVirtual;
-            }
-
-            return _memoryStatus;
+            GetOs();
         }
 
         [DllImport("ntdll.dll", SetLastError = true)]
@@ -109,22 +86,63 @@ namespace Hardware.Info.Windows
                 : null;
         }
 
-        public static Version? GetOsVersionByWmi()
+        public void GetOs()
         {
-            using ManagementObjectSearcher searcher = new ManagementObjectSearcher(new SelectQuery("Win32_OperatingSystem"));
+            string queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_OperatingSystem"
+                                                  : "SELECT Caption, Version FROM Win32_OperatingSystem";
+            using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
 
-            ManagementObject os = searcher.Get().Cast<ManagementObject>().FirstOrDefault();
-            PropertyData[]? properties = os?.Properties.Cast<PropertyData>().ToArray();
-
-            ushort osTypeValue = (ushort)(properties?.SingleOrDefault(x => (x.Name == "OSType") && (x.Type == CimType.UInt16))?.Value ?? 0);
-
-            if (osTypeValue == 18) // WINNT
+            foreach (ManagementBaseObject mo in mos.Get())
             {
-                if (properties?.SingleOrDefault(x => x.Name == "Version")?.Value is string versionValue)
-                    return new Version(versionValue);
+                _os.Name = GetPropertyString(mo["Caption"]);
+                _os.VersionString = GetPropertyString(mo["Version"]);
+
+                if (Version.TryParse(_os.VersionString, out Version version))
+                    _os.Version = version;
             }
 
-            return null;
+            if (string.IsNullOrEmpty(_os.Name))
+            {
+                _os.Name = "Windows";
+            }
+
+            if (string.IsNullOrEmpty(_os.VersionString))
+            {
+                Version? version = GetOsVersionByRtlGetVersion();
+
+                if (version != null)
+                {
+                    _os.Version = version;
+                    _os.VersionString = version.ToString();
+                }
+            }
+        }
+
+        public OS GetOperatingSystem()
+        {
+            return _os;
+        }
+
+        // https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/nf-sysinfoapi-globalmemorystatusex
+
+        [DllImport("kernel32.dll", CharSet = CharSet.Auto, SetLastError = true)]
+        [return: MarshalAs(UnmanagedType.Bool)]
+        static extern bool GlobalMemoryStatusEx([In, Out] MEMORYSTATUSEX lpBuffer);
+
+        public MemoryStatus GetMemoryStatus()
+        {
+            if (GlobalMemoryStatusEx(_memoryStatusEx))
+            {
+                _memoryStatus.TotalPhysical = _memoryStatusEx.ullTotalPhys;
+                _memoryStatus.AvailablePhysical = _memoryStatusEx.ullAvailPhys;
+                _memoryStatus.TotalPageFile = _memoryStatusEx.ullTotalPageFile;
+                _memoryStatus.AvailablePageFile = _memoryStatusEx.ullAvailPageFile;
+                _memoryStatus.TotalVirtual = _memoryStatusEx.ullTotalVirtual;
+                _memoryStatus.AvailableVirtual = _memoryStatusEx.ullAvailVirtual;
+                _memoryStatus.AvailableExtendedVirtual = _memoryStatusEx.ullAvailExtendedVirtual;
+            }
+
+            return _memoryStatus;
         }
 
         public static T GetPropertyValue<T>(object obj) where T : struct
@@ -236,7 +254,7 @@ namespace Hardware.Info.Windows
                 }
             }
 
-            bool isAtLeastWin8 = (_osVersion?.Major == 6 && _osVersion?.Minor >= 2) || (_osVersion?.Major > 6);
+            bool isAtLeastWin8 = (_os.Version.Major == 6 && _os.Version.Minor >= 2) || (_os.Version.Major > 6);
 
             string query = UseAsteriskInWMI ? "SELECT * FROM Win32_Processor"
                                             : isAtLeastWin8 ? "SELECT Caption, CurrentClockSpeed, Description, L2CacheSize, L3CacheSize, Manufacturer, MaxClockSpeed, Name, NumberOfCores, NumberOfLogicalProcessors, ProcessorId, SecondLevelAddressTranslationExtensions, SocketDesignation, VirtualizationFirmwareEnabled, VMMonitorModeExtensions FROM Win32_Processor"
@@ -378,7 +396,7 @@ namespace Hardware.Info.Windows
             List<Memory> memoryList = new List<Memory>();
 
             string queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_PhysicalMemory"
-                                                  : _osVersion?.Major >= 10 ? "SELECT BankLabel, Capacity, FormFactor, Manufacturer, MaxVoltage, MinVoltage, PartNumber, SerialNumber, Speed FROM Win32_PhysicalMemory"
+                                                  : _os.Version.Major >= 10 ? "SELECT BankLabel, Capacity, FormFactor, Manufacturer, MaxVoltage, MinVoltage, PartNumber, SerialNumber, Speed FROM Win32_PhysicalMemory"
                                                                             : "SELECT BankLabel, Capacity, FormFactor, Manufacturer, PartNumber, SerialNumber, Speed FROM Win32_PhysicalMemory";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
 
@@ -395,7 +413,7 @@ namespace Hardware.Info.Windows
                     Speed = GetPropertyValue<uint>(mo["Speed"])
                 };
 
-                if (_osVersion?.Major >= 10)
+                if (_os.Version.Major >= 10)
                 {
                     memory.MaxVoltage = GetPropertyValue<uint>(mo["MaxVoltage"]);
                     memory.MinVoltage = GetPropertyValue<uint>(mo["MinVoltage"]);

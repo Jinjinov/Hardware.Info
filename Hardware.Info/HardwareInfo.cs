@@ -10,6 +10,7 @@ namespace Hardware.Info
 {
     public class HardwareInfo : IHardwareInfo
     {
+        public OS OperatingSystem { get; private set; } = new OS();
         public MemoryStatus MemoryStatus { get; private set; } = new MemoryStatus();
 
         public List<Battery> BatteryList { get; private set; } = new List<Battery>();
@@ -48,6 +49,7 @@ namespace Hardware.Info
 
         public void RefreshAll()
         {
+            RefreshOperatingSystem();
             RefreshMemoryStatus();
 
             RefreshBatteryList();
@@ -65,6 +67,7 @@ namespace Hardware.Info
             RefreshVideoControllerList();
         }
 
+        public void RefreshOperatingSystem() => OperatingSystem = _hardwareInfoRetrieval.GetOperatingSystem();
         public void RefreshMemoryStatus() => MemoryStatus = _hardwareInfoRetrieval.GetMemoryStatus();
 
         public void RefreshBatteryList() => BatteryList = _hardwareInfoRetrieval.GetBatteryList();

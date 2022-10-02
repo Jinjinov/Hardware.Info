@@ -1,10 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices;
-using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading;
 
@@ -20,6 +18,13 @@ namespace Hardware.Info.Mac
     internal class HardwareInfoRetrieval : HardwareInfoBase, IHardwareInfoRetrieval
     {
         private readonly MemoryStatus _memoryStatus = new MemoryStatus();
+
+        private readonly OS _os = new OS();
+
+        public OS GetOperatingSystem()
+        {
+            return _os;
+        }
 
         [DllImport("libc")]
         static extern int sysctlbyname(string name, out IntPtr oldp, ref IntPtr oldlenp, IntPtr newp, IntPtr newlen);

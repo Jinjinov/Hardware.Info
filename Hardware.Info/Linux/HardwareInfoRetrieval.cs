@@ -12,6 +12,31 @@ namespace Hardware.Info.Linux
     {
         private readonly MemoryStatus _memoryStatus = new MemoryStatus();
 
+        private readonly OS _os = new OS();
+
+        public OS GetOperatingSystem()
+        {
+            string[] lines = TryReadLinesFromFile("/etc/os-release");
+
+            foreach (string line in lines)
+            {
+                if (line.StartsWith("NAME="))
+                {
+                    _os.Name = line.Replace("NAME=", string.Empty).Trim('"');
+                }
+
+                if (line.StartsWith("VERSION_ID="))
+                {
+                    _os.VersionString = line.Replace("VERSION_ID=", string.Empty).Trim('"');
+
+                    if (Version.TryParse(_os.VersionString, out Version version))
+                        _os.Version = version;
+                }
+            }
+
+            return _os;
+        }
+
         public MemoryStatus GetMemoryStatus()
         {
             string[] meminfo = TryReadLinesFromFile("/proc/meminfo");

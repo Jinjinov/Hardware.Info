@@ -4,6 +4,7 @@ namespace Hardware.Info
 {
     internal interface IHardwareInfoRetrieval
     {
+        OS GetOperatingSystem();
         MemoryStatus GetMemoryStatus();
 
         List<Battery> GetBatteryList();

@@ -8,6 +8,8 @@ namespace Hardware.Info.Benchmark
         readonly IHardwareInfo _hardwareInfo = new HardwareInfo();
 
         [Benchmark]
+        public void RefreshOperatingSystem() => _hardwareInfo.RefreshOperatingSystem();
+        [Benchmark]
         public void RefreshMemoryStatus() => _hardwareInfo.RefreshMemoryStatus();
         [Benchmark]
         public void RefreshBatteryList() => _hardwareInfo.RefreshBatteryList();

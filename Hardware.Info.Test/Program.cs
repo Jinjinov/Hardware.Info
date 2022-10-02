@@ -9,6 +9,7 @@ namespace Hardware.Info.Test
 
         static void Main(string[] _)
         {
+            _hardwareInfo.RefreshOperatingSystem();
             _hardwareInfo.RefreshMemoryStatus();
             _hardwareInfo.RefreshBatteryList();
             _hardwareInfo.RefreshBIOSList();
@@ -25,6 +26,8 @@ namespace Hardware.Info.Test
             _hardwareInfo.RefreshVideoControllerList();
 
             //hardwareInfo.RefreshAll();
+
+            Console.WriteLine(_hardwareInfo.OperatingSystem);
 
             Console.WriteLine(_hardwareInfo.MemoryStatus);
 

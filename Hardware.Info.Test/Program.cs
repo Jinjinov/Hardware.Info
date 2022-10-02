@@ -5,36 +5,36 @@ namespace Hardware.Info.Test
 {
     class Program
     {
-        static readonly IHardwareInfo hardwareInfo = new HardwareInfo(useAsteriskInWMI: false);
+        static readonly IHardwareInfo _hardwareInfo = new HardwareInfo(useAsteriskInWMI: false);
 
         static void Main(string[] _)
         {
-            hardwareInfo.RefreshMemoryStatus();
-            hardwareInfo.RefreshBatteryList();
-            hardwareInfo.RefreshBIOSList();
-            hardwareInfo.RefreshCPUList(includePercentProcessorTime: false);
-            hardwareInfo.RefreshDriveList();
-            hardwareInfo.RefreshKeyboardList();
-            hardwareInfo.RefreshMemoryList();
-            hardwareInfo.RefreshMonitorList();
-            hardwareInfo.RefreshMotherboardList();
-            hardwareInfo.RefreshMouseList();
-            hardwareInfo.RefreshNetworkAdapterList(includeBytesPerSec: false, includeNetworkAdapterConfiguration: true);
-            hardwareInfo.RefreshPrinterList();
-            hardwareInfo.RefreshSoundDeviceList();
-            hardwareInfo.RefreshVideoControllerList();
+            _hardwareInfo.RefreshMemoryStatus();
+            _hardwareInfo.RefreshBatteryList();
+            _hardwareInfo.RefreshBIOSList();
+            _hardwareInfo.RefreshCPUList(includePercentProcessorTime: false);
+            _hardwareInfo.RefreshDriveList();
+            _hardwareInfo.RefreshKeyboardList();
+            _hardwareInfo.RefreshMemoryList();
+            _hardwareInfo.RefreshMonitorList();
+            _hardwareInfo.RefreshMotherboardList();
+            _hardwareInfo.RefreshMouseList();
+            _hardwareInfo.RefreshNetworkAdapterList(includeBytesPerSec: false, includeNetworkAdapterConfiguration: true);
+            _hardwareInfo.RefreshPrinterList();
+            _hardwareInfo.RefreshSoundDeviceList();
+            _hardwareInfo.RefreshVideoControllerList();
 
             //hardwareInfo.RefreshAll();
 
-            Console.WriteLine(hardwareInfo.MemoryStatus);
+            Console.WriteLine(_hardwareInfo.MemoryStatus);
 
-            foreach (var hardware in hardwareInfo.BatteryList)
+            foreach (var hardware in _hardwareInfo.BatteryList)
                 Console.WriteLine(hardware);
 
-            foreach (var hardware in hardwareInfo.BiosList)
+            foreach (var hardware in _hardwareInfo.BiosList)
                 Console.WriteLine(hardware);
 
-            foreach (var cpu in hardwareInfo.CpuList)
+            foreach (var cpu in _hardwareInfo.CpuList)
             {
                 Console.WriteLine(cpu);
 
@@ -44,7 +44,7 @@ namespace Hardware.Info.Test
 
             Console.ReadLine();
 
-            foreach (var drive in hardwareInfo.DriveList)
+            foreach (var drive in _hardwareInfo.DriveList)
             {
                 Console.WriteLine(drive);
 
@@ -59,31 +59,31 @@ namespace Hardware.Info.Test
 
             Console.ReadLine();
 
-            foreach (var hardware in hardwareInfo.KeyboardList)
+            foreach (var hardware in _hardwareInfo.KeyboardList)
                 Console.WriteLine(hardware);
 
-            foreach (var hardware in hardwareInfo.MemoryList)
+            foreach (var hardware in _hardwareInfo.MemoryList)
                 Console.WriteLine(hardware);
 
-            foreach (var hardware in hardwareInfo.MonitorList)
+            foreach (var hardware in _hardwareInfo.MonitorList)
                 Console.WriteLine(hardware);
 
-            foreach (var hardware in hardwareInfo.MotherboardList)
+            foreach (var hardware in _hardwareInfo.MotherboardList)
                 Console.WriteLine(hardware);
 
-            foreach (var hardware in hardwareInfo.MouseList)
+            foreach (var hardware in _hardwareInfo.MouseList)
                 Console.WriteLine(hardware);
 
-            foreach (var hardware in hardwareInfo.NetworkAdapterList)
+            foreach (var hardware in _hardwareInfo.NetworkAdapterList)
                 Console.WriteLine(hardware);
 
-            foreach (var hardware in hardwareInfo.PrinterList)
+            foreach (var hardware in _hardwareInfo.PrinterList)
                 Console.WriteLine(hardware);
 
-            foreach (var hardware in hardwareInfo.SoundDeviceList)
+            foreach (var hardware in _hardwareInfo.SoundDeviceList)
                 Console.WriteLine(hardware);
 
-            foreach (var hardware in hardwareInfo.VideoControllerList)
+            foreach (var hardware in _hardwareInfo.VideoControllerList)
                 Console.WriteLine(hardware);
 
             Console.ReadLine();

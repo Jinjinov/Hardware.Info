@@ -5,36 +5,36 @@ namespace Hardware.Info.Benchmark
 {
     public class Benchmarks
     {
-        readonly IHardwareInfo hardwareInfo = new HardwareInfo();
+        readonly IHardwareInfo _hardwareInfo = new HardwareInfo();
 
         [Benchmark]
-        public void RefreshMemoryStatus() => hardwareInfo.RefreshMemoryStatus();
+        public void RefreshMemoryStatus() => _hardwareInfo.RefreshMemoryStatus();
         [Benchmark]
-        public void RefreshBatteryList() => hardwareInfo.RefreshBatteryList();
+        public void RefreshBatteryList() => _hardwareInfo.RefreshBatteryList();
         [Benchmark]
-        public void RefreshBIOSList() => hardwareInfo.RefreshBIOSList();
+        public void RefreshBIOSList() => _hardwareInfo.RefreshBIOSList();
         [Benchmark]
-        public void RefreshCPUList() => hardwareInfo.RefreshCPUList();
+        public void RefreshCPUList() => _hardwareInfo.RefreshCPUList();
         [Benchmark]
-        public void RefreshDriveList() => hardwareInfo.RefreshDriveList();
+        public void RefreshDriveList() => _hardwareInfo.RefreshDriveList();
         [Benchmark]
-        public void RefreshKeyboardList() => hardwareInfo.RefreshKeyboardList();
+        public void RefreshKeyboardList() => _hardwareInfo.RefreshKeyboardList();
         [Benchmark]
-        public void RefreshMemoryList() => hardwareInfo.RefreshMemoryList();
+        public void RefreshMemoryList() => _hardwareInfo.RefreshMemoryList();
         [Benchmark]
-        public void RefreshMonitorList() => hardwareInfo.RefreshMonitorList();
+        public void RefreshMonitorList() => _hardwareInfo.RefreshMonitorList();
         [Benchmark]
-        public void RefreshMotherboardList() => hardwareInfo.RefreshMotherboardList();
+        public void RefreshMotherboardList() => _hardwareInfo.RefreshMotherboardList();
         [Benchmark]
-        public void RefreshMouseList() => hardwareInfo.RefreshMouseList();
+        public void RefreshMouseList() => _hardwareInfo.RefreshMouseList();
         [Benchmark]
-        public void RefreshNetworkAdapterList() => hardwareInfo.RefreshNetworkAdapterList();
+        public void RefreshNetworkAdapterList() => _hardwareInfo.RefreshNetworkAdapterList();
         [Benchmark]
-        public void RefreshPrinterList() => hardwareInfo.RefreshPrinterList();
+        public void RefreshPrinterList() => _hardwareInfo.RefreshPrinterList();
         [Benchmark]
-        public void RefreshSoundDeviceList() => hardwareInfo.RefreshSoundDeviceList();
+        public void RefreshSoundDeviceList() => _hardwareInfo.RefreshSoundDeviceList();
         [Benchmark]
-        public void RefreshVideoControllerList() => hardwareInfo.RefreshVideoControllerList();
+        public void RefreshVideoControllerList() => _hardwareInfo.RefreshVideoControllerList();
     }
 
     class Program

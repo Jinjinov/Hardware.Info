@@ -36,7 +36,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 
                 hardwareInfo.RefreshAll();
 
-                Console.WriteLine(_hardwareInfo.OperatingSystem);
+                Console.WriteLine(hardwareInfo.OperatingSystem);
 
                 Console.WriteLine(hardwareInfo.MemoryStatus);
 

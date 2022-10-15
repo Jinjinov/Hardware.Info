@@ -231,26 +231,51 @@ namespace Hardware.Info.Windows
             {
                 string queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name != '_Total'"
                                                       : "SELECT Name, PercentProcessorTime FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name != '_Total'";
-                using ManagementObjectSearcher percentProcessorTimeMOS = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
+                ManagementObjectSearcher percentProcessorTimeMOS = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
 
-                foreach (ManagementBaseObject mo in percentProcessorTimeMOS.Get())
+                queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name = '_Total'"
+                                               : "SELECT PercentProcessorTime FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name = '_Total'";
+                ManagementObjectSearcher totalPercentProcessorTimeMOS = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
+
+                try
                 {
-                    CpuCore core = new CpuCore
+                    foreach (ManagementBaseObject mo in percentProcessorTimeMOS.Get())
                     {
-                        Name = GetPropertyString(mo["Name"]),
-                        PercentProcessorTime = GetPropertyValue<ulong>(mo["PercentProcessorTime"])
-                    };
+                        CpuCore core = new CpuCore
+                        {
+                            Name = GetPropertyString(mo["Name"]),
+                            PercentProcessorTime = GetPropertyValue<ulong>(mo["PercentProcessorTime"])
+                        };
 
-                    cpuCoreList.Add(core);
+                        cpuCoreList.Add(core);
+                    }
+
+                    foreach (ManagementBaseObject mo in totalPercentProcessorTimeMOS.Get())
+                    {
+                        percentProcessorTime = GetPropertyValue<ulong>(mo["PercentProcessorTime"]);
+                    }
+                }
+                catch (ManagementException)
+                {
+                    // https://github.com/Jinjinov/Hardware.Info/issues/30
+                }
+                finally
+                {
+                    percentProcessorTimeMOS.Dispose();
+
+                    totalPercentProcessorTimeMOS.Dispose();
                 }
 
-                string QueryString = UseAsteriskInWMI ? "SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name = '_Total'"
-                                                      : "SELECT PercentProcessorTime FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name = '_Total'";
-                using ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher(_managementScope, QueryString, _enumerationOptions);
-
-                foreach (ManagementBaseObject mo in managementObjectSearcher.Get())
+                if (percentProcessorTime == 0ul)
                 {
-                    percentProcessorTime = GetPropertyValue<ulong>(mo["PercentProcessorTime"]);
+                    queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_Processor"
+                                                   : "SELECT LoadPercentage FROM Win32_Processor";
+                    using ManagementObjectSearcher loadPercentageMOS = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
+
+                    foreach (ManagementBaseObject mo in loadPercentageMOS.Get())
+                    {
+                        percentProcessorTime = GetPropertyValue<ushort>(mo["LoadPercentage"]);
+                    }
                 }
             }
 

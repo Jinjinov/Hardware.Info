@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="10.0.1.1" />
+            <PackageReference Include="Hardware.Info" Version="10.1.0.0" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -183,6 +183,8 @@ Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact 
 
 ## Version history:
 
+- 10.1.0.0:
+    - Fixed `PercentProcessorTime` in Windows - thanks to [@C6OI](https://github.com/C6OI)
 - 10.0.1.1:
     - Added `GetOperatingSystem()` in Windows, macOS, Linux - thanks to [@adhip94](https://github.com/adhip94)
 - 10.0.1.0:

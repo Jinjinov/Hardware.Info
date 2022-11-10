@@ -10,8 +10,6 @@ namespace Hardware.Info.Linux
 {
     internal class HardwareInfoRetrieval : HardwareInfoBase, IHardwareInfoRetrieval
     {
-        private readonly MemoryStatus _memoryStatus = new MemoryStatus();
-
         private readonly OS _os = new OS();
 
         public OS GetOperatingSystem()
@@ -39,29 +37,37 @@ namespace Hardware.Info.Linux
 
         public MemoryStatus GetMemoryStatus()
         {
-            string[] meminfo = TryReadLinesFromFile("/proc/meminfo");
+            var meminfo = TryReadLinesFromFile("/proc/meminfo");
 
-            _memoryStatus.TotalPhysical = GetBytesFromLine(meminfo, "MemTotal:");
-            _memoryStatus.AvailablePhysical = GetBytesFromLine(meminfo, "MemAvailable:");
-            _memoryStatus.TotalVirtual = GetBytesFromLine(meminfo, "SwapTotal:");
-            _memoryStatus.AvailableVirtual = GetBytesFromLine(meminfo, "SwapFree:");
+            // htop uses MemUsed = MemTotal - MemFree - Cached - Buffers - SReclaimable + Shmem
 
-            return _memoryStatus;
+            var memFree = GetBytesFromLine(meminfo, "MemFree:");
+            var cached = GetBytesFromLine(meminfo, "Cached:");
+            var buffers = GetBytesFromLine(meminfo, "Buffers:");
+            var sReclaimable = GetBytesFromLine(meminfo, "SReclaimable:");
+            var shmem = GetBytesFromLine(meminfo, "Shmem:");
+
+            return new MemoryStatus
+            {
+                TotalPhysical = GetBytesFromLine(meminfo, "MemTotal:"),
+                AvailablePhysical = memFree - cached - buffers - sReclaimable + shmem,
+                TotalVirtual = GetBytesFromLine(meminfo, "SwapTotal:"),
+                AvailableVirtual = GetBytesFromLine(meminfo, "SwapFree:")
+            };
         }
 
-        private ulong GetBytesFromLine(string[] meminfo, string token)
+        private static ulong GetBytesFromLine(IEnumerable<string> memInfo, string token)
         {
-            const string KbToken = "kB";
+            const string kbToken = "kB";
 
-            string? memLine = meminfo.FirstOrDefault(line => line.StartsWith(token) && line.EndsWith(KbToken));
+            var memLine = memInfo.FirstOrDefault(line => line.StartsWith(token) && line.EndsWith(kbToken));
+            if (memLine == null) 
+                return 0;
 
-            if (memLine != null)
-            {
-                string mem = memLine.Replace(token, string.Empty).Replace(KbToken, string.Empty).Trim();
+            var mem = memLine.Replace(token, string.Empty).Replace(kbToken, string.Empty).Trim();
 
-                if (ulong.TryParse(mem, out ulong memKb))
-                    return memKb * 1024;
-            }
+            if (ulong.TryParse(mem, out var memKb))
+                return memKb * 1024;
 
             return 0;
         }

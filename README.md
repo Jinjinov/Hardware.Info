@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="10.1.0.0" />
+            <PackageReference Include="Hardware.Info" Version="10.1.0.1" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -183,6 +183,9 @@ Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact 
 
 ## Version history:
 
+- 10.1.0.1:
+    - Fixed `CPU.Name` and `CPU.CurrentClockSpeed` in macOS - by [@davidaramant](https://github.com/davidaramant)
+    - Added `CPU.MaxClockSpeed` in macOS - by [@davidaramant](https://github.com/davidaramant)
 - 10.1.0.0:
     - Fixed `PercentProcessorTime` in Windows - thanks to [@C6OI](https://github.com/C6OI)
 - 10.0.1.1:

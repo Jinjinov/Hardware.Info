@@ -7,17 +7,29 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <PackageId>Hardware.Info</PackageId>
     <Product>Hardware.Info</Product>
+    <PackageId>Hardware.Info</PackageId>
+    <PackageVersion>10.1.0.1</PackageVersion>
     <Version>10.1.0.1</Version>
     <Authors>Jinjinov</Authors>
     <Description>Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, motherboard, mouse, NIC - network adapter, printer, sound card - audio card, graphics card - video card. Hardware.Info is a .NET Standard 2.0 library and uses WMI on Windows, /dev, /proc, /sys on Linux and sysctl, system_profiler on macOS.</Description>
-    <PackageTags>Computer;Device;Hardware;Info;Information;NET Standard;Windows;Linux;macOS</PackageTags>
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <Copyright>Copyright (c) Jinjinov 2022</Copyright>
     <PackageProjectUrl>https://github.com/Jinjinov/Hardware.Info</PackageProjectUrl>
+    <!--<PackageIcon></PackageIcon>-->
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <RepositoryUrl>https://github.com/Jinjinov/Hardware.Info.git</RepositoryUrl>
     <RepositoryType>git</RepositoryType>
+    <PackageTags>Computer;Device;Hardware;Info;Information;NET Standard;Windows;Linux;macOS</PackageTags>
+    <!--<PackageReleaseNotes></PackageReleaseNotes>-->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="System.Management" Version="4.7.0" />

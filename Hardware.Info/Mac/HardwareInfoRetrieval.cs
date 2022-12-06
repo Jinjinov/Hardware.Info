@@ -353,35 +353,20 @@ Hardware:
             CPU cpu = new CPU();
 
             string processOutput = ReadProcessOutput("sysctl", "-n machdep.cpu.brand_string");
-            string[] info = processOutput.Split('@');
 
-            if (info.Length > 1)
-            {
-                string speedString = info[1].Trim();
-                uint speed = 0;
+            // Intel CPUs include the clock speed as part of the name
+            cpu.Name = processOutput.Split('@')[0].Trim();
 
-                if (speedString.EndsWith("GHz"))
-                {
-                    string number = speedString.Replace("GHz", string.Empty).Trim();
-                    if (uint.TryParse(number, out speed))
-                        speed *= 1000;
-                }
-                else if (speedString.EndsWith("KHz"))
-                {
-                    string number = speedString.Replace("KHz", string.Empty).Trim();
-                    if (uint.TryParse(number, out speed))
-                        speed /= 1000;
-                }
-                else if (speedString.EndsWith("MHz"))
-                {
-                    string number = speedString.Replace("MHz", string.Empty).Trim();
-                    uint.TryParse(number, out speed);
-                }
+            processOutput = ReadProcessOutput("sysctl", "-n hw.cpufrequency_max");
 
-                cpu.Name = info[0];
-                cpu.CurrentClockSpeed = speed;
-            }
+            if (uint.TryParse(processOutput, out uint maxFrequency))
+                cpu.MaxClockSpeed = maxFrequency / 1_000_000;
 
+            processOutput = ReadProcessOutput("sysctl", "-n hw.cpufrequency");
+
+            if (uint.TryParse(processOutput, out uint frequency))
+                cpu.CurrentClockSpeed = frequency / 1_000_000;
+            
             processOutput = ReadProcessOutput("sysctl", "-n hw.l2cachesize");
 
             if (uint.TryParse(processOutput, out uint L2CacheSize))

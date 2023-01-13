@@ -226,7 +226,7 @@ namespace Hardware.Info.Linux
             // 6        irq     Time spent serving hardware interrupts.See the description of the intr line for more details.
             // 7        softirq Time spent serving software interrupts.
             // 8        steal   Time stolen by other operating systems running in a virtual environment.
-            // 9	    guest   Time spent for running a virtual CPU or guest OS under the control of the kernel.
+            // 9        guest   Time spent for running a virtual CPU or guest OS under the control of the kernel.
 
             // > cat /proc/stat 
             // cpu 1279636934 73759586 192327563 12184330186 543227057 56603 68503253 0 0
@@ -241,17 +241,23 @@ namespace Hardware.Info.Linux
 
             if (cpuUsageLineLast.Length > 0 && cpuUsageLineNow.Length > 0)
             {
-                cpu.PercentProcessorTime = GetCpuPercentage(cpuUsageLineLast.First(), cpuUsageLineNow.First());
+                cpu.PercentProcessorTime = GetCpuPercentage(cpuUsageLineLast[0], cpuUsageLineNow[0]);
 
                 for (int i = 0; i < cpu.NumberOfLogicalProcessors; i++)
                 {
-                    CpuCore core = new CpuCore
-                    {
-                        Name = i.ToString(),
-                        PercentProcessorTime = GetCpuPercentage(cpuUsageLineLast.First(s => s.StartsWith($"cpu{i}")), cpuUsageLineNow.First(s => s.StartsWith($"cpu{i}")))
-                    };
+                    string? cpuStatLast = cpuUsageLineLast.FirstOrDefault(s => s.StartsWith($"cpu{i}"));
+                    string? cpuStatNow = cpuUsageLineNow.FirstOrDefault(s => s.StartsWith($"cpu{i}"));
 
-                    cpu.CpuCoreList.Add(core);
+                    if (!string.IsNullOrEmpty(cpuStatLast) && !string.IsNullOrEmpty(cpuStatNow))
+                    {
+                        CpuCore core = new CpuCore
+                        {
+                            Name = i.ToString(),
+                            PercentProcessorTime = GetCpuPercentage(cpuStatLast, cpuStatNow)
+                        };
+
+                        cpu.CpuCoreList.Add(core);
+                    }
                 }
             }
         }
@@ -261,23 +267,43 @@ namespace Hardware.Info.Linux
             char[] charSeparators = new char[] { ' ' };
 
             // Get all columns but skip the first (which is the "cpu" string) 
-            List<string> cpuSumLine = cpuStatNow.Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
-            cpuSumLine.RemoveAt(0);
+            List<string> cpuSumLineNow = cpuStatNow.Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
+            cpuSumLineNow.RemoveAt(0);
 
             // Get all columns but skip the first (which is the "cpu" string) 
-            List<string> cpuLastSumLine = cpuStatLast.Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
-            cpuLastSumLine.RemoveAt(0);
+            List<string> cpuSumLineLast = cpuStatLast.Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
+            cpuSumLineLast.RemoveAt(0);
 
-            ulong cpuSum = 0;
-            cpuSumLine.ForEach(s => cpuSum += Convert.ToUInt64(s));
+            ulong cpuSumNow = 0;
 
-            ulong cpuLastSum = 0;
-            cpuLastSumLine.ForEach(s => cpuLastSum += Convert.ToUInt64(s));
+            foreach (string cpuLineNow in cpuSumLineNow)
+            {
+                if (ulong.TryParse(cpuLineNow, out ulong cpuNow))
+                    cpuSumNow += cpuNow;
+            }
+
+            ulong cpuSumLast = 0;
+
+            foreach (string cpuLineLast in cpuSumLineLast)
+            {
+                if (ulong.TryParse(cpuLineLast, out ulong cpuLast))
+                    cpuSumLast += cpuLast;
+            }
 
             // Get the delta between two reads 
-            ulong cpuDelta = cpuSum - cpuLastSum;
+            ulong cpuDelta = cpuSumNow - cpuSumLast;
+
             // Get the idle time Delta 
-            ulong cpuIdle = Convert.ToUInt64(cpuSumLine[3]) - Convert.ToUInt64(cpuLastSumLine[3]);
+            ulong cpuIdle = 0;
+
+            if (cpuSumLineNow.Count > 3 && cpuSumLineLast.Count > 3)
+            {
+                if (ulong.TryParse(cpuSumLineNow[3], out ulong cpuIdleNow) && ulong.TryParse(cpuSumLineLast[3], out ulong cpuIdleLast))
+                {
+                    cpuIdle = cpuIdleNow - cpuIdleLast;
+                }
+            }
+
             // Calc percentage 
             ulong cpuUsed = cpuDelta - cpuIdle;
 
@@ -475,16 +501,32 @@ namespace Hardware.Info.Linux
             {
                 char[] charSeparators = new char[] { ' ' };
 
+                string[] procNetDevLast = TryReadLinesFromFile("/proc/net/dev");
+                Task.Delay(1000).Wait();
+                string[] procNetDevNow = TryReadLinesFromFile("/proc/net/dev");
+
                 foreach (NetworkAdapter networkAdapter in networkAdapterList)
                 {
-                    List<string>? networkAdapterUsageLast = TryReadLinesFromFile("/proc/net/dev").FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
-                    Task.Delay(1000).Wait();
-                    List<string>? networkAdapterUsageNow = TryReadLinesFromFile("/proc/net/dev").FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList();
+                    List<string>? networkAdapterUsageLast = procNetDevLast.FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList<string>();
+                    List<string>? networkAdapterUsageNow = procNetDevNow.FirstOrDefault(l => l.Trim().StartsWith(networkAdapter.Name))?.Trim().Split(charSeparators, StringSplitOptions.RemoveEmptyEntries).ToList<string>();
 
-                    if (networkAdapterUsageLast != null && networkAdapterUsageLast.Count > 0 && networkAdapterUsageNow != null && networkAdapterUsageNow.Count > 0)
+                    if (networkAdapterUsageLast != null && networkAdapterUsageNow != null)
                     {
-                        networkAdapter.BytesReceivedPersec = Convert.ToUInt64(networkAdapterUsageNow[1]) - Convert.ToUInt64(networkAdapterUsageLast[1]);
-                        networkAdapter.BytesSentPersec = Convert.ToUInt64(networkAdapterUsageNow[9]) - Convert.ToUInt64(networkAdapterUsageLast[9]);
+                        if (networkAdapterUsageLast.Count > 1 && networkAdapterUsageNow.Count > 1)
+                        {
+                            if (ulong.TryParse(networkAdapterUsageNow[1], out ulong bytesReceivedPersecNow) && ulong.TryParse(networkAdapterUsageLast[1], out ulong bytesReceivedPersecLast))
+                            {
+                                networkAdapter.BytesReceivedPersec = bytesReceivedPersecNow - bytesReceivedPersecLast;
+                            }
+                        }
+
+                        if (networkAdapterUsageLast.Count > 9 && networkAdapterUsageNow.Count > 9)
+                        {
+                            if (ulong.TryParse(networkAdapterUsageNow[9], out ulong bytesSentPersecNow) && ulong.TryParse(networkAdapterUsageLast[9], out ulong bytesSentPersecLast))
+                            {
+                                networkAdapter.BytesSentPersec = bytesSentPersecNow - bytesSentPersecLast;
+                            }
+                        }
                     }
                 }
             }

@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="10.1.0.1" />
+            <PackageReference Include="Hardware.Info" Version="10.1.1.0" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -181,8 +181,30 @@ Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact 
 |     RefreshSoundDeviceList |     3,608,577.5 ns |     68,688.62 ns |     73,496.06 ns |
 | RefreshVideoControllerList |    11,568,549.2 ns |     54,666.07 ns |     48,460.05 ns |
 
+### Windows 10 (AMD Ryzen 5 5600G, 32 GB RAM):
+
+|                     Method |                 Mean |               Error |              StdDev |
+|--------------------------- |---------------------:|--------------------:|--------------------:|
+|     RefreshOperatingSystem |             2.946 ns |           0.0052 ns |           0.0047 ns |
+|        RefreshMemoryStatus |           460.552 ns |           4.4810 ns |           3.9723 ns |
+|         RefreshBatteryList |     1,624,392.057 ns |      22,526.9314 ns |      21,071.7057 ns |
+|            RefreshBIOSList |     1,785,673.828 ns |       8,812.8115 ns |       8,243.5094 ns |
+|             RefreshCPUList | 1,964,995,539.000 ns | 171,465,934.5051 ns | 505,571,176.5574 ns |
+|           RefreshDriveList |    62,452,668.148 ns |     342,662.0413 ns |     320,526.2860 ns |
+|        RefreshKeyboardList |     4,303,528.516 ns |      47,355.1733 ns |      41,979.1277 ns |
+|          RefreshMemoryList |     1,926,931.367 ns |      19,754.4179 ns |      18,478.2948 ns |
+|         RefreshMonitorList |     3,884,362.370 ns |      29,422.1438 ns |      27,521.4916 ns |
+|     RefreshMotherboardList |     1,782,235.664 ns |      12,974.2296 ns |      12,136.1024 ns |
+|           RefreshMouseList |     4,700,086.615 ns |      44,435.0631 ns |      41,564.5856 ns |
+|  RefreshNetworkAdapterList |   945,004,493.333 ns |   8,568,978.4607 ns |   8,015,427.7687 ns |
+|         RefreshPrinterList |    48,126,103.030 ns |     729,958.0933 ns |     682,803.2534 ns |
+|     RefreshSoundDeviceList |     4,154,082.924 ns |      46,922.5501 ns |      41,595.6184 ns |
+| RefreshVideoControllerList |     8,784,372.500 ns |     125,080.5212 ns |     117,000.3971 ns |
+
 ## Version history:
 
+- 10.1.1.0:
+    - Fixed `GetCpuUsage` in Linux - thanks to [@glebov21](https://github.com/glebov21)
 - 10.1.0.1:
     - Fixed `CPU.Name` and `CPU.CurrentClockSpeed` in macOS - by [@davidaramant](https://github.com/davidaramant)
     - Added `CPU.MaxClockSpeed` in macOS - by [@davidaramant](https://github.com/davidaramant)

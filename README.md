@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="10.1.1.0" />
+            <PackageReference Include="Hardware.Info" Version="10.1.1.1" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -203,6 +203,8 @@ Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact 
 
 ## Version history:
 
+- 10.1.1.1:
+    - Fixed `CurrentClockSpeed` in Windows - thanks to [@jason-c-daniels](https://github.com/jason-c-daniels)
 - 10.1.1.0:
     - Fixed `GetCpuUsage` in Linux - thanks to [@glebov21](https://github.com/glebov21)
 - 10.1.0.1:

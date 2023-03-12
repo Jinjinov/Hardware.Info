@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Management;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -286,17 +287,27 @@ namespace Hardware.Info.Windows
                                                             : "SELECT Caption, CurrentClockSpeed, Description, L2CacheSize, L3CacheSize, Manufacturer, MaxClockSpeed, Name, NumberOfCores, NumberOfLogicalProcessors, ProcessorId, SocketDesignation FROM Win32_Processor";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, query, _enumerationOptions);
 
+            using PerformanceCounter cpuCounter = new PerformanceCounter("Processor Information", "% Processor Performance", "_Total");
+            float processorPerformance = cpuCounter.NextValue();
+            System.Threading.Thread.Sleep(1); // the first call to NextValue() always returns 0
+            processorPerformance = cpuCounter.NextValue();
+
             foreach (ManagementBaseObject mo in mos.Get())
             {
+                uint maxClockSpeed = GetPropertyValue<uint>(mo["MaxClockSpeed"]);
+
+                uint currentClockSpeed = (uint)(maxClockSpeed * (processorPerformance / 100));
+
                 CPU cpu = new CPU
                 {
                     Caption = GetPropertyString(mo["Caption"]),
-                    CurrentClockSpeed = GetPropertyValue<uint>(mo["CurrentClockSpeed"]),
+                    //CurrentClockSpeed = GetPropertyValue<uint>(mo["CurrentClockSpeed"]), https://stackoverflow.com/questions/61802420/unable-to-get-current-cpu-frequency-in-powershell-or-python
+                    CurrentClockSpeed = currentClockSpeed,
                     Description = GetPropertyString(mo["Description"]),
                     L2CacheSize = GetPropertyValue<uint>(mo["L2CacheSize"]),
                     L3CacheSize = GetPropertyValue<uint>(mo["L3CacheSize"]),
                     Manufacturer = GetPropertyString(mo["Manufacturer"]),
-                    MaxClockSpeed = GetPropertyValue<uint>(mo["MaxClockSpeed"]),
+                    MaxClockSpeed = maxClockSpeed,
                     Name = GetPropertyString(mo["Name"]),
                     NumberOfCores = GetPropertyValue<uint>(mo["NumberOfCores"]),
                     NumberOfLogicalProcessors = GetPropertyValue<uint>(mo["NumberOfLogicalProcessors"]),

@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="10.1.1.1" />
+            <PackageReference Include="Hardware.Info" Version="11.0.0.0" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -203,6 +203,8 @@ Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact 
 
 ## Version history:
 
+- 11.0.0.0
+    - Fixed `GetNetworkAdapterList` in Windows - thanks to [@isenmann](https://github.com/isenmann)
 - 10.1.1.1:
     - Fixed `CurrentClockSpeed` in Windows - thanks to [@jason-c-daniels](https://github.com/jason-c-daniels)
 - 10.1.1.0:

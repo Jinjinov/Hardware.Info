@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="11.0.0.0" />
+            <PackageReference Include="Hardware.Info" Version="11.0.0.1" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -203,6 +203,9 @@ Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact 
 
 ## Version history:
 
+- 11.0.0.1
+    - Added `L1DataCacheSize` and `L1InstructionCacheSize` in Windows, macOS, Linux
+    - Fixed `L2CacheSize` and `L3CacheSize` in Windows, Linux
 - 11.0.0.0
     - Fixed `GetNetworkAdapterList` in Windows - thanks to [@isenmann](https://github.com/isenmann)
 - 10.1.1.1:

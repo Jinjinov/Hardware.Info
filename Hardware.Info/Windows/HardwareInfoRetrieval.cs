@@ -309,7 +309,7 @@ namespace Hardware.Info.Windows
             foreach (ManagementObject mo in Win32_CacheMemory.Get())
             {
                 ushort CacheType = GetPropertyValue<ushort>(mo["CacheType"]);
-                uint MaxCacheSize = GetPropertyValue<uint>(mo["MaxCacheSize"]);
+                uint MaxCacheSize = 1024 * GetPropertyValue<uint>(mo["MaxCacheSize"]);
 
                 // if CacheType is Other or Unknown
                 if (L1InstructionCacheSize == 0)
@@ -340,8 +340,8 @@ namespace Hardware.Info.Windows
                     Description = GetPropertyString(mo["Description"]),
                     L1InstructionCacheSize = L1InstructionCacheSize,
                     L1DataCacheSize = L1DataCacheSize,
-                    L2CacheSize = GetPropertyValue<uint>(mo["L2CacheSize"]),
-                    L3CacheSize = GetPropertyValue<uint>(mo["L3CacheSize"]),
+                    L2CacheSize = 1024 * GetPropertyValue<uint>(mo["L2CacheSize"]),
+                    L3CacheSize = 1024 * GetPropertyValue<uint>(mo["L3CacheSize"]),
                     Manufacturer = GetPropertyString(mo["Manufacturer"]),
                     MaxClockSpeed = maxClockSpeed,
                     Name = GetPropertyString(mo["Name"]),

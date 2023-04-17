@@ -205,6 +205,33 @@ namespace Hardware.Info.Linux
                 }
             }
 
+            for (int i = 0; i <= 3; i++)
+            {
+                string level = TryReadTextFromFile($"/sys/devices/system/cpu/cpu0/cache/index{i}/level");
+                string type = TryReadTextFromFile($"/sys/devices/system/cpu/cpu0/cache/index{i}/type");
+                string size = TryReadTextFromFile($"/sys/devices/system/cpu/cpu0/cache/index{i}/size");
+
+                if (uint.TryParse(size.TrimEnd('K'), out uint cacheSize))
+                {
+                    cacheSize *= 1024;
+
+                    if (level == "1")
+                    {
+                        if (type == "Data")
+                            cpu.L1DataCacheSize = cacheSize;
+
+                        if (type == "Instruction")
+                            cpu.L1InstructionCacheSize = cacheSize;
+                    }
+
+                    if (level == "2")
+                        cpu.L2CacheSize = cacheSize;
+
+                    if (level == "3")
+                        cpu.L3CacheSize = cacheSize;
+                }
+            }
+
             if (includePercentProcessorTime)
             {
                 GetCpuUsage(cpu);

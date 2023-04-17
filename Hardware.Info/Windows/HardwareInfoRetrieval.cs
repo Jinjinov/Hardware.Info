@@ -322,7 +322,7 @@ namespace Hardware.Info.Windows
                 if (CacheType == 3) // Instruction
                     L1InstructionCacheSize = MaxCacheSize;
 
-                if(CacheType == 4) // Data
+                if (CacheType == 4) // Data
                     L1DataCacheSize = MaxCacheSize;
             }
 

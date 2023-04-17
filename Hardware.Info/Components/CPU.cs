@@ -26,6 +26,16 @@ namespace Hardware.Info
         public string Description { get; set; } = string.Empty;
 
         /// <summary>
+        /// Size of the Level 1 processor instruction cache. A Level 1 cache is an external memory area that has a faster access time than the main RAM memory.
+        /// </summary>
+        public UInt32 L1InstructionCacheSize { get; set; }
+
+        /// <summary>
+        /// Size of the Level 1 processor data cache. A Level 1 cache is an external memory area that has a faster access time than the main RAM memory.
+        /// </summary>
+        public UInt32 L1DataCacheSize { get; set; }
+
+        /// <summary>
         /// Size of the Level 2 processor cache. A Level 2 cache is an external memory area that has a faster access time than the main RAM memory.
         /// </summary>
         public UInt32 L2CacheSize { get; set; }
@@ -109,6 +119,8 @@ namespace Hardware.Info
                 "Caption: " + Caption + Environment.NewLine +
                 "CurrentClockSpeed: " + CurrentClockSpeed + Environment.NewLine +
                 "Description: " + Description + Environment.NewLine +
+                "L1InstructionCacheSize: " + L1InstructionCacheSize + Environment.NewLine +
+                "L1DataCacheSize: " + L1DataCacheSize + Environment.NewLine +
                 "L2CacheSize: " + L2CacheSize + Environment.NewLine +
                 "L3CacheSize: " + L3CacheSize + Environment.NewLine +
                 "Manufacturer: " + Manufacturer + Environment.NewLine +

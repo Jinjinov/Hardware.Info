@@ -292,6 +292,40 @@ namespace Hardware.Info.Windows
             System.Threading.Thread.Sleep(1); // the first call to NextValue() always returns 0
             processorPerformance = cpuCounter.NextValue();
 
+            uint L1InstructionCacheSize = 0;
+            uint L1DataCacheSize = 0;
+            // L1 = 3
+            // L2 = 4
+            // L3 = 5
+            query = UseAsteriskInWMI ? "SELECT * FROM Win32_CacheMemory WHERE Level = 3"
+                                     : "SELECT CacheType, MaxCacheSize FROM Win32_CacheMemory WHERE Level = 3";
+            using ManagementObjectSearcher Win32_CacheMemory = new ManagementObjectSearcher(_managementScope, query, _enumerationOptions);
+
+            // Other = 1
+            // Unknown = 2
+            // Instruction = 3
+            // Data = 4
+            // Unified = 5
+            foreach (ManagementObject mo in Win32_CacheMemory.Get())
+            {
+                ushort CacheType = GetPropertyValue<ushort>(mo["CacheType"]);
+                uint MaxCacheSize = GetPropertyValue<uint>(mo["MaxCacheSize"]);
+
+                // if CacheType is Other or Unknown
+                if (L1InstructionCacheSize == 0)
+                    L1InstructionCacheSize = MaxCacheSize;
+
+                // if CacheType is Other or Unknown
+                if (L1DataCacheSize == 0)
+                    L1DataCacheSize = MaxCacheSize;
+
+                if (CacheType == 3) // Instruction
+                    L1InstructionCacheSize = MaxCacheSize;
+
+                if(CacheType == 4) // Data
+                    L1DataCacheSize = MaxCacheSize;
+            }
+
             foreach (ManagementBaseObject mo in mos.Get())
             {
                 uint maxClockSpeed = GetPropertyValue<uint>(mo["MaxClockSpeed"]);
@@ -304,6 +338,8 @@ namespace Hardware.Info.Windows
                     //CurrentClockSpeed = GetPropertyValue<uint>(mo["CurrentClockSpeed"]), https://stackoverflow.com/questions/61802420/unable-to-get-current-cpu-frequency-in-powershell-or-python
                     CurrentClockSpeed = currentClockSpeed,
                     Description = GetPropertyString(mo["Description"]),
+                    L1InstructionCacheSize = L1InstructionCacheSize,
+                    L1DataCacheSize = L1DataCacheSize,
                     L2CacheSize = GetPropertyValue<uint>(mo["L2CacheSize"]),
                     L3CacheSize = GetPropertyValue<uint>(mo["L3CacheSize"]),
                     Manufacturer = GetPropertyString(mo["Manufacturer"]),

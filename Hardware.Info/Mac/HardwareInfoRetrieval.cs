@@ -367,6 +367,16 @@ Hardware:
             if (uint.TryParse(processOutput, out uint frequency))
                 cpu.CurrentClockSpeed = frequency / 1_000_000;
             
+            processOutput = ReadProcessOutput("sysctl", "-n hw.l1icachesize");
+
+            if (uint.TryParse(processOutput, out uint L1InstructionCacheSize))
+                cpu.L1InstructionCacheSize = L1InstructionCacheSize;
+
+            processOutput = ReadProcessOutput("sysctl", "-n hw.l1dcachesize");
+
+            if (uint.TryParse(processOutput, out uint L1DataCacheSize))
+                cpu.L1DataCacheSize = L1DataCacheSize;
+
             processOutput = ReadProcessOutput("sysctl", "-n hw.l2cachesize");
 
             if (uint.TryParse(processOutput, out uint L2CacheSize))

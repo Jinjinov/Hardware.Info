@@ -12,7 +12,7 @@ namespace Hardware.Info
         /// <summary>
         /// Memory size of the video adapter.
         /// </summary>
-        public UInt32 AdapterRAM { get; set; }
+        public UInt64 AdapterRAM { get; set; }
 
         /// <summary>
         /// Short description of the object.

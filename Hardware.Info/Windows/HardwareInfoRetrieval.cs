@@ -1,9 +1,12 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Management;
 using System.Net;
 using System.Runtime.InteropServices;
+using System.Text;
 
 // https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-osversioninfoexa
 
@@ -730,6 +733,83 @@ namespace Hardware.Info.Windows
                 };
 
                 videoControllerList.Add(videoController);
+            }
+
+            RegistryKey? videoAdaptersKey = Registry.LocalMachine.OpenSubKey(@"SYSTEM\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}");
+
+            if (videoAdaptersKey != null)
+            {
+                foreach (string adapterKeyName in videoAdaptersKey.GetSubKeyNames())
+                {
+                    if (!adapterKeyName.StartsWith("0"))
+                        continue;
+
+                    RegistryKey? adapterKey = videoAdaptersKey.OpenSubKey(adapterKeyName);
+
+                    if (adapterKey == null)
+                        continue;
+
+                    string[] valueNames = adapterKey.GetValueNames();
+
+                    string GetRegistryKeyValue(string name)
+                    {
+                        if (valueNames.Contains(name))
+                        {
+                            object? objectValue = adapterKey.GetValue(name);
+
+                            if (objectValue is byte[] bytesValue)
+                                return Encoding.Unicode.GetString(bytesValue).TrimEnd('\0');
+                            else if (objectValue is string stringValue)
+                                return stringValue;
+                        }
+
+                        return string.Empty;
+                    }
+
+                    string adapterString = GetRegistryKeyValue("HardwareInformation.AdapterString");
+                    string adapterDesc = GetRegistryKeyValue("AdapterDesc");
+                    string driverDesc = GetRegistryKeyValue("DriverDesc");
+
+                    string[] adapterNames = { adapterString, adapterDesc, driverDesc };
+
+                    if (videoControllerList.FirstOrDefault(vc => adapterNames.Contains(vc.Caption) || adapterNames.Contains(vc.Description) || adapterNames.Contains(vc.Name)) is VideoController videoController)
+                    {
+                        if (valueNames.Contains("HardwareInformation.qwMemorySize"))
+                        {
+                            object? qwMemorySize = adapterKey.GetValue("HardwareInformation.qwMemorySize");
+
+                            if (qwMemorySize is byte[] qwMemorySizeBytes)
+                            {
+                                if (qwMemorySizeBytes.Length == 4)
+                                    videoController.AdapterRAM = BitConverter.ToUInt32(qwMemorySizeBytes, 0);
+                                else if (qwMemorySizeBytes.Length == 8)
+                                    videoController.AdapterRAM = BitConverter.ToUInt64(qwMemorySizeBytes, 0);
+                            }
+                            else if (qwMemorySize is long memory)
+                            {
+                                videoController.AdapterRAM = (ulong)memory;
+                            }
+                        }
+                        else if (valueNames.Contains("HardwareInformation.MemorySize"))
+                        {
+                            object? memorySize = adapterKey.GetValue("HardwareInformation.MemorySize");
+
+                            if (memorySize is byte[] memorySizeBytes)
+                            {
+                                if (memorySizeBytes.Length == 4)
+                                    videoController.AdapterRAM = BitConverter.ToUInt32(memorySizeBytes, 0);
+                                else if (memorySizeBytes.Length == 8)
+                                    videoController.AdapterRAM = BitConverter.ToUInt64(memorySizeBytes, 0);
+                            }
+                            else if (memorySize is int memory)
+                            {
+                                videoController.AdapterRAM = (ulong)memory;
+                            }
+                        }
+                    }
+                }
+
+                videoAdaptersKey.Close();
             }
 
             return videoControllerList;

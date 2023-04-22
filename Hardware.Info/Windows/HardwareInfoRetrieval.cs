@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Microsoft.Win32;
+using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
@@ -707,7 +708,7 @@ namespace Hardware.Info.Windows
             List<VideoController> videoControllerList = new List<VideoController>();
 
             string queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_VideoController"
-                                                  : "SELECT AdapterCompatibility, AdapterRAM, Caption, CurrentBitsPerPixel, CurrentHorizontalResolution, CurrentNumberOfColors, CurrentRefreshRate, CurrentVerticalResolution, Description, DriverDate, DriverVersion, MaxRefreshRate, MinRefreshRate, Name, VideoModeDescription, VideoProcessor FROM Win32_VideoController";
+                                                  : "SELECT AdapterCompatibility, AdapterRAM, Caption, CurrentBitsPerPixel, CurrentHorizontalResolution, CurrentNumberOfColors, CurrentRefreshRate, CurrentVerticalResolution, Description, DriverDate, DriverVersion, MaxRefreshRate, MinRefreshRate, Name, PNPDeviceID, VideoModeDescription, VideoProcessor FROM Win32_VideoController";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
 
             foreach (ManagementBaseObject mo in mos.Get())
@@ -731,104 +732,25 @@ namespace Hardware.Info.Windows
                     VideoModeDescription = GetPropertyString(mo["VideoModeDescription"]),
                     VideoProcessor = GetPropertyString(mo["VideoProcessor"])
                 };
-
+                try
+                {
+                    // find device in registry and lookup 64 bit value for memory
+                    var device = GetPropertyString(mo["PNPDeviceID"]);
+                    var driver = Registry.GetValue(@$"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\{device}", "Driver", default(string));
+                    var memorySize = Registry.GetValue(@$"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\{driver}", "HardwareInformation.qwMemorySize", default(long));
+                    // safe conversion of ulong registry value stored as 32 bit long
+                    videoController.AdapterRAM = unchecked((ulong)GetPropertyValue<long>(memorySize));
+                }
+                catch (SecurityException)
+                {
+                }
+                catch (UnauthorizedAccessException)
+                {
+                }
                 videoControllerList.Add(videoController);
             }
 
-            GetAdapterRamFromRegistry(videoControllerList);
-
             return videoControllerList;
-        }
-
-        private static void GetAdapterRamFromRegistry(List<VideoController> videoControllerList)
-        {
-            try
-            {
-                Microsoft.Win32.RegistryKey? videoAdaptersKey = Microsoft.Win32.Registry.LocalMachine.OpenSubKey(@"SYSTEM\ControlSet001\Control\Class\{4d36e968-e325-11ce-bfc1-08002be10318}");
-
-                if (videoAdaptersKey == null)
-                    return;
-
-                foreach (string adapterKeyName in videoAdaptersKey.GetSubKeyNames())
-                {
-                    if (!adapterKeyName.StartsWith("0"))
-                        continue;
-
-                    Microsoft.Win32.RegistryKey? adapterKey = videoAdaptersKey.OpenSubKey(adapterKeyName);
-
-                    if (adapterKey == null)
-                        continue;
-
-                    string[] valueNames = adapterKey.GetValueNames();
-
-                    string GetRegistryKeyValue(string name)
-                    {
-                        if (valueNames.Contains(name))
-                        {
-                            object? objectValue = adapterKey.GetValue(name);
-
-                            if (objectValue is byte[] bytesValue)
-                                return Encoding.Unicode.GetString(bytesValue).TrimEnd('\0');
-                            else if (objectValue is string stringValue)
-                                return stringValue;
-                        }
-
-                        return string.Empty;
-                    }
-
-                    string adapterString = GetRegistryKeyValue("HardwareInformation.AdapterString");
-                    string adapterDesc = GetRegistryKeyValue("AdapterDesc");
-                    string driverDesc = GetRegistryKeyValue("DriverDesc");
-
-                    string[] adapterNames = { adapterString, adapterDesc, driverDesc };
-
-                    if (videoControllerList.FirstOrDefault(vc => adapterNames.Contains(vc.Caption) || adapterNames.Contains(vc.Description) || adapterNames.Contains(vc.Name)) is VideoController videoController)
-                    {
-                        if (valueNames.Contains("HardwareInformation.qwMemorySize"))
-                        {
-                            object? qwMemorySize = adapterKey.GetValue("HardwareInformation.qwMemorySize");
-
-                            if (qwMemorySize is byte[] qwMemorySizeBytes)
-                            {
-                                if (qwMemorySizeBytes.Length == 4)
-                                    videoController.AdapterRAM = BitConverter.ToUInt32(qwMemorySizeBytes, 0);
-                                else if (qwMemorySizeBytes.Length == 8)
-                                    videoController.AdapterRAM = BitConverter.ToUInt64(qwMemorySizeBytes, 0);
-                            }
-                            else if (qwMemorySize is long memory)
-                            {
-                                videoController.AdapterRAM = (ulong)memory;
-                            }
-                        }
-                        else if (valueNames.Contains("HardwareInformation.MemorySize"))
-                        {
-                            object? memorySize = adapterKey.GetValue("HardwareInformation.MemorySize");
-
-                            if (memorySize is byte[] memorySizeBytes)
-                            {
-                                if (memorySizeBytes.Length == 4)
-                                    videoController.AdapterRAM = BitConverter.ToUInt32(memorySizeBytes, 0);
-                                else if (memorySizeBytes.Length == 8)
-                                    videoController.AdapterRAM = BitConverter.ToUInt64(memorySizeBytes, 0);
-                            }
-                            else if (memorySize is int memory)
-                            {
-                                videoController.AdapterRAM = (ulong)memory;
-                            }
-                        }
-                    }
-
-                    adapterKey.Close();
-                }
-
-                videoAdaptersKey.Close();
-            }
-            catch (SecurityException)
-            {
-            }
-            catch (UnauthorizedAccessException)
-            {
-            }
         }
     }
 }

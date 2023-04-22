@@ -1,13 +1,10 @@
-﻿using Microsoft.Win32;
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Management;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security;
-using System.Text;
 
 // https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-osversioninfoexa
 
@@ -732,14 +729,25 @@ namespace Hardware.Info.Windows
                     VideoModeDescription = GetPropertyString(mo["VideoModeDescription"]),
                     VideoProcessor = GetPropertyString(mo["VideoProcessor"])
                 };
+
                 try
                 {
-                    // find device in registry and lookup 64 bit value for memory
-                    var device = GetPropertyString(mo["PNPDeviceID"]);
-                    var driver = Registry.GetValue(@$"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\{device}", "Driver", default(string));
-                    var memorySize = Registry.GetValue(@$"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\{driver}", "HardwareInformation.qwMemorySize", default(long));
-                    // safe conversion of ulong registry value stored as 32 bit long
-                    videoController.AdapterRAM = unchecked((ulong)GetPropertyValue<long>(memorySize));
+                    string deviceID = GetPropertyString(mo["PNPDeviceID"]);
+
+                    if (string.IsNullOrEmpty(deviceID))
+                        continue;
+
+                    object? driverObject = Microsoft.Win32.Registry.GetValue(@$"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Enum\{deviceID}", "Driver", default(string));
+
+                    if (driverObject is string driver && !string.IsNullOrEmpty(driver))
+                    {
+                        object? qwMemorySizeObject = Microsoft.Win32.Registry.GetValue(@$"HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control\Class\{driver}", "HardwareInformation.qwMemorySize", default(long));
+
+                        if (qwMemorySizeObject is long qwMemorySize && qwMemorySize != 0L)
+                        {
+                            videoController.AdapterRAM = (ulong)qwMemorySize;
+                        }
+                    }
                 }
                 catch (SecurityException)
                 {
@@ -747,6 +755,7 @@ namespace Hardware.Info.Windows
                 catch (UnauthorizedAccessException)
                 {
                 }
+
                 videoControllerList.Add(videoController);
             }
 

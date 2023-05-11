@@ -184,7 +184,7 @@ namespace Hardware.Info.Linux
                 if (match.Success && match.Groups.Count > 1)
                 {
                     if (uint.TryParse(match.Groups[1].Value, out uint cacheSize))
-                        cpu.L3CacheSize = cacheSize;
+                        cpu.L3CacheSize = 1024 * cacheSize;
                     continue;
                 }
 

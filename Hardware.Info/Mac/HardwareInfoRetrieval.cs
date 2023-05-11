@@ -1007,8 +1007,8 @@ Audio:
 
                             if (split.Length == 2)
                             {
-                                if (uint.TryParse(split[1].Replace("MB", string.Empty).Trim(), out uint ram))
-                                    videoController.AdapterRAM = ram;
+                                if (ulong.TryParse(split[1].Replace("MB", string.Empty).Trim(), out ulong ram))
+                                    videoController.AdapterRAM = 1024uL * 1024uL * ram;
                             }
                         }
 

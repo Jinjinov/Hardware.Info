@@ -728,6 +728,9 @@ namespace Hardware.Info.Linux
                 }
             }
 
+            if (soundDeviceList.Count > 0)
+                return soundDeviceList;
+
             // cat /proc/asound/cards
             /*
             0 [Intel          ]: HDA-Intel - HDA Intel
@@ -759,6 +762,9 @@ namespace Hardware.Info.Linux
                     }
                 }
             }
+
+            if (soundDeviceList.Count > 0)
+                return soundDeviceList;
 
             // aplay -l
             /*

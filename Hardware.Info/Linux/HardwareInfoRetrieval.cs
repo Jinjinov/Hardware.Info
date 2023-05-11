@@ -712,7 +712,7 @@ namespace Hardware.Info.Linux
             {
                 if (line.Contains("Audio device") || line.Contains("Multimedia audio controller"))
                 {
-                    string[] name = line.Split(new[] { ':' }, StringSplitOptions.RemoveEmptyEntries);
+                    string[] name = line.Split(new[] { "Audio device: ", "Multimedia audio controller: " }, StringSplitOptions.RemoveEmptyEntries);
 
                     if (name.Length > 1)
                     {
@@ -744,13 +744,15 @@ namespace Hardware.Info.Linux
                 {
                     string[] name = soundCard.Split(new[] { " at " }, StringSplitOptions.RemoveEmptyEntries);
 
-                    if (name.Length > 1)
+                    if (name.Length > 0)
                     {
+                        string trimmed = name[0].Trim();
+
                         SoundDevice soundDevice = new SoundDevice()
                         {
-                            Caption = name[1],
-                            Description = name[1],
-                            Name = name[1]
+                            Caption = trimmed,
+                            Description = trimmed,
+                            Name = trimmed
                         };
 
                         soundDeviceList.Add(soundDevice);
@@ -788,11 +790,13 @@ namespace Hardware.Info.Linux
 
                     if (name.Length > 0)
                     {
+                        string trimmed = name[name.Length - 1].Trim();
+
                         SoundDevice soundDevice = new SoundDevice()
                         {
-                            Caption = name[name.Length - 1],
-                            Description = name[name.Length - 1],
-                            Name = name[name.Length - 1]
+                            Caption = trimmed,
+                            Description = trimmed,
+                            Name = trimmed
                         };
 
                         soundDeviceList.Add(soundDevice);
@@ -817,7 +821,7 @@ namespace Hardware.Info.Linux
 
             foreach (string line in lines)
             {
-                if (line.StartsWith("\t") && line.Contains('x') && line.Contains('*'))
+                if (line.Contains('*') && line.Contains('x'))
                 {
                     string[] currentMode = line.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries);
 

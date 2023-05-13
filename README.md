@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="11.0.1.0" />
+            <PackageReference Include="Hardware.Info" Version="11.0.1.1" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -203,6 +203,13 @@ Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact 
 
 ## Version history:
 
+- 11.0.1.1
+    - Added `Keyboard` info in Linux
+    - Added `Mouse` info in Linux
+    - Added `SoundDevice` info in Linux
+    - Added `VideoController.CurrentHorizontalResolution` in Linux
+    - Added `VideoController.CurrentVerticalResolution` in Linux
+    - Added `VideoController.CurrentRefreshRate` in Linux
 - 11.0.1.0
     - Fixed `VideoController.AdapterRAM` in Windows - by [@jesperll](https://github.com/jesperll)
 - 11.0.0.1

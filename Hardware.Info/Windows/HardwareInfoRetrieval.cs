@@ -596,20 +596,28 @@ namespace Hardware.Info.Windows
                     Speed = GetPropertyValue<ulong>(mo["Speed"])
                 };
 
-                if (includeBytesPersec)
+                if (includeBytesPersec ||
+                    networkAdapter.Speed == 0 ||
+                    networkAdapter.Speed == long.MaxValue)
                 {
                     // https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.performancecounter.instancename
 
                     string name = networkAdapter.Name.Replace('(', '[').Replace(')', ']').Replace('#', '_').Replace('\\', '_').Replace('/', '_');
 
                     string query = UseAsteriskInWMI ? $"SELECT * FROM Win32_PerfFormattedData_Tcpip_NetworkAdapter WHERE Name = '{name}'"
-                                                    : $"SELECT BytesSentPersec, BytesReceivedPersec FROM Win32_PerfFormattedData_Tcpip_NetworkAdapter WHERE Name = '{name}'";
+                                                    : $"SELECT BytesSentPersec, BytesReceivedPersec, CurrentBandwidth FROM Win32_PerfFormattedData_Tcpip_NetworkAdapter WHERE Name = '{name}'";
                     using ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher(_managementScope, query, _enumerationOptions);
 
                     foreach (ManagementBaseObject managementObject in managementObjectSearcher.Get())
                     {
                         networkAdapter.BytesSentPersec = GetPropertyValue<ulong>(managementObject["BytesSentPersec"]);
                         networkAdapter.BytesReceivedPersec = GetPropertyValue<ulong>(managementObject["BytesReceivedPersec"]);
+
+                        if (networkAdapter.Speed == 0 ||
+                            networkAdapter.Speed == long.MaxValue)
+                        {
+                            networkAdapter.Speed = GetPropertyValue<ulong>(managementObject["CurrentBandwidth"]);
+                        }
                     }
                 }
 

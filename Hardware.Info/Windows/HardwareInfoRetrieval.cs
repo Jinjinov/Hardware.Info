@@ -603,13 +603,19 @@ namespace Hardware.Info.Windows
                     string name = networkAdapter.Name.Replace('(', '[').Replace(')', ']').Replace('#', '_').Replace('\\', '_').Replace('/', '_');
 
                     string query = UseAsteriskInWMI ? $"SELECT * FROM Win32_PerfFormattedData_Tcpip_NetworkAdapter WHERE Name = '{name}'"
-                                                    : $"SELECT BytesSentPersec, BytesReceivedPersec FROM Win32_PerfFormattedData_Tcpip_NetworkAdapter WHERE Name = '{name}'";
+                                                    : $"SELECT BytesSentPersec, BytesReceivedPersec, CurrentBandwidth FROM Win32_PerfFormattedData_Tcpip_NetworkAdapter WHERE Name = '{name}'";
                     using ManagementObjectSearcher managementObjectSearcher = new ManagementObjectSearcher(_managementScope, query, _enumerationOptions);
 
                     foreach (ManagementBaseObject managementObject in managementObjectSearcher.Get())
                     {
                         networkAdapter.BytesSentPersec = GetPropertyValue<ulong>(managementObject["BytesSentPersec"]);
                         networkAdapter.BytesReceivedPersec = GetPropertyValue<ulong>(managementObject["BytesReceivedPersec"]);
+
+                        bool maybeInvalidSpeed = networkAdapter.Speed == 0 || networkAdapter.Speed == long.MaxValue;
+                        if (maybeInvalidSpeed)
+                        {
+                            networkAdapter.Speed = GetPropertyValue<ulong>(managementObject["CurrentBandwidth"]);
+                        }
                     }
                 }
 

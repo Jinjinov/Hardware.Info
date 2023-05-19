@@ -610,8 +610,11 @@ namespace Hardware.Info.Windows
 
                     foreach (ManagementBaseObject managementObject in managementObjectSearcher.Get())
                     {
-                        networkAdapter.BytesSentPersec = GetPropertyValue<ulong>(managementObject["BytesSentPersec"]);
-                        networkAdapter.BytesReceivedPersec = GetPropertyValue<ulong>(managementObject["BytesReceivedPersec"]);
+                        if (includeBytesPersec)
+                        {
+                            networkAdapter.BytesSentPersec = GetPropertyValue<ulong>(managementObject["BytesSentPersec"]);
+                            networkAdapter.BytesReceivedPersec = GetPropertyValue<ulong>(managementObject["BytesReceivedPersec"]);
+                        }
 
                         if (networkAdapter.Speed == 0 ||
                             networkAdapter.Speed == long.MaxValue)

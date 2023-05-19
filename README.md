@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="11.0.1.1" />
+            <PackageReference Include="Hardware.Info" Version="11.1.0.0" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -132,6 +132,10 @@ The 21 second initialization delay is caused by RPC that WMI uses internally. In
 
 You can avoid the 21 second delay by excluding the queries that cause it (see Settings).
 
+### Invalid `NetworkAdapter.Speed` in Windows
+
+Sometimes `NetworkAdapter.Speed` in `Win32_NetworkAdapter` can be `0` or `long.MaxValue`. The correct value can be retrived from `CurrentBandwidth` in `Win32_PerfFormattedData_Tcpip_NetworkAdapter` but unfortunately reading from `Win32_PerfFormattedData_Tcpip_NetworkAdapter` causes a 21 second delay on the first read, like mentioned in the previous paragraph. Calling `RefreshNetworkAdapterList` with `includeBytesPersec = true` will also read the `CurrentBandwidth`.
+
 ## Settings
 
 ### Constructor settings:
@@ -203,6 +207,8 @@ Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact 
 
 ## Version history:
 
+- 11.1.0.0
+    - Fixed `NetworkAdapter.Speed` in Windows - by [@isenmann](https://github.com/isenmann)
 - 11.0.1.1
     - Added `Keyboard` info in Linux
     - Added `Mouse` info in Linux

@@ -611,8 +611,7 @@ namespace Hardware.Info.Windows
                         networkAdapter.BytesSentPersec = GetPropertyValue<ulong>(managementObject["BytesSentPersec"]);
                         networkAdapter.BytesReceivedPersec = GetPropertyValue<ulong>(managementObject["BytesReceivedPersec"]);
 
-                        bool maybeInvalidSpeed = networkAdapter.Speed == 0 || networkAdapter.Speed == long.MaxValue;
-                        if (maybeInvalidSpeed)
+                        if (networkAdapter.Speed == 0 || networkAdapter.Speed == long.MaxValue)
                         {
                             networkAdapter.Speed = GetPropertyValue<ulong>(managementObject["CurrentBandwidth"]);
                         }

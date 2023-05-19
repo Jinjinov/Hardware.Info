@@ -596,9 +596,7 @@ namespace Hardware.Info.Windows
                     Speed = GetPropertyValue<ulong>(mo["Speed"])
                 };
 
-                bool maybeInvalidSpeed = networkAdapter.Speed == 0 || networkAdapter.Speed == long.MaxValue;
-
-                if (includeBytesPersec || maybeInvalidSpeed)
+                if (includeBytesPersec)
                 {
                     // https://learn.microsoft.com/en-us/dotnet/api/system.diagnostics.performancecounter.instancename
 
@@ -610,12 +608,10 @@ namespace Hardware.Info.Windows
 
                     foreach (ManagementBaseObject managementObject in managementObjectSearcher.Get())
                     {
-                        if (includeBytesPersec)
-                        {
-                            networkAdapter.BytesSentPersec = GetPropertyValue<ulong>(managementObject["BytesSentPersec"]);
-                            networkAdapter.BytesReceivedPersec = GetPropertyValue<ulong>(managementObject["BytesReceivedPersec"]);
-                        }
+                        networkAdapter.BytesSentPersec = GetPropertyValue<ulong>(managementObject["BytesSentPersec"]);
+                        networkAdapter.BytesReceivedPersec = GetPropertyValue<ulong>(managementObject["BytesReceivedPersec"]);
 
+                        bool maybeInvalidSpeed = networkAdapter.Speed == 0 || networkAdapter.Speed == long.MaxValue;
                         if (maybeInvalidSpeed)
                         {
                             networkAdapter.Speed = GetPropertyValue<ulong>(managementObject["CurrentBandwidth"]);

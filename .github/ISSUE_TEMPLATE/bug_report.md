@@ -20,7 +20,7 @@ A clear and concise description of what the bug is.
 <!--
 Provide minimalistic example code for this issue. You can:
 - create a new project and apply the minimum required code to reproduce in the issue. Host the project on GitHub.
-- provide exact steps to reproduce this isse.
+- provide exact steps to reproduce this issue.
 
 This issue will be closed if:
 - the project you share is too complex.

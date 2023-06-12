@@ -1,6 +1,9 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Linq;
+using System.Net.NetworkInformation;
+using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -639,7 +642,65 @@ namespace Hardware.Info.Linux
 
         public override List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)
         {
-            List<NetworkAdapter> networkAdapterList = base.GetNetworkAdapterList(includeBytesPersec, includeNetworkAdapterConfiguration);
+            List<NetworkAdapter> networkAdapterList;
+
+            try
+            {
+                networkAdapterList = base.GetNetworkAdapterList(includeBytesPersec, includeNetworkAdapterConfiguration);
+            }
+            catch (NetworkInformationException)
+            {
+                networkAdapterList = new List<NetworkAdapter>();
+
+                IEnumerable<string> interfaceFiles = Directory.EnumerateDirectories("/sys/class/net");
+
+                foreach (string interfaceFile in interfaceFiles)
+                {
+                    string interfaceName = Path.GetFileName(interfaceFile);
+
+                    string macAddressFile = $"/sys/class/net/{interfaceName}/address";
+
+                    string macAddress = TryReadTextFromFile(macAddressFile);
+
+                    NetworkAdapter networkAdapter = new NetworkAdapter
+                    {
+                        Name = interfaceName,
+                        MACAddress = macAddress,
+                        Description = interfaceName,
+                    };
+
+                    string ipFile = $"/proc/net/dev";
+
+                    var lines = TryReadLinesFromFile(ipFile);
+
+                    string? ipAddressInfo = lines.FirstOrDefault(line => line.Contains(interfaceName));
+
+                    if (ipAddressInfo != null)
+                    {
+                        string[] parts = ipAddressInfo.Split(':');
+
+                        if (parts.Length > 1)
+                        {
+                            string[] addresses = parts[1].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
+
+                            if (addresses.Length > 1)
+                            {
+                                if (IPAddress.TryParse(addresses[0], out IPAddress ipAddress))
+                                {
+                                    networkAdapter.IPAddressList.Add(ipAddress);
+                                }
+
+                                if (IPAddress.TryParse(addresses[1], out IPAddress subnetMask))
+                                {
+                                    networkAdapter.IPSubnetList.Add(subnetMask);
+                                }
+                            }
+                        }
+                    }
+
+                    networkAdapterList.Add(networkAdapter);
+                }
+            }
 
             if (includeBytesPersec)
             {

@@ -640,6 +640,143 @@ namespace Hardware.Info.Linux
             return mouseList;
         }
 
+        public List<NetworkAdapter> GetNetworkAdapters()
+        {
+            List<NetworkAdapter> adapters = new List<NetworkAdapter>();
+
+            // Read the contents of /proc/net/dev
+            string[] procNetDevLines = File.ReadAllLines("/proc/net/dev");
+
+            // Skip the header lines
+            string[] dataLines = procNetDevLines.Skip(2).ToArray();
+
+            foreach (string line in dataLines)
+            {
+                string[] parts = line.Split(':');
+                string interfaceName = parts[0].Trim();
+
+                // Get the MAC address from the /sys/class/net/{interface}/address file
+                string macAddressPath = $"/sys/class/net/{interfaceName}/address";
+                string macAddress = File.ReadAllText(macAddressPath).Trim();
+
+                // Get other properties from the /sys/class/net/{interface} directory
+                string interfaceDescription = File.ReadAllText($"/sys/class/net/{interfaceName}/device/uevent").Trim();
+                string interfaceManufacturer = File.ReadAllText($"/sys/class/net/{interfaceName}/device/vendor").Trim();
+                string interfaceProductName = File.ReadAllText($"/sys/class/net/{interfaceName}/device/device").Trim();
+
+                // Create a new NetworkAdapter instance
+                NetworkAdapter adapter = new NetworkAdapter
+                {
+                    Name = interfaceName,
+                    MACAddress = macAddress,
+                    Description = interfaceDescription,
+                    Manufacturer = interfaceManufacturer,
+                    ProductName = interfaceProductName
+                };
+
+                // Retrieve other properties using custom parsing methods
+                adapter.AdapterType = GetAdapterType(interfaceName);
+                adapter.Caption = GetAdapterCaption(interfaceName);
+                adapter.NetConnectionID = GetNetConnectionID(interfaceName);
+                adapter.Speed = GetAdapterSpeed(interfaceName);
+                adapter.BytesSentPersec = GetBytesSentPersec(interfaceName);
+                adapter.BytesReceivedPersec = GetBytesReceivedPersec(interfaceName);
+
+                // Add the NetworkAdapter to the list
+                adapters.Add(adapter);
+            }
+
+            return adapters;
+        }
+
+        private string GetAdapterType(string interfaceName)
+        {
+            string[] udevInfoLines = File.ReadAllLines($"/sys/class/net/{interfaceName}/device/uevent");
+
+            string line = udevInfoLines.FirstOrDefault(l => l.StartsWith("DEVTYPE"));
+
+            if (line != null)
+            {
+                return line.Split('=')[1].Trim();
+            }
+
+            return string.Empty;
+        }
+
+        private string GetAdapterCaption(string interfaceName)
+        {
+            string[] sysClassNetAddressLines = File.ReadAllLines($"/sys/class/net/{interfaceName}/address");
+
+            string line = sysClassNetAddressLines.FirstOrDefault(l => l.StartsWith("Interface"));
+
+            if (line != null)
+            {
+                return line.Split(':')[1].Trim();
+            }
+
+            return string.Empty;
+        }
+
+        private string GetNetConnectionID(string interfaceName)
+        {
+            string[] sysClassNetAddressLines = File.ReadAllLines($"/sys/class/net/{interfaceName}/address");
+
+            string line = sysClassNetAddressLines.FirstOrDefault(l => l.StartsWith("Interface"));
+
+            if (line != null)
+            {
+                return line.Split(':')[1].Trim();
+            }
+
+            return string.Empty;
+        }
+
+        private ulong GetAdapterSpeed(string interfaceName)
+        {
+            string speedString = File.ReadAllText($"/sys/class/net/{interfaceName}/speed").Trim();
+
+            if (ulong.TryParse(speedString, out ulong speed))
+            {
+                return speed;
+            }
+
+            return 0;
+        }
+
+        private ulong GetBytesSentPersec(string interfaceName)
+        {
+            string procNetDevLine = File.ReadLines("/proc/net/dev").FirstOrDefault(line => line.Contains(interfaceName));
+
+            if (procNetDevLine != null)
+            {
+                string[] parts = Regex.Split(procNetDevLine, @"\s+");
+
+                if (parts.Length >= 10 && ulong.TryParse(parts[9], out ulong bytesSentPersec))
+                {
+                    return bytesSentPersec;
+                }
+            }
+
+            return 0;
+        }
+
+        private ulong GetBytesReceivedPersec(string interfaceName)
+        {
+            string procNetDevLine = File.ReadLines("/proc/net/dev").FirstOrDefault(line => line.Contains(interfaceName));
+
+            if (procNetDevLine != null)
+            {
+                string[] parts = Regex.Split(procNetDevLine, @"\s+");
+
+                if (parts.Length >= 2 && ulong.TryParse(parts[1], out ulong bytesReceivedPersec))
+                {
+                    return bytesReceivedPersec;
+                }
+            }
+
+            return 0;
+        }
+
         public override List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)
         {
             List<NetworkAdapter> networkAdapterList;
@@ -650,6 +787,8 @@ namespace Hardware.Info.Linux
             }
             catch (NetworkInformationException)
             {
+                networkAdapterList = GetNetworkAdapters();
+
                 networkAdapterList = new List<NetworkAdapter>();
 
                 IEnumerable<string> interfaceFiles = Directory.EnumerateDirectories("/sys/class/net");

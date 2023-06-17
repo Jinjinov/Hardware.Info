@@ -7,6 +7,7 @@ using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Globalization;
+using System.Net.Sockets;
 
 // https://www.binarytides.com/linux-commands-hardware-info/
 
@@ -703,13 +704,13 @@ namespace Hardware.Info.Linux
 
                 foreach (string line in if_inet6)
                 {
-                    string[] parts = line.Split(' ');
+                    string[] parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
 
                     if (parts.Length >= 6 && parts[5] == interfaceName)
                     {
                         string ipAddress = parts[0];
 
-                        if (IPAddress.TryParse(ipAddress, out IPAddress ipv6Address) && ipv6Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+                        if (IPAddress.TryParse(ipAddress, out IPAddress ipv6Address) && ipv6Address.AddressFamily == AddressFamily.InterNetworkV6)
                         {
                             networkAdapter.IPAddressList.Add(ipv6Address);
                         }
@@ -753,7 +754,7 @@ namespace Hardware.Info.Linux
                     }
                     else if (foundNetwork)
                     {
-                        string[] parts = line.Split(' ');
+                        string[] parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                         ip = parts[1];
                     }
                     else if (line.Contains("32 host"))

@@ -682,23 +682,18 @@ namespace Hardware.Info.Linux
                     }
                 }
 
-                foreach (string line in TryReadLinesFromFile("/proc/net/inet6"))
+                foreach (string line in TryReadLinesFromFile("/proc/net/if_inet6"))
                 {
                     string[] parts = line.Split(' ');
 
-                    if (parts.Length >= 6 && parts[0] == interfaceName)
+                    if (parts.Length >= 6 && parts[5] == interfaceName)
                     {
-                        string ipAddressHex = parts[1];
-                        string subnetMaskHex = parts[4];
+                        string ipAddress = parts[0];
 
-                        byte[] ipAddressBytes = FromHexString(ipAddressHex);
-                        byte[] subnetMaskBytes = FromHexString(subnetMaskHex);
-
-                        IPAddress ipAddress = new IPAddress(ipAddressBytes);
-                        IPAddress subnetMask = new IPAddress(subnetMaskBytes);
-
-                        networkAdapter.IPAddressList.Add(ipAddress);
-                        networkAdapter.IPSubnetList.Add(subnetMask);
+                        if (IPAddress.TryParse(ipAddress, out IPAddress ipv6Address) && ipv6Address.AddressFamily == System.Net.Sockets.AddressFamily.InterNetworkV6)
+                        {
+                            networkAdapter.IPAddressList.Add(ipv6Address);
+                        }
                     }
                 }
 
@@ -706,19 +701,6 @@ namespace Hardware.Info.Linux
             }
 
             return networkAdapterList;
-        }
-
-        private byte[] FromHexString(string hexString)
-        {
-            hexString = hexString.Replace(":", string.Empty);
-            byte[] bytes = new byte[hexString.Length / 2];
-
-            for (int i = 0; i < hexString.Length; i += 2)
-            {
-                bytes[i / 2] = Convert.ToByte(hexString.Substring(i, 2), 16);
-            }
-
-            return bytes;
         }
 
         // solution 1

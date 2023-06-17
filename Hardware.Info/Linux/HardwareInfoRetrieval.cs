@@ -640,28 +640,67 @@ namespace Hardware.Info.Linux
             return mouseList;
         }
 
-        public List<NetworkAdapter> GetNetworkAdapters()
+        private List<NetworkAdapter> GetNetworkAdapters()
         {
             List<NetworkAdapter> networkAdapterList = new List<NetworkAdapter>();
 
-            IEnumerable<string> interfaceFiles = Directory.EnumerateDirectories("/sys/class/net");
-
-            foreach (string interfaceFile in interfaceFiles)
+            foreach (string interfaceDirectory in Directory.EnumerateDirectories("/sys/class/net"))
             {
-                string interfaceName = Path.GetFileName(interfaceFile);
+                string interfaceName = Path.GetDirectoryName(interfaceDirectory);
 
-                string macAddressFile = $"/sys/class/net/{interfaceName}/address";
-
-                string macAddress = TryReadTextFromFile(macAddressFile);
+                string macAddress = TryReadTextFromFile($"/sys/class/net/{interfaceName}/address");
 
                 NetworkAdapter networkAdapter = new NetworkAdapter
                 {
+                    Caption = interfaceName,
+                    Description = interfaceName,
                     Name = interfaceName,
                     MACAddress = macAddress,
+                    NetConnectionID = interfaceName,
+                    ProductName = interfaceName,
                 };
 
-                networkAdapter.AdapterType = GetAdapterType(interfaceName);
-                networkAdapter.Speed = GetAdapterSpeed(interfaceName);
+                string speedString = TryReadTextFromFile($"/sys/class/net/{interfaceName}/speed");
+
+                if (ulong.TryParse(speedString, out ulong speed))
+                {
+                    networkAdapter.Speed = speed;
+                }
+
+                foreach (string line in TryReadLinesFromFile("/proc/net/route"))
+                {
+                    string[] parts = line.Split('\t');
+
+                    if (parts.Length >= 3 && parts[1] == "00000000")
+                    {
+                        string gatewayHex = parts[2];
+                        byte[] gatewayBytes = BitConverter.GetBytes(Convert.ToInt32(gatewayHex, 16));
+                        Array.Reverse(gatewayBytes);
+                        IPAddress gatewayAddress = new IPAddress(gatewayBytes);
+
+                        networkAdapter.DefaultIPGatewayList.Add(gatewayAddress);
+                    }
+                }
+
+                foreach (string line in TryReadLinesFromFile("/proc/net/inet6"))
+                {
+                    string[] parts = line.Split(' ');
+
+                    if (parts.Length >= 6 && parts[0] == interfaceName)
+                    {
+                        string ipAddressHex = parts[1];
+                        string subnetMaskHex = parts[4];
+
+                        byte[] ipAddressBytes = FromHexString(ipAddressHex);
+                        byte[] subnetMaskBytes = FromHexString(subnetMaskHex);
+
+                        IPAddress ipAddress = new IPAddress(ipAddressBytes);
+                        IPAddress subnetMask = new IPAddress(subnetMaskBytes);
+
+                        networkAdapter.IPAddressList.Add(ipAddress);
+                        networkAdapter.IPSubnetList.Add(subnetMask);
+                    }
+                }
 
                 networkAdapterList.Add(networkAdapter);
             }
@@ -669,30 +708,17 @@ namespace Hardware.Info.Linux
             return networkAdapterList;
         }
 
-        private string GetAdapterType(string interfaceName)
+        private byte[] FromHexString(string hexString)
         {
-            string[] udevInfoLines = File.ReadAllLines($"/sys/class/net/{interfaceName}/device/uevent");
+            hexString = hexString.Replace(":", string.Empty);
+            byte[] bytes = new byte[hexString.Length / 2];
 
-            string line = udevInfoLines.FirstOrDefault(l => l.StartsWith("DEVTYPE"));
-
-            if (line != null)
+            for (int i = 0; i < hexString.Length; i += 2)
             {
-                return line.Split('=')[1].Trim();
+                bytes[i / 2] = Convert.ToByte(hexString.Substring(i, 2), 16);
             }
 
-            return string.Empty;
-        }
-
-        private ulong GetAdapterSpeed(string interfaceName)
-        {
-            string speedString = File.ReadAllText($"/sys/class/net/{interfaceName}/speed").Trim();
-
-            if (ulong.TryParse(speedString, out ulong speed))
-            {
-                return speed;
-            }
-
-            return 0;
+            return bytes;
         }
 
         public override List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)

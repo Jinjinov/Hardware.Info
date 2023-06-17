@@ -642,51 +642,31 @@ namespace Hardware.Info.Linux
 
         public List<NetworkAdapter> GetNetworkAdapters()
         {
-            List<NetworkAdapter> adapters = new List<NetworkAdapter>();
+            List<NetworkAdapter> networkAdapterList = new List<NetworkAdapter>();
 
-            // Read the contents of /proc/net/dev
-            string[] procNetDevLines = File.ReadAllLines("/proc/net/dev");
+            IEnumerable<string> interfaceFiles = Directory.EnumerateDirectories("/sys/class/net");
 
-            // Skip the header lines
-            string[] dataLines = procNetDevLines.Skip(2).ToArray();
-
-            foreach (string line in dataLines)
+            foreach (string interfaceFile in interfaceFiles)
             {
-                string[] parts = line.Split(':');
-                string interfaceName = parts[0].Trim();
+                string interfaceName = Path.GetFileName(interfaceFile);
 
-                // Get the MAC address from the /sys/class/net/{interface}/address file
-                string macAddressPath = $"/sys/class/net/{interfaceName}/address";
-                string macAddress = File.ReadAllText(macAddressPath).Trim();
+                string macAddressFile = $"/sys/class/net/{interfaceName}/address";
 
-                // Get other properties from the /sys/class/net/{interface} directory
-                string interfaceDescription = File.ReadAllText($"/sys/class/net/{interfaceName}/device/uevent").Trim();
-                string interfaceManufacturer = File.ReadAllText($"/sys/class/net/{interfaceName}/device/vendor").Trim();
-                string interfaceProductName = File.ReadAllText($"/sys/class/net/{interfaceName}/device/device").Trim();
+                string macAddress = TryReadTextFromFile(macAddressFile);
 
-                // Create a new NetworkAdapter instance
-                NetworkAdapter adapter = new NetworkAdapter
+                NetworkAdapter networkAdapter = new NetworkAdapter
                 {
                     Name = interfaceName,
                     MACAddress = macAddress,
-                    Description = interfaceDescription,
-                    Manufacturer = interfaceManufacturer,
-                    ProductName = interfaceProductName
                 };
 
-                // Retrieve other properties using custom parsing methods
-                adapter.AdapterType = GetAdapterType(interfaceName);
-                adapter.Caption = GetAdapterCaption(interfaceName);
-                adapter.NetConnectionID = GetNetConnectionID(interfaceName);
-                adapter.Speed = GetAdapterSpeed(interfaceName);
-                adapter.BytesSentPersec = GetBytesSentPersec(interfaceName);
-                adapter.BytesReceivedPersec = GetBytesReceivedPersec(interfaceName);
+                networkAdapter.AdapterType = GetAdapterType(interfaceName);
+                networkAdapter.Speed = GetAdapterSpeed(interfaceName);
 
-                // Add the NetworkAdapter to the list
-                adapters.Add(adapter);
+                networkAdapterList.Add(networkAdapter);
             }
 
-            return adapters;
+            return networkAdapterList;
         }
 
         private string GetAdapterType(string interfaceName)
@@ -698,34 +678,6 @@ namespace Hardware.Info.Linux
             if (line != null)
             {
                 return line.Split('=')[1].Trim();
-            }
-
-            return string.Empty;
-        }
-
-        private string GetAdapterCaption(string interfaceName)
-        {
-            string[] sysClassNetAddressLines = File.ReadAllLines($"/sys/class/net/{interfaceName}/address");
-
-            string line = sysClassNetAddressLines.FirstOrDefault(l => l.StartsWith("Interface"));
-
-            if (line != null)
-            {
-                return line.Split(':')[1].Trim();
-            }
-
-            return string.Empty;
-        }
-
-        private string GetNetConnectionID(string interfaceName)
-        {
-            string[] sysClassNetAddressLines = File.ReadAllLines($"/sys/class/net/{interfaceName}/address");
-
-            string line = sysClassNetAddressLines.FirstOrDefault(l => l.StartsWith("Interface"));
-
-            if (line != null)
-            {
-                return line.Split(':')[1].Trim();
             }
 
             return string.Empty;
@@ -743,40 +695,6 @@ namespace Hardware.Info.Linux
             return 0;
         }
 
-        private ulong GetBytesSentPersec(string interfaceName)
-        {
-            string procNetDevLine = File.ReadLines("/proc/net/dev").FirstOrDefault(line => line.Contains(interfaceName));
-
-            if (procNetDevLine != null)
-            {
-                string[] parts = Regex.Split(procNetDevLine, @"\s+");
-
-                if (parts.Length >= 10 && ulong.TryParse(parts[9], out ulong bytesSentPersec))
-                {
-                    return bytesSentPersec;
-                }
-            }
-
-            return 0;
-        }
-
-        private ulong GetBytesReceivedPersec(string interfaceName)
-        {
-            string procNetDevLine = File.ReadLines("/proc/net/dev").FirstOrDefault(line => line.Contains(interfaceName));
-
-            if (procNetDevLine != null)
-            {
-                string[] parts = Regex.Split(procNetDevLine, @"\s+");
-
-                if (parts.Length >= 2 && ulong.TryParse(parts[1], out ulong bytesReceivedPersec))
-                {
-                    return bytesReceivedPersec;
-                }
-            }
-
-            return 0;
-        }
-
         public override List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)
         {
             List<NetworkAdapter> networkAdapterList;
@@ -788,57 +706,6 @@ namespace Hardware.Info.Linux
             catch (NetworkInformationException)
             {
                 networkAdapterList = GetNetworkAdapters();
-
-                networkAdapterList = new List<NetworkAdapter>();
-
-                IEnumerable<string> interfaceFiles = Directory.EnumerateDirectories("/sys/class/net");
-
-                foreach (string interfaceFile in interfaceFiles)
-                {
-                    string interfaceName = Path.GetFileName(interfaceFile);
-
-                    string macAddressFile = $"/sys/class/net/{interfaceName}/address";
-
-                    string macAddress = TryReadTextFromFile(macAddressFile);
-
-                    NetworkAdapter networkAdapter = new NetworkAdapter
-                    {
-                        Name = interfaceName,
-                        MACAddress = macAddress,
-                        Description = interfaceName,
-                    };
-
-                    string ipFile = $"/proc/net/dev";
-
-                    var lines = TryReadLinesFromFile(ipFile);
-
-                    string? ipAddressInfo = lines.FirstOrDefault(line => line.Contains(interfaceName));
-
-                    if (ipAddressInfo != null)
-                    {
-                        string[] parts = ipAddressInfo.Split(':');
-
-                        if (parts.Length > 1)
-                        {
-                            string[] addresses = parts[1].Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                            if (addresses.Length > 1)
-                            {
-                                if (IPAddress.TryParse(addresses[0], out IPAddress ipAddress))
-                                {
-                                    networkAdapter.IPAddressList.Add(ipAddress);
-                                }
-
-                                if (IPAddress.TryParse(addresses[1], out IPAddress subnetMask))
-                                {
-                                    networkAdapter.IPSubnetList.Add(subnetMask);
-                                }
-                            }
-                        }
-                    }
-
-                    networkAdapterList.Add(networkAdapter);
-                }
             }
 
             if (includeBytesPersec)

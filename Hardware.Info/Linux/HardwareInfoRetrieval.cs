@@ -6,6 +6,7 @@ using System.Net.NetworkInformation;
 using System.Net;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using System.Globalization;
 
 // https://www.binarytides.com/linux-commands-hardware-info/
 
@@ -671,7 +672,7 @@ namespace Hardware.Info.Linux
                 {
                     string[] parts = line.Split('\t');
 
-                    if (parts.Length >= 3 && parts[0] == interfaceName && parts[1] == "00000000")
+                    if (parts.Length >= 3 && parts[0] == interfaceName && parts[1] == "00000000" && parts[7] == "00000000")
                     {
                         string gatewayHex = parts[2];
                         byte[] gatewayBytes = BitConverter.GetBytes(Convert.ToInt32(gatewayHex, 16));
@@ -707,81 +708,73 @@ namespace Hardware.Info.Linux
 
         private void GetIP()
         {
-            string fibTriePath = "/proc/net/fib_trie";
-            string routePath = "/proc/net/route";
-            string[] networkInterfaces = Directory.GetDirectories("/sys/class/net/");
+            string[] fibTrieLines = TryReadLinesFromFile("/proc/net/fib_trie");
+            string[] routeLines = TryReadLinesFromFile("/proc/net/route");
 
-            string fibTrieContent = File.ReadAllText(fibTriePath);
-            string routeContent = File.ReadAllText(routePath);
-
-            string[] fibTrieLines = fibTrieContent.Split('\n');
-            string[] routeLines = routeContent.Split('\n');
-
-            foreach (string networkInterface in networkInterfaces)
+            foreach (string networkInterface in Directory.GetDirectories("/sys/class/net/"))
             {
                 string interfaceName = networkInterface.Split('/').Last();
-                string networks = GetNetworksForInterface(routeLines, interfaceName);
 
-                foreach (string network in networks.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                foreach (string routeLine in routeLines)
                 {
-                    string netHex = network.Split(' ')[0];
-                    string netDec = ConvertHexToDecimalIP(netHex.Substring(6, 2)) + "." +
-                                    ConvertHexToDecimalIP(netHex.Substring(4, 2)) + "." +
-                                    ConvertHexToDecimalIP(netHex.Substring(2, 2)) + "." +
-                                    ConvertHexToDecimalIP(netHex.Substring(0, 2));
+                    string[] parts = routeLine.Split('\t');
 
-                    string maskHex = network.Split(' ')[1];
-                    string maskDec = ConvertHexToDecimalIP(maskHex.Substring(6, 2)) + "." +
-                                     ConvertHexToDecimalIP(maskHex.Substring(4, 2)) + "." +
-                                     ConvertHexToDecimalIP(maskHex.Substring(2, 2)) + "." +
-                                     ConvertHexToDecimalIP(maskHex.Substring(0, 2));
+                    if (parts[0] == interfaceName && parts[2] == "00000000" && parts[7] != "FFFFFFFF")
+                    {
+                        string network = HexToDecimalIP(parts[1]);
+                        string mask = HexToDecimalIP(parts[7]);
 
-                    string interfaceRoute = GetInterfaceRoute(fibTrieLines, netDec);
+                        string interfaceIp = GetInterfaceIp(fibTrieLines, network);
 
-                    Console.WriteLine($"{interfaceName}:\t{interfaceRoute}\n\t{maskDec}\n");
+                        Console.WriteLine($"{interfaceName}:\t{interfaceIp}\n\t{mask}\n");
+                    }
                 }
+            }
+
+            string HexToDecimalIP(string hex)
+            {
+                return int.Parse(hex.Substring(6, 2), NumberStyles.HexNumber) + "." +
+                       int.Parse(hex.Substring(4, 2), NumberStyles.HexNumber) + "." +
+                       int.Parse(hex.Substring(2, 2), NumberStyles.HexNumber) + "." +
+                       int.Parse(hex.Substring(0, 2), NumberStyles.HexNumber);
             }
         }
 
-        private string GetNetworksForInterface(string[] routeLines, string interfaceName)
+        private string GetInterfaceIp(string[] fibTrieLines, string network)
         {
-            return string.Join("\n", routeLines
-                .Where(line => line.StartsWith(interfaceName) && line.Split('\t')[2] != "FFFFFFFF")
-                .Select(line => line.Split('\t')[1] + " " + line.Split('\t')[7]));
-        }
+            string ip = string.Empty;
 
-        private string GetInterfaceRoute(string[] fibTrieLines, string network)
-        {
             bool foundLocal = false;
-            string interfaceRoute = string.Empty;
+            bool foundNetwork = false;
+            bool foundIp = false;
 
             foreach (string line in fibTrieLines)
             {
-                if (line.StartsWith("Local:"))
+                if (line.StartsWith("Local"))
                 {
                     foundLocal = true;
                 }
                 else if (foundLocal)
                 {
-                    string[] parts = line.Split(' ');
 
-                    if (parts[0] == network)
+                    if (line.Contains(network))
                     {
-                        interfaceRoute = parts[1];
+                        foundNetwork = true;
                     }
-                    else if (parts[0] == "32" && parts[1] == "host")
+                    else if (foundNetwork)
                     {
+                        string[] parts = line.Split(' ');
+                        ip = parts[1];
+                    }
+                    else if (line.Contains("32 host"))
+                    {
+                        foundIp = true;
                         break;
                     }
                 }
             }
 
-            return interfaceRoute;
-        }
-
-        private string ConvertHexToDecimalIP(string hex)
-        {
-            return int.Parse(hex, System.Globalization.NumberStyles.HexNumber).ToString();
+            return foundIp ? ip : network;
         }
 
         // solution 1
@@ -790,8 +783,7 @@ namespace Hardware.Info.Linux
 
         private void HexToInt(ref int result, string hexString)
         {
-            result = int.Parse(hexString.Substring(6, 2) + hexString.Substring(4, 2) +
-                               hexString.Substring(2, 2) + hexString.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
+            result = int.Parse(hexString.Substring(6, 2) + hexString.Substring(4, 2) + hexString.Substring(2, 2) + hexString.Substring(0, 2), NumberStyles.HexNumber);
         }
 
         private string IntToIp(params int[] ipInts)
@@ -812,7 +804,7 @@ namespace Hardware.Info.Linux
             int maskInt = 0;
             int netGw = 0;
             int ipInt = 0;
-            int maskBits = 0;
+            int maskBits;
             string[] rtLine = new string[0];
 
             using (StreamReader reader = new StreamReader("/proc/net/route"))

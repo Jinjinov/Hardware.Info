@@ -647,7 +647,6 @@ namespace Hardware.Info.Linux
             List<NetworkAdapter> networkAdapterList = new List<NetworkAdapter>();
 
             string[] route = TryReadLinesFromFile("/proc/net/route");
-            string[] if_inet6 = TryReadLinesFromFile("/proc/net/if_inet6");
             string[] fibTrieLines = TryReadLinesFromFile("/proc/net/fib_trie");
 
             foreach (string interfaceDirectory in Directory.EnumerateDirectories("/sys/class/net"))
@@ -694,25 +693,11 @@ namespace Hardware.Info.Linux
                             string network = HexToDecimalIP(parts[1]);
                             string mask = HexToDecimalIP(parts[7]);
 
-                            string interfaceIp = GetInterfaceIp(fibTrieLines, network);
-
-                            networkAdapter.IPAddressList.Add(IPAddress.Parse(interfaceIp));
-                            networkAdapter.IPSubnetList.Add(IPAddress.Parse(mask));
-                        }
-                    }
-                }
-
-                foreach (string line in if_inet6)
-                {
-                    string[] parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
-
-                    if (parts.Length >= 6 && parts[5] == interfaceName)
-                    {
-                        string ipAddress = parts[0];
-
-                        if (IPAddress.TryParse(ipAddress, out IPAddress ipv6Address) && ipv6Address.AddressFamily == AddressFamily.InterNetworkV6)
-                        {
-                            networkAdapter.IPAddressList.Add(ipv6Address);
+                            if (TryGetInterfaceIp(fibTrieLines, network, out string interfaceIp))
+                            {
+                                networkAdapter.IPAddressList.Add(IPAddress.Parse(interfaceIp));
+                                networkAdapter.IPSubnetList.Add(IPAddress.Parse(mask));
+                            }
                         }
                     }
                 }
@@ -731,9 +716,9 @@ namespace Hardware.Info.Linux
                    int.Parse(hex.Substring(0, 2), NumberStyles.HexNumber);
         }
 
-        private string GetInterfaceIp(string[] fibTrieLines, string network)
+        private bool TryGetInterfaceIp(string[] fibTrieLines, string network, out string ip)
         {
-            string ip = string.Empty;
+            ip = string.Empty;
 
             bool foundLocal = false;
             bool foundNetwork = false;
@@ -747,25 +732,25 @@ namespace Hardware.Info.Linux
                 }
                 else if (foundLocal)
                 {
-
                     if (line.Contains(network))
                     {
                         foundNetwork = true;
                     }
                     else if (foundNetwork)
                     {
+                        if (line.Contains("32 host"))
+                        {
+                            foundIp = true;
+                            break;
+                        }
+
                         string[] parts = line.Split(new[] { ' ' }, StringSplitOptions.RemoveEmptyEntries);
                         ip = parts[1];
-                    }
-                    else if (line.Contains("32 host"))
-                    {
-                        foundIp = true;
-                        break;
                     }
                 }
             }
 
-            return foundIp ? ip : network;
+            return foundIp;
         }
 
         public override List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)

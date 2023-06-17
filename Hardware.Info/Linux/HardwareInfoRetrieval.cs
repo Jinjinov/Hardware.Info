@@ -721,6 +721,174 @@ namespace Hardware.Info.Linux
             return bytes;
         }
 
+        // solution 1
+
+        private void GetIP()
+        {
+            string fibTriePath = "/proc/net/fib_trie";
+            string routePath = "/proc/net/route";
+            string[] networkInterfaces = Directory.GetDirectories("/sys/class/net/");
+
+            string fibTrieContent = File.ReadAllText(fibTriePath);
+            string routeContent = File.ReadAllText(routePath);
+
+            string[] fibTrieLines = fibTrieContent.Split('\n');
+            string[] routeLines = routeContent.Split('\n');
+
+            foreach (string networkInterface in networkInterfaces)
+            {
+                string interfaceName = networkInterface.Split('/').Last();
+                string networks = GetNetworksForInterface(routeLines, interfaceName);
+
+                foreach (string network in networks.Split(new[] { '\n' }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    string netHex = network.Split(' ')[0];
+                    string netDec = ConvertHexToDecimalIP(netHex.Substring(6, 2)) + "." +
+                                    ConvertHexToDecimalIP(netHex.Substring(4, 2)) + "." +
+                                    ConvertHexToDecimalIP(netHex.Substring(2, 2)) + "." +
+                                    ConvertHexToDecimalIP(netHex.Substring(0, 2));
+
+                    string maskHex = network.Split(' ')[1];
+                    string maskDec = ConvertHexToDecimalIP(maskHex.Substring(6, 2)) + "." +
+                                     ConvertHexToDecimalIP(maskHex.Substring(4, 2)) + "." +
+                                     ConvertHexToDecimalIP(maskHex.Substring(2, 2)) + "." +
+                                     ConvertHexToDecimalIP(maskHex.Substring(0, 2));
+
+                    string interfaceRoute = GetInterfaceRoute(fibTrieLines, netDec);
+
+                    Console.WriteLine($"{interfaceName}:\t{interfaceRoute}\n\t{maskDec}\n");
+                }
+            }
+        }
+
+        private string GetNetworksForInterface(string[] routeLines, string interfaceName)
+        {
+            return string.Join("\n", routeLines
+                .Where(line => line.StartsWith(interfaceName) && line.Split('\t')[2] != "FFFFFFFF")
+                .Select(line => line.Split('\t')[1] + " " + line.Split('\t')[7]));
+        }
+
+        private string GetInterfaceRoute(string[] fibTrieLines, string network)
+        {
+            bool foundLocal = false;
+            string interfaceRoute = string.Empty;
+
+            foreach (string line in fibTrieLines)
+            {
+                if (line.StartsWith("Local:"))
+                {
+                    foundLocal = true;
+                }
+                else if (foundLocal)
+                {
+                    string[] parts = line.Split(' ');
+
+                    if (parts[0] == network)
+                    {
+                        interfaceRoute = parts[1];
+                    }
+                    else if (parts[0] == "32" && parts[1] == "host")
+                    {
+                        break;
+                    }
+                }
+            }
+
+            return interfaceRoute;
+        }
+
+        private string ConvertHexToDecimalIP(string hex)
+        {
+            return int.Parse(hex, System.Globalization.NumberStyles.HexNumber).ToString();
+        }
+
+        // solution 1
+
+        // solution 2
+
+        private void HexToInt(ref int result, string hexString)
+        {
+            result = int.Parse(hexString.Substring(6, 2) + hexString.Substring(4, 2) +
+                               hexString.Substring(2, 2) + hexString.Substring(0, 2), System.Globalization.NumberStyles.HexNumber);
+        }
+
+        private string IntToIp(params int[] ipInts)
+        {
+            return $"{(ipInts[0] >> 24) & 255}.{(ipInts[0] >> 16) & 255}.{(ipInts[0] >> 8) & 255}.{ipInts[0] & 255}";
+        }
+
+        private int MaskLen(int maskInt)
+        {
+            int i;
+            for (i = 0; i < 32 && (1 & (maskInt >> (31 - i))) != 0; i++) { }
+            return i;
+        }
+
+        private void GetIp()
+        {
+            int netInt = 0;
+            int maskInt = 0;
+            int netGw = 0;
+            int ipInt = 0;
+            int maskBits = 0;
+            string[] rtLine = new string[0];
+
+            using (StreamReader reader = new StreamReader("/proc/net/route"))
+            {
+                string line;
+                while ((line = reader.ReadLine()) != null)
+                {
+                    rtLine = line.Split(' ');
+                    if (rtLine[2] == "00000000" && rtLine[7] != "00000000")
+                    {
+                        HexToInt(ref netInt, rtLine[1]);
+                        HexToInt(ref maskInt, rtLine[7]);
+                        if ((netInt & maskInt) == netInt)
+                        {
+                            string[] procConnLists = { "/proc/net/tcp", "/proc/net/udp" };
+                            foreach (string procConnList in procConnLists)
+                            {
+                                using (StreamReader connReader = new StreamReader(procConnList))
+                                {
+                                    string connLine;
+                                    while ((connLine = connReader.ReadLine()) != null)
+                                    {
+                                        string[] conLine = connLine.Split(':', ' ', '\t', '\n');
+                                        if (Regex.IsMatch(conLine[1], "^[0-9a-fA-F]*$"))
+                                        {
+                                            HexToInt(ref ipInt, conLine[1]);
+                                            if ((ipInt & maskInt) == netInt)
+                                                break;
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    }
+                    else if (rtLine[1] == "00000000" && rtLine[7] == "00000000")
+                    {
+                        HexToInt(ref netGw, rtLine[2]);
+                    }
+                }
+            }
+
+            maskBits = MaskLen(maskInt);
+            string addrLine = IntToIp(ipInt);
+            string network = IntToIp(netInt);
+            string gateway = IntToIp(netGw);
+            string netmask = IntToIp(maskInt);
+
+            string outForm = "{0,-12}: {1}\n";
+            Console.WriteLine(outForm, "Interface", "Address");
+            Console.WriteLine(outForm, rtLine, addrLine);
+            Console.WriteLine(outForm, "Network", network);
+            Console.WriteLine(outForm, "Gateway", gateway);
+            Console.WriteLine(outForm, "Netmask", netmask);
+            Console.WriteLine("Masklen: {0} bits", maskBits);
+        }
+
+        // solution 2
+
         public override List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)
         {
             List<NetworkAdapter> networkAdapterList;

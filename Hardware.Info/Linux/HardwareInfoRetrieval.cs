@@ -646,7 +646,7 @@ namespace Hardware.Info.Linux
 
             foreach (string interfaceDirectory in Directory.EnumerateDirectories("/sys/class/net"))
             {
-                string interfaceName = Path.GetDirectoryName(interfaceDirectory);
+                string interfaceName = Path.GetFileName(interfaceDirectory);
 
                 string macAddress = TryReadTextFromFile($"/sys/class/net/{interfaceName}/address");
 
@@ -671,7 +671,7 @@ namespace Hardware.Info.Linux
                 {
                     string[] parts = line.Split('\t');
 
-                    if (parts.Length >= 3 && parts[1] == "00000000")
+                    if (parts.Length >= 3 && parts[0] == interfaceName && parts[1] == "00000000")
                     {
                         string gatewayHex = parts[2];
                         byte[] gatewayBytes = BitConverter.GetBytes(Convert.ToInt32(gatewayHex, 16));

@@ -288,10 +288,19 @@ namespace Hardware.Info.Windows
                                                             : "SELECT Caption, CurrentClockSpeed, Description, L2CacheSize, L3CacheSize, Manufacturer, MaxClockSpeed, Name, NumberOfCores, NumberOfLogicalProcessors, ProcessorId, SocketDesignation FROM Win32_Processor";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, query, _enumerationOptions);
 
-            using PerformanceCounter cpuCounter = new PerformanceCounter("Processor Information", "% Processor Performance", "_Total");
-            float processorPerformance = cpuCounter.NextValue();
-            System.Threading.Thread.Sleep(1); // the first call to NextValue() always returns 0
-            processorPerformance = cpuCounter.NextValue();
+            float processorPerformance = 100f;
+
+            try
+            {
+                using PerformanceCounter cpuCounter = new PerformanceCounter("Processor Information", "% Processor Performance", "_Total");
+                processorPerformance = cpuCounter.NextValue();
+                System.Threading.Thread.Sleep(1); // the first call to NextValue() always returns 0
+                processorPerformance = cpuCounter.NextValue();
+            }
+            catch
+            {
+                // Ignore performance counter errors and just assume that it's at 100 %
+            }
 
             uint L1InstructionCacheSize = 0;
             uint L1DataCacheSize = 0;

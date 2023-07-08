@@ -136,6 +136,10 @@ You can avoid the 21 second delay by excluding the queries that cause it (see Se
 
 Sometimes `NetworkAdapter.Speed` in `Win32_NetworkAdapter` can be `0` or `long.MaxValue`. The correct value can be retrived from `CurrentBandwidth` in `Win32_PerfFormattedData_Tcpip_NetworkAdapter` but unfortunately reading from `Win32_PerfFormattedData_Tcpip_NetworkAdapter` causes a 21 second delay on the first read, like mentioned in the previous paragraph. Calling `RefreshNetworkAdapterList` with `includeBytesPersec = true` will also read the `CurrentBandwidth`.
 
+### `WmiNetUtilsHelper` will throw an exception in Windows if publish settings use `<PublishTrimmed>true</PublishTrimmed>`
+
+This is a known error: https://github.com/dotnet/core/issues/7051#issuecomment-1071484354
+
 ## Settings
 
 ### Constructor settings:

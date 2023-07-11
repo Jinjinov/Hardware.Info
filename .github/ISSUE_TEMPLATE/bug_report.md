@@ -9,7 +9,7 @@ assignees: ''
 
 ### Library version
 
-### OS & OS version
+### OS, version, architecture (32 bit / 64 bit)
 
 ### Describe the bug
 <!-- 

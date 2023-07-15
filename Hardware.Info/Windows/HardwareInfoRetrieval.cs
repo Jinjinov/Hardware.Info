@@ -164,7 +164,7 @@ namespace Hardware.Info.Windows
             return (obj is string str) ? str : string.Empty;
         }
 
-        public static string GetStringFromByteArray(ushort[] array)
+        public static string GetStringFromUInt16Array(ushort[] array)
         {
             try
             {
@@ -567,10 +567,10 @@ namespace Hardware.Info.Windows
                 MonitorExtended monitorExtended = new MonitorExtended
                 {
                     Active = GetPropertyValue<bool>(mo["Active"]),
-                    ProductCodeID = GetStringFromByteArray(GetPropertyArray<ushort>(mo["ProductCodeID"])),
-                    UserFriendlyName = GetStringFromByteArray(GetPropertyArray<ushort>(mo["UserFriendlyName"])),
-                    SerialNumberID = GetStringFromByteArray(GetPropertyArray<ushort>(mo["SerialNumberID"])),
-                    ManufacturerName = GetStringFromByteArray(GetPropertyArray<ushort>(mo["ManufacturerName"])),
+                    ProductCodeID = GetStringFromUInt16Array(GetPropertyArray<ushort>(mo["ProductCodeID"])),
+                    UserFriendlyName = GetStringFromUInt16Array(GetPropertyArray<ushort>(mo["UserFriendlyName"])),
+                    SerialNumberID = GetStringFromUInt16Array(GetPropertyArray<ushort>(mo["SerialNumberID"])),
+                    ManufacturerName = GetStringFromUInt16Array(GetPropertyArray<ushort>(mo["ManufacturerName"])),
                     WeekOfManufacture = GetPropertyValue<byte>(mo["WeekOfManufacture"]),
                     YearOfManufacture = GetPropertyValue<ushort>(mo["YearOfManufacture"]),
                 };

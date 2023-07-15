@@ -18,6 +18,7 @@ namespace Hardware.Info.Test
             _hardwareInfo.RefreshKeyboardList();
             _hardwareInfo.RefreshMemoryList();
             _hardwareInfo.RefreshMonitorList();
+            _hardwareInfo.RefreshMonitorExtendedList();
             _hardwareInfo.RefreshMotherboardList();
             _hardwareInfo.RefreshMouseList();
             _hardwareInfo.RefreshNetworkAdapterList(includeBytesPerSec: false, includeNetworkAdapterConfiguration: true);
@@ -69,6 +70,9 @@ namespace Hardware.Info.Test
                 Console.WriteLine(hardware);
 
             foreach (var hardware in _hardwareInfo.MonitorList)
+                Console.WriteLine(hardware);
+
+            foreach (var hardware in _hardwareInfo.MonitorExtendedList)
                 Console.WriteLine(hardware);
 
             foreach (var hardware in _hardwareInfo.MotherboardList)

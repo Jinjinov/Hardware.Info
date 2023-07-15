@@ -20,6 +20,7 @@ namespace Hardware.Info
         public List<Keyboard> KeyboardList { get; private set; } = new List<Keyboard>();
         public List<Memory> MemoryList { get; private set; } = new List<Memory>();
         public List<Monitor> MonitorList { get; private set; } = new List<Monitor>();
+        public List<MonitorExtended> MonitorExtendedList { get; private set; } = new List<MonitorExtended>();
         public List<Motherboard> MotherboardList { get; private set; } = new List<Motherboard>();
         public List<Mouse> MouseList { get; private set; } = new List<Mouse>();
         public List<NetworkAdapter> NetworkAdapterList { get; private set; } = new List<NetworkAdapter>();
@@ -59,6 +60,7 @@ namespace Hardware.Info
             RefreshKeyboardList();
             RefreshMemoryList();
             RefreshMonitorList();
+            RefreshMonitorExtendedList();
             RefreshMotherboardList();
             RefreshMouseList();
             RefreshNetworkAdapterList();
@@ -77,6 +79,7 @@ namespace Hardware.Info
         public void RefreshKeyboardList() => KeyboardList = _hardwareInfoRetrieval.GetKeyboardList();
         public void RefreshMemoryList() => MemoryList = _hardwareInfoRetrieval.GetMemoryList();
         public void RefreshMonitorList() => MonitorList = _hardwareInfoRetrieval.GetMonitorList();
+        public void RefreshMonitorExtendedList() => MonitorExtendedList = _hardwareInfoRetrieval.GetMonitorExtendedList();
         public void RefreshMotherboardList() => MotherboardList = _hardwareInfoRetrieval.GetMotherboardList();
         public void RefreshMouseList() => MouseList = _hardwareInfoRetrieval.GetMouseList();
         public void RefreshNetworkAdapterList(bool includeBytesPerSec = true, bool includeNetworkAdapterConfiguration = true) => NetworkAdapterList = _hardwareInfoRetrieval.GetNetworkAdapterList(includeBytesPerSec, includeNetworkAdapterConfiguration);

@@ -5,6 +5,7 @@ using System.Management;
 using System.Net;
 using System.Runtime.InteropServices;
 using System.Security;
+using System.Text;
 
 // https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-osversioninfoexa
 
@@ -42,6 +43,7 @@ namespace Hardware.Info.Windows
         public bool UseAsteriskInWMI { get; set; }
 
         private readonly string _managementScope = "root\\cimv2";
+        private readonly string _managementScopeWmi = "root\\wmi";
         private readonly EnumerationOptions _enumerationOptions = new EnumerationOptions() { ReturnImmediately = true, Rewindable = false, Timeout = EnumerationOptions.InfiniteTimeout };
 
         public HardwareInfoRetrieval(TimeSpan? enumerationOptionsTimeout = null)
@@ -160,6 +162,24 @@ namespace Hardware.Info.Windows
         public static string GetPropertyString(object obj)
         {
             return (obj is string str) ? str : string.Empty;
+        }
+
+        public static string GetStringFromByteArray(ushort[] array)
+        {
+            try
+            {
+                if (array.Length == 0) return string.Empty;
+
+                byte[] byteArray = new byte[array.Length * 2];
+                Buffer.BlockCopy(array, 0, byteArray, 0, byteArray.Length);
+
+                string str = Encoding.Unicode.GetString(byteArray).Trim('\0');
+                return str;
+            }
+            catch
+            {
+                return string.Empty;
+            }
         }
 
         // https://docs.microsoft.com/en-us/dotnet/api/system.management.managementpath.defaultpath?view=netframework-4.8
@@ -532,6 +552,33 @@ namespace Hardware.Info.Windows
             }
 
             return monitorList;
+        }
+
+        public List<MonitorExtended> GetMonitorExtendedList()
+        {
+            List<MonitorExtended> monitorExtList = new List<MonitorExtended>();
+
+            string queryString = UseAsteriskInWMI ? "SELECT * FROM WmiMonitorID"
+                                      : "SELECT Active, ProductCodeID, SerialNumberID, ManufacturerName, UserFriendlyName, WeekOfManufacture, YearOfManufacture FROM WmiMonitorID";
+            using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScopeWmi, queryString, _enumerationOptions);
+
+            foreach (ManagementBaseObject mo in mos.Get())
+            {
+                MonitorExtended monitorExtended = new MonitorExtended
+                {
+                    Active = GetPropertyValue<bool>(mo["Active"]),
+                    ProductCodeID = GetStringFromByteArray(GetPropertyArray<ushort>(mo["ProductCodeID"])),
+                    UserFriendlyName = GetStringFromByteArray(GetPropertyArray<ushort>(mo["UserFriendlyName"])),
+                    SerialNumberID = GetStringFromByteArray(GetPropertyArray<ushort>(mo["SerialNumberID"])),
+                    ManufacturerName = GetStringFromByteArray(GetPropertyArray<ushort>(mo["ManufacturerName"])),
+                    WeekOfManufacture = GetPropertyValue<byte>(mo["WeekOfManufacture"]),
+                    YearOfManufacture = GetPropertyValue<ushort>(mo["YearOfManufacture"]),
+                };
+
+                monitorExtList.Add(monitorExtended);
+            }
+
+            return monitorExtList;
         }
 
         public List<Motherboard> GetMotherboardList()

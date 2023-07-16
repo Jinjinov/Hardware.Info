@@ -813,17 +813,6 @@ Graphics/Displays:
             return monitorList;
         }
 
-        public List<MonitorExtended> GetMonitorExtendedList()
-        {
-            List<MonitorExtended> monitorExtendedList = new List<MonitorExtended>();
-            
-            MonitorExtended monitorExtended = new MonitorExtended();
-
-            monitorExtendedList.Add(monitorExtended);
-
-            return monitorExtendedList;
-        }
-
         public List<Motherboard> GetMotherboardList()
         {
             List<Motherboard> motherboardList = new List<Motherboard>();

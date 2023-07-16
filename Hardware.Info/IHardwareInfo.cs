@@ -14,7 +14,6 @@ namespace Hardware.Info
         List<Keyboard> KeyboardList { get; }
         List<Memory> MemoryList { get; }
         List<Monitor> MonitorList { get; }
-        List<MonitorExtended> MonitorExtendedList { get;}
         List<Motherboard> MotherboardList { get; }
         List<Mouse> MouseList { get; }
         List<NetworkAdapter> NetworkAdapterList { get; }
@@ -34,7 +33,6 @@ namespace Hardware.Info
         void RefreshKeyboardList();
         void RefreshMemoryList();
         void RefreshMonitorList();
-        void RefreshMonitorExtendedList();
         void RefreshMotherboardList();
         void RefreshMouseList();
         void RefreshNetworkAdapterList(bool includeBytesPerSec = true, bool includeNetworkAdapterConfiguration = true);

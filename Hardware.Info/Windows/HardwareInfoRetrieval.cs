@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Linq;
 using System.Management;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -531,54 +532,52 @@ namespace Hardware.Info.Windows
         {
             List<Monitor> monitorList = new List<Monitor>();
 
-            string queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_DesktopMonitor WHERE PNPDeviceID IS NOT NULL"
-                                                  : "SELECT Caption, Description, MonitorManufacturer, MonitorType, Name, PixelsPerXLogicalInch, PixelsPerYLogicalInch FROM Win32_DesktopMonitor WHERE PNPDeviceID IS NOT NULL";
-            using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
+            string win32PnpEntityQuery = UseAsteriskInWMI ? "SELECT * FROM WHERE PNPClass='Monitor'"
+                                                          : "SELECT DeviceId FROM Win32_PnPEntity WHERE PNPClass='Monitor'";
+            using ManagementObjectSearcher win32PnpEntityMos = new ManagementObjectSearcher(_managementScope, win32PnpEntityQuery, _enumerationOptions);
 
-            foreach (ManagementBaseObject mo in mos.Get())
+            foreach (ManagementBaseObject win32PnpEntityMo in win32PnpEntityMos.Get())
             {
-                Monitor monitor = new Monitor
+                string deviceId = GetPropertyString(win32PnpEntityMo["DeviceId"]);
+                string win32DesktopMonitorQuery = UseAsteriskInWMI ? $"SELECT * FROM Win32_DesktopMonitor WHERE PNPDeviceId='{deviceId}'"
+                                                                   : $"SELECT Caption, Description, MonitorManufacturer, MonitorType, Name, PixelsPerXLogicalInch, PixelsPerYLogicalInch FROM Win32_DesktopMonitor WHERE PNPDeviceId='{deviceId}'";
+                using ManagementObjectSearcher win32DesktopMonitorMos = new ManagementObjectSearcher(_managementScope, win32DesktopMonitorQuery.Replace(@"\", @"\\"), _enumerationOptions);
+                
+                string wmiMonitorIdQuery = UseAsteriskInWMI ? $"SELECT * FROM WmiMonitorID WHERE InstanceName LIKE '{deviceId}%'"
+                                                            : $"SELECT Active, ProductCodeID, SerialNumberID, ManufacturerName, UserFriendlyName, WeekOfManufacture, YearOfManufacture FROM WmiMonitorID WHERE InstanceName LIKE '{deviceId}%'";
+                using ManagementObjectSearcher wmiMonitorIdMos = new ManagementObjectSearcher(_managementScopeWmi, wmiMonitorIdQuery.Replace(@"\", "_"), _enumerationOptions);
+
+                using ManagementBaseObject? desktopMonitorMo = win32DesktopMonitorMos.Get().Cast<ManagementBaseObject>().FirstOrDefault();
+                using ManagementBaseObject? wmiMonitorIdMo = wmiMonitorIdMos.Get().Cast<ManagementBaseObject>().FirstOrDefault();
+
+                Monitor monitor = new Monitor();
+                if (desktopMonitorMo != null)
                 {
-                    Caption = GetPropertyString(mo["Caption"]),
-                    Description = GetPropertyString(mo["Description"]),
-                    MonitorManufacturer = GetPropertyString(mo["MonitorManufacturer"]),
-                    MonitorType = GetPropertyString(mo["MonitorType"]),
-                    Name = GetPropertyString(mo["Name"]),
-                    PixelsPerXLogicalInch = GetPropertyValue<uint>(mo["PixelsPerXLogicalInch"]),
-                    PixelsPerYLogicalInch = GetPropertyValue<uint>(mo["PixelsPerYLogicalInch"])
-                };
+                    monitor.Caption = GetPropertyString(desktopMonitorMo["Caption"]);
+                    monitor.Description = GetPropertyString(desktopMonitorMo["Description"]);
+                    monitor.MonitorManufacturer = GetPropertyString(desktopMonitorMo["MonitorManufacturer"]);
+                    monitor.MonitorType = GetPropertyString(desktopMonitorMo["MonitorType"]);
+                    monitor.Name = GetPropertyString(desktopMonitorMo["Name"]);
+                    monitor.PixelsPerXLogicalInch = GetPropertyValue<uint>(desktopMonitorMo["PixelsPerXLogicalInch"]);
+                    monitor.PixelsPerYLogicalInch = GetPropertyValue<uint>(desktopMonitorMo["PixelsPerYLogicalInch"]);
+                }
+
+                if (wmiMonitorIdMo != null)
+                {
+                    monitor.Active = GetPropertyValue<bool>(wmiMonitorIdMo["Active"]);
+                    monitor.ProductCodeID = GetStringFromUInt16Array(GetPropertyArray<ushort>(wmiMonitorIdMo["ProductCodeID"]));
+                    monitor.UserFriendlyName = GetStringFromUInt16Array(GetPropertyArray<ushort>(wmiMonitorIdMo["UserFriendlyName"]));
+                    monitor.SerialNumberID = GetStringFromUInt16Array(GetPropertyArray<ushort>(wmiMonitorIdMo["SerialNumberID"]));
+                    monitor.ManufacturerName = GetStringFromUInt16Array(GetPropertyArray<ushort>(wmiMonitorIdMo["ManufacturerName"]));
+                    monitor.WeekOfManufacture = GetPropertyValue<byte>(wmiMonitorIdMo["WeekOfManufacture"]);
+                    monitor.YearOfManufacture = GetPropertyValue<ushort>(wmiMonitorIdMo["YearOfManufacture"]);
+                }
 
                 monitorList.Add(monitor);
+
             }
 
             return monitorList;
-        }
-
-        public List<MonitorExtended> GetMonitorExtendedList()
-        {
-            List<MonitorExtended> monitorExtList = new List<MonitorExtended>();
-
-            string queryString = UseAsteriskInWMI ? "SELECT * FROM WmiMonitorID"
-                                      : "SELECT Active, ProductCodeID, SerialNumberID, ManufacturerName, UserFriendlyName, WeekOfManufacture, YearOfManufacture FROM WmiMonitorID";
-            using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScopeWmi, queryString, _enumerationOptions);
-
-            foreach (ManagementBaseObject mo in mos.Get())
-            {
-                MonitorExtended monitorExtended = new MonitorExtended
-                {
-                    Active = GetPropertyValue<bool>(mo["Active"]),
-                    ProductCodeID = GetStringFromUInt16Array(GetPropertyArray<ushort>(mo["ProductCodeID"])),
-                    UserFriendlyName = GetStringFromUInt16Array(GetPropertyArray<ushort>(mo["UserFriendlyName"])),
-                    SerialNumberID = GetStringFromUInt16Array(GetPropertyArray<ushort>(mo["SerialNumberID"])),
-                    ManufacturerName = GetStringFromUInt16Array(GetPropertyArray<ushort>(mo["ManufacturerName"])),
-                    WeekOfManufacture = GetPropertyValue<byte>(mo["WeekOfManufacture"]),
-                    YearOfManufacture = GetPropertyValue<ushort>(mo["YearOfManufacture"]),
-                };
-
-                monitorExtList.Add(monitorExtended);
-            }
-
-            return monitorExtList;
         }
 
         public List<Motherboard> GetMotherboardList()

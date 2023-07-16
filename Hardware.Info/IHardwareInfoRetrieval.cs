@@ -14,7 +14,6 @@ namespace Hardware.Info
         List<Keyboard> GetKeyboardList();
         List<Memory> GetMemoryList();
         List<Monitor> GetMonitorList();
-        List<MonitorExtended> GetMonitorExtendedList();
         List<Motherboard> GetMotherboardList();
         List<Mouse> GetMouseList();
         List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true);

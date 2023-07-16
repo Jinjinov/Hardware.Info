@@ -169,12 +169,14 @@ namespace Hardware.Info.Windows
         {
             try
             {
-                if (array.Length == 0) return string.Empty;
+                if (array.Length == 0)
+                    return string.Empty;
 
                 byte[] byteArray = new byte[array.Length * 2];
                 Buffer.BlockCopy(array, 0, byteArray, 0, byteArray.Length);
 
                 string str = Encoding.Unicode.GetString(byteArray).Trim('\0');
+
                 return str;
             }
             catch
@@ -551,6 +553,7 @@ namespace Hardware.Info.Windows
                 using ManagementBaseObject? wmiMonitorIdMo = wmiMonitorIdMos.Get().Cast<ManagementBaseObject>().FirstOrDefault();
 
                 Monitor monitor = new Monitor();
+
                 if (desktopMonitorMo != null)
                 {
                     monitor.Caption = GetPropertyString(desktopMonitorMo["Caption"]);
@@ -574,7 +577,6 @@ namespace Hardware.Info.Windows
                 }
 
                 monitorList.Add(monitor);
-
             }
 
             return monitorList;

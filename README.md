@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="11.1.0.1" />
+            <PackageReference Include="Hardware.Info" Version="11.1.1.0" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -211,6 +211,8 @@ Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact 
 
 ## Version history:
 
+- 11.1.1.0
+    - Fixed `GetMonitorList` in Windows - by [@Geevo](https://github.com/Geevo)
 - 11.1.0.1
     - Fixed `GetNetworkAdapterList` in Linux - thanks to [@Nihlus](https://github.com/Nihlus)
     - Fixed `GetCpuList` in Windows - by [@Frooxius](https://github.com/Frooxius)

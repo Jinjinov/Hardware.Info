@@ -26,8 +26,6 @@ namespace Hardware.Info.Benchmark
         [Benchmark]
         public void RefreshMonitorList() => _hardwareInfo.RefreshMonitorList();
         [Benchmark]
-        public void RefreshMonitorExtendedList() => _hardwareInfo.RefreshMonitorExtendedList();
-        [Benchmark]
         public void RefreshMotherboardList() => _hardwareInfo.RefreshMotherboardList();
         [Benchmark]
         public void RefreshMouseList() => _hardwareInfo.RefreshMouseList();

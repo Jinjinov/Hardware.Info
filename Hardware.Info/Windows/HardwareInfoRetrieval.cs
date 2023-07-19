@@ -534,7 +534,7 @@ namespace Hardware.Info.Windows
         {
             List<Monitor> monitorList = new List<Monitor>();
 
-            string win32PnpEntityQuery = UseAsteriskInWMI ? "SELECT * FROM WHERE PNPClass='Monitor'"
+            string win32PnpEntityQuery = UseAsteriskInWMI ? "SELECT * FROM Win32_PnPEntity WHERE PNPClass='Monitor'"
                                                           : "SELECT DeviceId FROM Win32_PnPEntity WHERE PNPClass='Monitor'";
             using ManagementObjectSearcher win32PnpEntityMos = new ManagementObjectSearcher(_managementScope, win32PnpEntityQuery, _enumerationOptions);
 

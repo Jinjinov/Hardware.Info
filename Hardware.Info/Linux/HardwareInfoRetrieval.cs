@@ -152,6 +152,7 @@ namespace Hardware.Info.Linux
 
             string[] lines = TryReadLinesFromFile("/proc/cpuinfo");
 
+            Regex processorRegex = new Regex(@"^processor\s+:\s+(\d+)");
             Regex vendorIdRegex = new Regex(@"^vendor_id\s+:\s+(.+)");
             Regex modelNameRegex = new Regex(@"^model name\s+:\s+(.+)");
             Regex cpuSpeedRegex = new Regex(@"^cpu MHz\s+:\s+(.+)");
@@ -159,11 +160,33 @@ namespace Hardware.Info.Linux
             Regex physicalCoresRegex = new Regex(@"^cpu cores\s+:\s+(.+)");
             Regex logicalCoresRegex = new Regex(@"^siblings\s+:\s+(.+)");
 
-            CPU cpu = new CPU();
+            CPU cpu = null!;
 
             foreach (string line in lines)
             {
-                Match match = vendorIdRegex.Match(line);
+                Match match = processorRegex.Match(line);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    cpu = new CPU();
+                    cpu.ProcessorId = match.Groups[1].Value.Trim();
+
+                    GetCpuCacheSize(cpu);
+
+                    if (includePercentProcessorTime)
+                    {
+                        GetCpuUsage(cpu);
+                    }
+
+                    cpuList.Add(cpu);
+                    continue;
+                }
+
+                if (cpu == null)
+                {
+                    continue;
+                }
+
+                match = vendorIdRegex.Match(line);
                 if (match.Success && match.Groups.Count > 1)
                 {
                     cpu.Manufacturer = match.Groups[1].Value.Trim();
@@ -210,11 +233,16 @@ namespace Hardware.Info.Linux
                 }
             }
 
+            return cpuList;
+        }
+
+        private static void GetCpuCacheSize(CPU cpu)
+        {
             for (int i = 0; i <= 3; i++)
             {
-                string level = TryReadTextFromFile($"/sys/devices/system/cpu/cpu0/cache/index{i}/level");
-                string type = TryReadTextFromFile($"/sys/devices/system/cpu/cpu0/cache/index{i}/type");
-                string size = TryReadTextFromFile($"/sys/devices/system/cpu/cpu0/cache/index{i}/size");
+                string level = TryReadTextFromFile($"/sys/devices/system/cpu/cpu{cpu.ProcessorId}/cache/index{i}/level");
+                string type = TryReadTextFromFile($"/sys/devices/system/cpu/cpu{cpu.ProcessorId}/cache/index{i}/type");
+                string size = TryReadTextFromFile($"/sys/devices/system/cpu/cpu{cpu.ProcessorId}/cache/index{i}/size");
 
                 if (uint.TryParse(size.TrimEnd('K'), out uint cacheSize))
                 {
@@ -236,15 +264,6 @@ namespace Hardware.Info.Linux
                         cpu.L3CacheSize = cacheSize;
                 }
             }
-
-            if (includePercentProcessorTime)
-            {
-                GetCpuUsage(cpu);
-            }
-
-            cpuList.Add(cpu);
-
-            return cpuList;
         }
 
         private static void GetCpuUsage(CPU cpu)

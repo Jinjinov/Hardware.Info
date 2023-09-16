@@ -172,11 +172,6 @@ namespace Hardware.Info.Linux
 
                     GetCpuCacheSize(cpu);
 
-                    if (includePercentProcessorTime)
-                    {
-                        GetCpuUsage(cpu);
-                    }
-
                     cpuList.Add(cpu);
                     continue;
                 }
@@ -229,6 +224,12 @@ namespace Hardware.Info.Linux
                 {
                     if (uint.TryParse(match.Groups[1].Value, out uint numberOfLogicalProcessors))
                         cpu.NumberOfLogicalProcessors = numberOfLogicalProcessors;
+
+                    if (includePercentProcessorTime)
+                    {
+                        GetCpuUsage(cpu);
+                    }
+
                     continue;
                 }
             }

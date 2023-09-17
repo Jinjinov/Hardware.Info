@@ -173,7 +173,7 @@ namespace Hardware.Info.Linux
             Regex vendorIdRegex = new Regex(@"^vendor_id\s+:\s+(.+)");
             Regex modelNameRegex = new Regex(@"^model name\s+:\s+(.+)");
             Regex cpuSpeedRegex = new Regex(@"^cpu MHz\s+:\s+(.+)");
-            Regex cacheSizeRegex = new Regex(@"^cache size\s+:\s+(.+)\s+KB");
+            Regex cacheSizeRegex = new Regex(@"^cache size\s+:\s+(.+)\s+KB"); // L2 cache size in KB
             Regex physicalIdRegex = new Regex(@"^physical id\s+:\s+(\d+)"); // physical CPU ID (a PC with two quad core CPUs, 4 cores will have one value, and the other 4 will have another value)
             Regex logicalCoresRegex = new Regex(@"^siblings\s+:\s+(.+)"); // number of logical cores (no hyperthreading = same as physical, with hyperthreading = 2 * physical)
             Regex coreIdRegex = new Regex(@"^core id\s+:\s+(.+)"); // core ID (from 0 to 3 in a PC with two quad core CPUs - for the first CPU, and then the same for second CPU)
@@ -291,7 +291,7 @@ namespace Hardware.Info.Linux
                 cpu.Manufacturer = first.VendorId;
                 cpu.Name = first.ModelName;
                 cpu.CurrentClockSpeed = first.CpuMhz;
-                cpu.L3CacheSize = first.CacheSize;
+                //cpu.L2CacheSize = first.CacheSize;
                 cpu.NumberOfLogicalProcessors = first.Siblings;
                 cpu.NumberOfCores = first.CpuCores;
 

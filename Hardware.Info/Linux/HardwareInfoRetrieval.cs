@@ -1,13 +1,12 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
-using System.Net.NetworkInformation;
 using System.Net;
+using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
-using System.Globalization;
-using System.Net.Sockets;
 
 // https://www.binarytides.com/linux-commands-hardware-info/
 
@@ -146,37 +145,63 @@ namespace Hardware.Info.Linux
             return biosList;
         }
 
+        private class Processor
+        {
+            public string ProcessorId = string.Empty;
+            public string VendorId = string.Empty;
+            public string ModelName = string.Empty;
+            public uint CpuMhz;
+            public uint CacheSize;
+            public uint PhysicalId;
+            public uint Siblings;
+            public uint CoreId;
+            public uint CpuCores;
+
+            public uint L1DataCacheSize;
+            public uint L1InstructionCacheSize;
+            public uint L2CacheSize;
+            public uint L3CacheSize;
+
+            public ulong PercentProcessorTime;
+        }
+
         public List<CPU> GetCpuList(bool includePercentProcessorTime = true)
         {
-            List<CPU> cpuList = new List<CPU>();
-
             string[] lines = TryReadLinesFromFile("/proc/cpuinfo");
 
-            Regex processorRegex = new Regex(@"^processor\s+:\s+(\d+)");
+            Regex processorRegex = new Regex(@"^processor\s+:\s+(\d+)"); // processor ID (from 0 to 7 in a PC with two quad core CPUs)
             Regex vendorIdRegex = new Regex(@"^vendor_id\s+:\s+(.+)");
             Regex modelNameRegex = new Regex(@"^model name\s+:\s+(.+)");
             Regex cpuSpeedRegex = new Regex(@"^cpu MHz\s+:\s+(.+)");
             Regex cacheSizeRegex = new Regex(@"^cache size\s+:\s+(.+)\s+KB");
-            Regex physicalCoresRegex = new Regex(@"^cpu cores\s+:\s+(.+)");
-            Regex logicalCoresRegex = new Regex(@"^siblings\s+:\s+(.+)");
+            Regex physicalIdRegex = new Regex(@"^physical id\s+:\s+(\d+)"); // physical CPU ID (a PC with two quad core CPUs, 4 cores will have one value, and the other 4 will have another value)
+            Regex logicalCoresRegex = new Regex(@"^siblings\s+:\s+(.+)"); // number of logical cores (no hyperthreading = same as physical, with hyperthreading = 2 * physical)
+            Regex coreIdRegex = new Regex(@"^core id\s+:\s+(.+)"); // core ID (from 0 to 3 in a PC with two quad core CPUs - for the first CPU, and then the same for second CPU)
+            Regex physicalCoresRegex = new Regex(@"^cpu cores\s+:\s+(.+)"); // number of cores (in a quad core CPU = 4)
 
-            CPU cpu = null!;
+            List<Processor> processorList = new List<Processor>();
+
+            Processor processor = null!;
 
             foreach (string line in lines)
             {
                 Match match = processorRegex.Match(line);
                 if (match.Success && match.Groups.Count > 1)
                 {
-                    cpu = new CPU();
-                    cpu.ProcessorId = match.Groups[1].Value.Trim();
+                    processor = new Processor();
 
-                    GetCpuCacheSize(cpu);
+                    if (uint.TryParse(match.Groups[1].Value, out uint processorId))
+                    {
+                        processor.ProcessorId = $"cpu{processorId}";
 
-                    cpuList.Add(cpu);
+                        GetCpuCacheSize(processor);
+
+                        processorList.Add(processor);
+                    }
                     continue;
                 }
 
-                if (cpu == null)
+                if (processor == null)
                 {
                     continue;
                 }
@@ -184,14 +209,14 @@ namespace Hardware.Info.Linux
                 match = vendorIdRegex.Match(line);
                 if (match.Success && match.Groups.Count > 1)
                 {
-                    cpu.Manufacturer = match.Groups[1].Value.Trim();
+                    processor.VendorId = match.Groups[1].Value.Trim();
                     continue;
                 }
 
                 match = modelNameRegex.Match(line);
                 if (match.Success && match.Groups.Count > 1)
                 {
-                    cpu.Name = match.Groups[1].Value.Trim();
+                    processor.ModelName = match.Groups[1].Value.Trim();
                     continue;
                 }
 
@@ -199,7 +224,7 @@ namespace Hardware.Info.Linux
                 if (match.Success && match.Groups.Count > 1)
                 {
                     if (double.TryParse(match.Groups[1].Value, out double currentClockSpeed))
-                        cpu.CurrentClockSpeed = (uint)currentClockSpeed;
+                        processor.CpuMhz = (uint)currentClockSpeed;
                     continue;
                 }
 
@@ -207,15 +232,15 @@ namespace Hardware.Info.Linux
                 if (match.Success && match.Groups.Count > 1)
                 {
                     if (uint.TryParse(match.Groups[1].Value, out uint cacheSize))
-                        cpu.L3CacheSize = 1024 * cacheSize;
+                        processor.CacheSize = 1024 * cacheSize;
                     continue;
                 }
 
-                match = physicalCoresRegex.Match(line);
+                match = physicalIdRegex.Match(line);
                 if (match.Success && match.Groups.Count > 1)
                 {
-                    if (uint.TryParse(match.Groups[1].Value, out uint numberOfCores))
-                        cpu.NumberOfCores = numberOfCores;
+                    if (uint.TryParse(match.Groups[1].Value, out uint physicalId))
+                        processor.PhysicalId = physicalId;
                     continue;
                 }
 
@@ -223,27 +248,82 @@ namespace Hardware.Info.Linux
                 if (match.Success && match.Groups.Count > 1)
                 {
                     if (uint.TryParse(match.Groups[1].Value, out uint numberOfLogicalProcessors))
-                        cpu.NumberOfLogicalProcessors = numberOfLogicalProcessors;
-
-                    if (includePercentProcessorTime)
-                    {
-                        GetCpuUsage(cpu);
-                    }
-
+                        processor.Siblings = numberOfLogicalProcessors;
                     continue;
                 }
+
+                match = coreIdRegex.Match(line);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    if (uint.TryParse(match.Groups[1].Value, out uint coreId))
+                        processor.CoreId = coreId;
+                    continue;
+                }
+
+                match = physicalCoresRegex.Match(line);
+                if (match.Success && match.Groups.Count > 1)
+                {
+                    if (uint.TryParse(match.Groups[1].Value, out uint numberOfCores))
+                        processor.CpuCores = numberOfCores;
+                    continue;
+                }
+            }
+
+            ulong percentProcessorTime = 0;
+
+            if (includePercentProcessorTime)
+            {
+                percentProcessorTime = GetCpuUsage(processorList);
+            }
+
+            List<CPU> cpuList = new List<CPU>();
+
+            foreach (var group in processorList.GroupBy(processor => processor.PhysicalId))
+            {
+                CPU cpu = new CPU();
+
+                cpu.PercentProcessorTime = percentProcessorTime;
+
+                cpu.ProcessorId = group.Key.ToString();
+
+                Processor first = group.First();
+
+                cpu.Manufacturer = first.VendorId;
+                cpu.Name = first.ModelName;
+                cpu.CurrentClockSpeed = first.CpuMhz;
+                cpu.L3CacheSize = first.CacheSize;
+                cpu.NumberOfLogicalProcessors = first.Siblings;
+                cpu.NumberOfCores = first.CpuCores;
+
+                cpu.L1DataCacheSize = first.L1DataCacheSize;
+                cpu.L1InstructionCacheSize = first.L1InstructionCacheSize;
+                cpu.L2CacheSize = first.L2CacheSize;
+                cpu.L3CacheSize = first.L3CacheSize;
+
+                foreach (Processor proc in group)
+                {
+                    CpuCore core = new CpuCore
+                    {
+                        Name = proc.ProcessorId,
+                        PercentProcessorTime = proc.PercentProcessorTime
+                    };
+
+                    cpu.CpuCoreList.Add(core);
+                }
+
+                cpuList.Add(cpu);
             }
 
             return cpuList;
         }
 
-        private static void GetCpuCacheSize(CPU cpu)
+        private static void GetCpuCacheSize(Processor processor)
         {
             for (int i = 0; i <= 3; i++)
             {
-                string level = TryReadTextFromFile($"/sys/devices/system/cpu/cpu{cpu.ProcessorId}/cache/index{i}/level");
-                string type = TryReadTextFromFile($"/sys/devices/system/cpu/cpu{cpu.ProcessorId}/cache/index{i}/type");
-                string size = TryReadTextFromFile($"/sys/devices/system/cpu/cpu{cpu.ProcessorId}/cache/index{i}/size");
+                string level = TryReadTextFromFile($"/sys/devices/system/cpu/{processor.ProcessorId}/cache/index{i}/level");
+                string type = TryReadTextFromFile($"/sys/devices/system/cpu/{processor.ProcessorId}/cache/index{i}/type");
+                string size = TryReadTextFromFile($"/sys/devices/system/cpu/{processor.ProcessorId}/cache/index{i}/size");
 
                 if (uint.TryParse(size.TrimEnd('K'), out uint cacheSize))
                 {
@@ -252,22 +332,22 @@ namespace Hardware.Info.Linux
                     if (level == "1")
                     {
                         if (type == "Data")
-                            cpu.L1DataCacheSize = cacheSize;
+                            processor.L1DataCacheSize = cacheSize;
 
                         if (type == "Instruction")
-                            cpu.L1InstructionCacheSize = cacheSize;
+                            processor.L1InstructionCacheSize = cacheSize;
                     }
 
                     if (level == "2")
-                        cpu.L2CacheSize = cacheSize;
+                        processor.L2CacheSize = cacheSize;
 
                     if (level == "3")
-                        cpu.L3CacheSize = cacheSize;
+                        processor.L3CacheSize = cacheSize;
                 }
             }
         }
 
-        private static void GetCpuUsage(CPU cpu)
+        private static ulong GetCpuUsage(List<Processor> processorList)
         {
             // Column   Name    Description
             // 1        user    Time spent with normal processing in user mode.
@@ -291,27 +371,25 @@ namespace Hardware.Info.Linux
             Task.Delay(500).Wait();
             string[] cpuUsageLineNow = TryReadLinesFromFile("/proc/stat");
 
+            ulong percentProcessorTime = 0;
+
             if (cpuUsageLineLast.Length > 0 && cpuUsageLineNow.Length > 0)
             {
-                cpu.PercentProcessorTime = GetCpuPercentage(cpuUsageLineLast[0], cpuUsageLineNow[0]);
+                percentProcessorTime = GetCpuPercentage(cpuUsageLineLast[0], cpuUsageLineNow[0]);
 
-                for (int i = 0; i < cpu.NumberOfLogicalProcessors; i++)
+                foreach (Processor processor in processorList)
                 {
-                    string? cpuStatLast = cpuUsageLineLast.FirstOrDefault(s => s.StartsWith($"cpu{i}"));
-                    string? cpuStatNow = cpuUsageLineNow.FirstOrDefault(s => s.StartsWith($"cpu{i}"));
+                    string? cpuStatLast = cpuUsageLineLast.FirstOrDefault(s => s.StartsWith(processor.ProcessorId));
+                    string? cpuStatNow = cpuUsageLineNow.FirstOrDefault(s => s.StartsWith(processor.ProcessorId));
 
                     if (!string.IsNullOrEmpty(cpuStatLast) && !string.IsNullOrEmpty(cpuStatNow))
                     {
-                        CpuCore core = new CpuCore
-                        {
-                            Name = i.ToString(),
-                            PercentProcessorTime = GetCpuPercentage(cpuStatLast, cpuStatNow)
-                        };
-
-                        cpu.CpuCoreList.Add(core);
+                        processor.PercentProcessorTime = GetCpuPercentage(cpuStatLast, cpuStatNow);
                     }
                 }
             }
+
+            return percentProcessorTime;
         }
 
         private static UInt64 GetCpuPercentage(string cpuStatLast, string cpuStatNow)

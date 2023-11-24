@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <OutputType>Exe</OutputType>
@@ -8,7 +8,11 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Hardware.Info\Hardware.Info.csproj" />
+    <PackageReference Include="BenchmarkDotNet" Version="0.13.5" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <ProjectReference Include="..\Hardware.Info.Linux\Hardware.Info.Linux.csproj" />
   </ItemGroup>
 
 </Project>

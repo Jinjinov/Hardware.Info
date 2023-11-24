@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.8.34316.72
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hardware.Info", "Hardware.Info\Hardware.Info.csproj", "{A3F91D8E-1DF9-471C-9BBE-99A76881A419}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hardware.Info.Linux", "Hardware.Info.Linux\Hardware.Info.Linux.csproj", "{A3F91D8E-1DF9-471C-9BBE-99A76881A419}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hardware.Info.Test", "Hardware.Info.Test\Hardware.Info.Test.csproj", "{37D3CEB9-DB5B-4424-A033-52F8AB5C8F62}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hardware.Info.Linux.Test", "Hardware.Info.Lunux.Test\Hardware.Info.Linux.Test.csproj", "{37D3CEB9-DB5B-4424-A033-52F8AB5C8F62}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hardware.Info.Benchmark", "Hardware.Info.Benchmark\Hardware.Info.Benchmark.csproj", "{1E3DFEB6-2E9B-4BA3-B7FF-4AC79D62F014}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Hardware.Info.Linux.Benchmark", "Hardware.Info.Linux.Benchmark\Hardware.Info.Linux.Benchmark.csproj", "{1E3DFEB6-2E9B-4BA3-B7FF-4AC79D62F014}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution Items", "{AB8A3237-DD5C-44D0-8EFB-0B1569511FED}"
 	ProjectSection(SolutionItems) = preProject

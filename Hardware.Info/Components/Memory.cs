@@ -2,7 +2,7 @@
 
 // https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-physicalmemory
 
-namespace Hardware.Info
+namespace Hardware.Info.Linux
 {
     /// <summary>
     /// Implementation form factor for the chip.

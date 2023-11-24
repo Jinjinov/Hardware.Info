@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Hardware.Info
+namespace Hardware.Info.Linux
 {
     /// <summary>
     /// Operating System Info

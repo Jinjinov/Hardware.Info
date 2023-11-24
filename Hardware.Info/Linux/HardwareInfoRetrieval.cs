@@ -33,7 +33,7 @@ namespace Hardware.Info.Linux
                 {
                     _os.VersionString = line.Replace("VERSION_ID=", string.Empty).Trim('"');
 
-                    if (Version.TryParse(_os.VersionString, out Version version))
+                    if (Version.TryParse(_os.VersionString, out Version? version))
                         _os.Version = version;
                 }
             }
@@ -1143,7 +1143,7 @@ namespace Hardware.Info.Linux
                         {
                             vendor = "Advanced Micro Devices, Inc.";
                         }
-                        else if (relevant.ToUpperInvariant().Contains("NVIDIA"))
+                        else if (relevant.Contains("NVIDIA", StringComparison.InvariantCultureIgnoreCase))
                         {
                             vendor = "NVIDIA Corporation";
                         }

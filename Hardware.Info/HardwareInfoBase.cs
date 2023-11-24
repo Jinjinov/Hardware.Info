@@ -6,11 +6,11 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
-namespace Hardware.Info
+namespace Hardware.Info.Linux
 {
     internal class HardwareInfoBase
     {
-        internal static Process StartProcess(string cmd, string args)
+        internal static Process? StartProcess(string cmd, string args)
         {
             ProcessStartInfo processStartInfo = new ProcessStartInfo(cmd, args)
             {
@@ -28,7 +28,11 @@ namespace Hardware.Info
         {
             try
             {
-                using Process process = StartProcess(cmd, args);
+                using Process? process = StartProcess(cmd, args);
+                if (process == null)
+                {
+                    return string.Empty;
+                }
                 using StreamReader streamReader = process.StandardOutput;
                 process.WaitForExit();
 

@@ -1,13 +1,19 @@
-# Hardware.Info
+# Source
 
-Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, motherboard, mouse, NIC - network adapter, printer, sound card - audio card, graphics card - video card. Hardware.Info is a .NET Standard 2.0 library and uses WMI on Windows, /dev, /proc, /sys on Linux and sysctl, system_profiler on macOS.
+This fork of https://github.com/Jinjinov/Hardware.Info/
+
+# Hardware.Info.Linux
+
+Only Linux operating system is supported!
+
+Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, motherboard, mouse, NIC - network adapter, printer, sound card - audio card, graphics card - video card. Hardware.Info is a .NET Standard 2.0 library and /dev, /proc, /sys on Linux.
 
 ## How to use:
 
-1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
+1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info.Linux
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="100.0.0.0" />
+            <PackageReference Include="Hardware.Info.Linux" Version="100.0.0.0" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -124,33 +130,9 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 
 ## Known issues
 
-### 21 second delay on first use in Windows
-
-Hardware.Info uses WMI (Windows Management Instrumentation) on Windows OS. For certain queries WMI takes 21 seconds to initialize the first time you use it, after that all subsequent queries will execute immediately. If WMI isn't used for 15 minutes it will have to be initialized again the next time you use it.
-
-The 21 second initialization delay is caused by RPC that WMI uses internally. In RPC [documentation](https://docs.microsoft.com/en-us/windows/win32/services/services-and-rpc-tcp) it says that the RPC/TCP time-out interval is defined with a `SCMApiConnectionParam` registry value located at `HKEY_LOCAL_MACHINE\SYSTEM\CurrentControlSet\Control` and that the default value is set to 21,000 (21 seconds).
-
-You can avoid the 21 second delay by excluding the queries that cause it (see Settings).
-
-### Invalid `NetworkAdapter.Speed` in Windows
-
-Sometimes `NetworkAdapter.Speed` in `Win32_NetworkAdapter` can be `0` or `long.MaxValue`. The correct value can be retrived from `CurrentBandwidth` in `Win32_PerfFormattedData_Tcpip_NetworkAdapter` but unfortunately reading from `Win32_PerfFormattedData_Tcpip_NetworkAdapter` causes a 21 second delay on the first read, like mentioned in the previous paragraph. Calling `RefreshNetworkAdapterList` with `includeBytesPersec = true` will also read the `CurrentBandwidth`.
-
-### `WmiNetUtilsHelper` will throw an exception in Windows if publish settings use `<PublishTrimmed>true</PublishTrimmed>`
-
-This is a known error: https://github.com/dotnet/core/issues/7051#issuecomment-1071484354
+-
 
 ## Settings
-
-### Constructor settings:
-
-```
-HardwareInfo(bool useAsteriskInWMI = true, TimeSpan? timeoutInWMI = null)
-```
-
-The construcotr accepts two settings for WMI:
-- `useAsteriskInWMI` causes WMI queries to use `SELECT * FROM` instead of `SELECT` with a list of property names. This is slower, but safer, more compatible with older Windows (XP, Vista, 7, 8) where a certain WMI property might be missing and throw an exception when queried by name. The default value is `true`.
-- `timeoutInWMI` sets the `Timeout` property of the `EnumerationOptions` in the `ManagementObjectSearcher` that executes the query. The default value is `EnumerationOptions.InfiniteTimeout`. Changing this could cause the query to return empty results in certain cases.
 
 ### Refresh methods settings:
 
@@ -163,51 +145,12 @@ RefreshNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAda
 ```
 
 Setting `includePercentProcessorTime` and `includeBytesPersec` to `false` will exclude the queries that:
-- cause a 21 second delay the first time they are called in Windows
+
 - cause a 1 second delay every time they are called in Linux
 
 Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact on performance.
 
 ## Benchmarks
-
-### Windows 8.1 (Intel i5-2500, 8 GB RAM):
-
-|                     Method |               Mean |            Error |           StdDev |
-|--------------------------- |-------------------:|-----------------:|-----------------:|
-|        RefreshMemoryStatus |           947.8 ns |          3.77 ns |          3.53 ns |
-|         RefreshBatteryList |     1,811,885.7 ns |     12,921.05 ns |     11,454.17 ns |
-|            RefreshBIOSList |     2,086,001.0 ns |     23,896.69 ns |     22,352.98 ns |
-|             RefreshCPUList | 1,543,579,005.2 ns |  2,405,376.47 ns |  2,132,303.59 ns |
-|           RefreshDriveList |   409,137,516.3 ns |  8,612,410.99 ns | 25,258,710.57 ns |
-|        RefreshKeyboardList |     5,568,039.5 ns |     44,228.57 ns |     41,371.43 ns |
-|          RefreshMemoryList |     2,120,024.5 ns |     26,103.39 ns |     24,417.13 ns |
-|         RefreshMonitorList |     5,669,237.8 ns |     50,801.76 ns |     45,034.44 ns |
-|     RefreshMotherboardList |     1,965,222.9 ns |     14,387.30 ns |     13,457.89 ns |
-|           RefreshMouseList |     6,003,924.9 ns |     60,725.05 ns |     50,708.17 ns |
-|  RefreshNetworkAdapterList | 1,412,244,738.6 ns | 14,681,615.28 ns | 12,259,813.69 ns |
-|         RefreshPrinterList |    28,244,822.2 ns |    143,359.60 ns |    134,098.66 ns |
-|     RefreshSoundDeviceList |     3,608,577.5 ns |     68,688.62 ns |     73,496.06 ns |
-| RefreshVideoControllerList |    11,568,549.2 ns |     54,666.07 ns |     48,460.05 ns |
-
-### Windows 10 (AMD Ryzen 5 5600G, 32 GB RAM):
-
-|                     Method |                 Mean |               Error |              StdDev |
-|--------------------------- |---------------------:|--------------------:|--------------------:|
-|     RefreshOperatingSystem |             2.946 ns |           0.0052 ns |           0.0047 ns |
-|        RefreshMemoryStatus |           460.552 ns |           4.4810 ns |           3.9723 ns |
-|         RefreshBatteryList |     1,624,392.057 ns |      22,526.9314 ns |      21,071.7057 ns |
-|            RefreshBIOSList |     1,785,673.828 ns |       8,812.8115 ns |       8,243.5094 ns |
-|             RefreshCPUList | 1,964,995,539.000 ns | 171,465,934.5051 ns | 505,571,176.5574 ns |
-|           RefreshDriveList |    62,452,668.148 ns |     342,662.0413 ns |     320,526.2860 ns |
-|        RefreshKeyboardList |     4,303,528.516 ns |      47,355.1733 ns |      41,979.1277 ns |
-|          RefreshMemoryList |     1,926,931.367 ns |      19,754.4179 ns |      18,478.2948 ns |
-|         RefreshMonitorList |     3,884,362.370 ns |      29,422.1438 ns |      27,521.4916 ns |
-|     RefreshMotherboardList |     1,782,235.664 ns |      12,974.2296 ns |      12,136.1024 ns |
-|           RefreshMouseList |     4,700,086.615 ns |      44,435.0631 ns |      41,564.5856 ns |
-|  RefreshNetworkAdapterList |   945,004,493.333 ns |   8,568,978.4607 ns |   8,015,427.7687 ns |
-|         RefreshPrinterList |    48,126,103.030 ns |     729,958.0933 ns |     682,803.2534 ns |
-|     RefreshSoundDeviceList |     4,154,082.924 ns |      46,922.5501 ns |      41,595.6184 ns |
-| RefreshVideoControllerList |     8,784,372.500 ns |     125,080.5212 ns |     117,000.3971 ns |
 
 ## Version history:
 

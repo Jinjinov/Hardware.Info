@@ -2,7 +2,7 @@
 
 // https://docs.microsoft.com/en-us/windows/win32/api/sysinfoapi/ns-sysinfoapi-memorystatusex
 
-namespace Hardware.Info
+namespace Hardware.Info.Linux
 {
     public class MemoryStatus
     {

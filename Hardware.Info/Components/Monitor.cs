@@ -3,7 +3,7 @@
 // https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-desktopmonitor
 // https://learn.microsoft.com/en-us/windows/win32/wmicoreprov/wmimonitorid
 
-namespace Hardware.Info
+namespace Hardware.Info.Linux
 {
     /// <summary>
     /// WMI classes: Win32_DesktopMonitor And WmiMonitorID

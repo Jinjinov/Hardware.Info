@@ -6,7 +6,7 @@ using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
 
-namespace Hardware.Info
+namespace Hardware.Info.Linux
 {
     public class HardwareInfo : IHardwareInfo
     {
@@ -29,22 +29,15 @@ namespace Hardware.Info
 
         private readonly IHardwareInfoRetrieval _hardwareInfoRetrieval = null!;
 
-        public HardwareInfo(bool useAsteriskInWMI = true, TimeSpan? timeoutInWMI = null)
+        public HardwareInfo()
         {
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // Environment.OSVersion.Platform == PlatformID.Win32NT)
+            if (!RuntimeInformation.IsOSPlatform(OSPlatform.Linux))
             {
-                _hardwareInfoRetrieval = new Hardware.Info.Windows.HardwareInfoRetrieval(timeoutInWMI) { UseAsteriskInWMI = useAsteriskInWMI };
+                throw new NotSupportedException("Only Linux operating system is supported");
             }
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) // Environment.OSVersion.Platform == PlatformID.MacOSX)
-            {
-                _hardwareInfoRetrieval = new Hardware.Info.Mac.HardwareInfoRetrieval();
-            }
+            _hardwareInfoRetrieval = new Hardware.Info.Linux.HardwareInfoRetrieval();
 
-            if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) // Environment.OSVersion.Platform == PlatformID.Unix)
-            {
-                _hardwareInfoRetrieval = new Hardware.Info.Linux.HardwareInfoRetrieval();
-            }
         }
 
         public void RefreshAll()
@@ -122,7 +115,7 @@ namespace Hardware.Info
             if (e.Error != null)
                 success = false;
 
-            PingReply reply = e.Reply;
+            PingReply? reply = e.Reply;
 
             if (reply == null)
                 success = false;

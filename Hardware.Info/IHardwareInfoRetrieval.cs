@@ -1,6 +1,6 @@
 ﻿using System.Collections.Generic;
 
-namespace Hardware.Info
+namespace Hardware.Info.Linux
 {
     internal interface IHardwareInfoRetrieval
     {

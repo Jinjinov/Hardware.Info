@@ -1,40 +1,31 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
-  <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
-    <LangVersion>8.0</LangVersion>
-    <Nullable>enable</Nullable>
-  </PropertyGroup>
+	<PropertyGroup>
+		<TargetFramework>net5.0</TargetFramework>
+		<Nullable>enable</Nullable>
+	</PropertyGroup>
 
-  <PropertyGroup>
-    <Product>Hardware.Info</Product>
-    <PackageId>Hardware.Info</PackageId>
-    <PackageVersion>100.0.0.0</PackageVersion>
-    <Version>100.0.0.0</Version>
-    <Authors>Jinjinov</Authors>
-    <Description>Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, motherboard, mouse, NIC - network adapter, printer, sound card - audio card, graphics card - video card. Hardware.Info is a .NET Standard 2.0 library and uses WMI on Windows, /dev, /proc, /sys on Linux and sysctl, system_profiler on macOS.</Description>
-    <Copyright>Copyright (c) Jinjinov 2022</Copyright>
-    <PackageProjectUrl>https://github.com/Jinjinov/Hardware.Info</PackageProjectUrl>
-    <!--<PackageIcon></PackageIcon>-->
-    <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/Jinjinov/Hardware.Info.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
-    <PackageTags>Computer;Device;Hardware;Info;Information;NET Standard;Windows;Linux;macOS</PackageTags>
-    <!--<PackageReleaseNotes></PackageReleaseNotes>-->
-    <PackageLicenseExpression>MIT</PackageLicenseExpression>
-  </PropertyGroup>
+	<PropertyGroup>
+		<Product>Hardware.Info</Product>
+		<PackageId>Hardware.Info</PackageId>
+		<PackageVersion>100.0.0.0</PackageVersion>
+		<Version>100.0.0.0</Version>
+		<Authors>Jinjinov, stepagrus</Authors>
+		<Description>Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, motherboard, mouse, NIC - network adapter, printer, sound card - audio card, graphics card - video card. Hardware.Info is a .NET Standard 2.0 library and uses /dev, /proc, /sys on Linux.</Description>
+		<Copyright>Copyright (c) Jinjinov 2022</Copyright>
+		<PackageProjectUrl>https://github.com/stepagrus/Hardware.Info.Linux</PackageProjectUrl>
+		<PackageReadmeFile>README.md</PackageReadmeFile>
+		<RepositoryUrl>https://github.com/stepagrus/Hardware.Info.Linux.git</RepositoryUrl>
+		<RepositoryType>git</RepositoryType>
+		<PackageTags>Computer;Device;Hardware;Info;Information;NET Standard;Linux;</PackageTags>
+		<PackageLicenseExpression>MIT</PackageLicenseExpression>
+	</PropertyGroup>
 
-  <ItemGroup>
-    <None Include="..\README.md">
-      <Pack>True</Pack>
-      <PackagePath>\</PackagePath>
-    </None>
-  </ItemGroup>
-
-  <ItemGroup>
-    <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
-    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="7.0.0" />
-    <PackageReference Include="System.Management" Version="7.0.0" />
-  </ItemGroup>
+	<ItemGroup>
+		<None Include="..\README.md">
+			<Pack>True</Pack>
+			<PackagePath>\</PackagePath>
+		</None>
+	</ItemGroup>
 
 </Project>

@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Hardware.Info
+namespace Hardware.Info.Linux
 {
     // https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-logicaldisk
 

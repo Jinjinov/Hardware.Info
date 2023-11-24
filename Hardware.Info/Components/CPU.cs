@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 // https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-processor
 
-namespace Hardware.Info
+namespace Hardware.Info.Linux
 {
     /// <summary>
     /// WMI class: Win32_Processor

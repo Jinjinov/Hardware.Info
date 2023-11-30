@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="100.0.0.0" />
+            <PackageReference Include="Hardware.Info" Version="100.0.0.1" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -211,6 +211,8 @@ Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact 
 
 ## Version history:
 
+- 100.0.0.1
+    - Added `HardwareInfo.snk` to sign the assembly with a strong name key
 - 100.0.0.0
     - Fixed `GetCpuList` in Linux - thanks to [@inelisoni](https://github.com/inelisoni)
 - 11.1.1.1

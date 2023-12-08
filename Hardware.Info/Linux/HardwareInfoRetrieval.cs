@@ -480,6 +480,27 @@ namespace Hardware.Info.Linux
                     {
                         disk.Manufacturer = trimmed.Replace("vendor:", string.Empty).Trim();
                     }
+                    else if (trimmed.StartsWith("description:"))
+                    {
+                        disk.Description = trimmed.Replace("description:", string.Empty).Trim();
+                    }
+                    else if (trimmed.StartsWith("version:"))
+                    {
+                        disk.FirmwareRevision = trimmed.Replace("version:", string.Empty).Trim();
+                    }
+                    else if (trimmed.StartsWith("logical name:"))
+                    {
+                        disk.Name = trimmed.Replace("logical name:", string.Empty).Trim();
+                    }
+                    else if (trimmed.StartsWith("serial:"))
+                    {
+                        disk.SerialNumber = trimmed.Replace("serial:", string.Empty).Trim();
+                    }
+                    else if (trimmed.StartsWith("size:"))
+                    {
+                        string size = trimmed.Replace("size:", string.Empty).Trim();
+                        disk.Size = ExtractSizeInBytes(size);
+                    }
                 }
             }
 
@@ -489,6 +510,29 @@ namespace Hardware.Info.Linux
             }
 
             return driveList;
+
+            static ulong ExtractSizeInBytes(string input)
+            {
+                Regex regex = new Regex(@"(\d+)\s*(KB|MB|GB|TB)");
+                Match match = regex.Match(input);
+
+                if (match.Success)
+                {
+                    if (ulong.TryParse(match.Groups[1].Value, out ulong size))
+                    {
+                        return match.Groups[2].Value switch
+                        {
+                            "KB" => size * 1024UL,
+                            "MB" => size * 1024UL * 1024UL,
+                            "GB" => size * 1024UL * 1024UL * 1024UL,
+                            "TB" => size * 1024UL * 1024UL * 1024UL * 1024UL,
+                            _ => size,
+                        };
+                    }
+                }
+
+                return 0;
+            }
         }
 
         public List<Keyboard> GetKeyboardList()

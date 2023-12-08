@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="100.0.0.1" />
+            <PackageReference Include="Hardware.Info" Version="100.0.1.0" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -211,6 +211,12 @@ Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact 
 
 ## Version history:
 
+- 100.0.1.0
+    - Added `Disk.Description` in Linux
+    - Added `Disk.FirmwareRevision` in Linux
+    - Added `Disk.Name` in Linux
+    - Added `Disk.SerialNumber` in Linux
+    - Added `Disk.Size` in Linux
 - 100.0.0.1
     - Added `HardwareInfo.snk` to sign the assembly with a strong name key
 - 100.0.0.0

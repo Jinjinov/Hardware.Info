@@ -85,6 +85,10 @@ namespace Hardware.Info
         /// </summary>
         public UInt32 Speed { get; set; }
 
+        /// <summary>
+        /// Write all property values to a string
+        /// </summary>
+        /// <returns>Each property on a new line</returns>
         public override string ToString()
         {
             return

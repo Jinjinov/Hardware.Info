@@ -61,6 +61,9 @@ namespace Hardware.Info
 
         private string _batteryStatusDescription = string.Empty;
 
+        /// <summary>
+        /// Battery status description
+        /// </summary>
         public string BatteryStatusDescription
         {
             get => !string.IsNullOrEmpty(_batteryStatusDescription) ? _batteryStatusDescription : BatteryStatus switch
@@ -82,6 +85,10 @@ namespace Hardware.Info
             set => _batteryStatusDescription = value;
         }
 
+        /// <summary>
+        /// Write all property values to a string
+        /// </summary>
+        /// <returns>Each property on a new line</returns>
         public override string ToString()
         {
             return

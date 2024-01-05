@@ -23,6 +23,10 @@ namespace Hardware.Info
         /// </summary>
         public UInt64 PercentProcessorTime { get; set; }
 
+        /// <summary>
+        /// Write all property values to a string
+        /// </summary>
+        /// <returns>Each property on a new line</returns>
         public override string ToString()
         {
             return

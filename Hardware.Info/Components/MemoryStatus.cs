@@ -4,6 +4,9 @@
 
 namespace Hardware.Info
 {
+    /// <summary>
+    /// Memory status
+    /// </summary>
     public class MemoryStatus
     {
         /// <summary>
@@ -45,6 +48,10 @@ namespace Hardware.Info
         /// </summary>
         public ulong AvailableExtendedVirtual { get; set; }
 
+        /// <summary>
+        /// Write all property values to a string
+        /// </summary>
+        /// <returns>Each property on a new line</returns>
         public override string ToString()
         {
             return

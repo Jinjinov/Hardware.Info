@@ -56,6 +56,10 @@ namespace Hardware.Info
         /// </summary>
         public string VolumeSerialNumber { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Write all property values to a string
+        /// </summary>
+        /// <returns>Each property on a new line</returns>
         public override string ToString()
         {
             return
@@ -78,6 +82,9 @@ namespace Hardware.Info
     /// </summary>
     public class Partition
     {
+        /// <summary>
+        /// List of <see cref="Volume" />
+        /// </summary>
         public List<Volume> VolumeList { get; set; } = new List<Volume>();
 
         /// <summary>
@@ -131,6 +138,10 @@ namespace Hardware.Info
         /// </summary>
         public UInt64 StartingOffset { get; set; }
 
+        /// <summary>
+        /// Write all property values to a string
+        /// </summary>
+        /// <returns>Each property on a new line</returns>
         public override string ToString()
         {
             return
@@ -154,6 +165,9 @@ namespace Hardware.Info
     /// </summary>
     public class Drive
     {
+        /// <summary>
+        /// List of <see cref="Partition" />
+        /// </summary>
         public List<Partition> PartitionList { get; set; } = new List<Partition>();
 
         /// <summary>
@@ -206,6 +220,10 @@ namespace Hardware.Info
         /// </summary>
         public UInt64 Size { get; set; }
 
+        /// <summary>
+        /// Write all property values to a string
+        /// </summary>
+        /// <returns>Each property on a new line</returns>
         public override string ToString()
         {
             return

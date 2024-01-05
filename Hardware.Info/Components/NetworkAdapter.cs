@@ -98,6 +98,10 @@ namespace Hardware.Info
         /// </summary>
         public List<IPAddress> IPSubnetList { get; set; } = new List<IPAddress>();
 
+        /// <summary>
+        /// Write all property values to a string
+        /// </summary>
+        /// <returns>Each property on a new line</returns>
         public override string ToString()
         {
             return

@@ -34,6 +34,10 @@ namespace Hardware.Info
         /// </summary>
         public string ProductName { get; set; } = string.Empty;
 
+        /// <summary>
+        /// Write all property values to a string
+        /// </summary>
+        /// <returns>Each property on a new line</returns>
         public override string ToString()
         {
             return

@@ -34,6 +34,10 @@ namespace Hardware.Info
         /// </summary>
         public byte NumberOfButtons { get; set; }
 
+        /// <summary>
+        /// Write all property values to a string
+        /// </summary>
+        /// <returns>Each property on a new line</returns>
         public override string ToString()
         {
             return

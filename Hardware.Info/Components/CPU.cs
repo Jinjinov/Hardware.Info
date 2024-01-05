@@ -111,8 +111,15 @@ namespace Hardware.Info
         /// </summary>
         public UInt64 PercentProcessorTime { get; set; }
 
+        /// <summary>
+        /// List of <see cref="CpuCore" />
+        /// </summary>
         public List<CpuCore> CpuCoreList { get; set; } = new List<CpuCore>();
 
+        /// <summary>
+        /// Write all property values to a string
+        /// </summary>
+        /// <returns>Each property on a new line</returns>
         public override string ToString()
         {
             return

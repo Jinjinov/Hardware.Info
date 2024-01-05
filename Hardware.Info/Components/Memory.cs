@@ -9,29 +9,124 @@ namespace Hardware.Info
     /// </summary>
     public enum FormFactor
     {
+        /// <summary>
+        /// Represents an unknown or unspecified form factor.
+        /// </summary>
         UNKNOWN = 0,
+
+        /// <summary>
+        /// Represents a form factor that is categorized as "OTHER," not falling into specific predefined categories.
+        /// </summary>
         OTHER = 1,
+
+        /// <summary>
+        /// Represents a Single In-line Package (SIP) form factor.
+        /// </summary>
         SIP = 2,
+
+        /// <summary>
+        /// Represents a Dual In-line Package (DIP) form factor.
+        /// </summary>
         DIP = 3,
+
+        /// <summary>
+        /// Represents a Zigzag In-line Package (ZIP) form factor.
+        /// </summary>
         ZIP = 4,
+
+        /// <summary>
+        /// Represents a Small Outline J-lead (SOJ) form factor.
+        /// </summary>
         SOJ = 5,
+
+        /// <summary>
+        /// Represents a form factor that is proprietary and not covered by other specific categories.
+        /// </summary>
         PROPRIETARY = 6,
+
+        /// <summary>
+        /// Represents a Single Inline Memory Module (SIMM) form factor.
+        /// </summary>
         SIMM = 7,
+
+        /// <summary>
+        /// Represents a Dual Inline Memory Module (DIMM) form factor.
+        /// </summary>
         DIMM = 8,
+
+        /// <summary>
+        /// Represents a Thin Small Outline Package (TSOP) form factor.
+        /// </summary>
         TSOP = 9,
+
+        /// <summary>
+        /// Represents a Pin Grid Array (PGA) form factor.
+        /// </summary>
         PGA = 10,
+
+        /// <summary>
+        /// Represents a Rambus Inline Memory Module (RIMM) form factor.
+        /// </summary>
         RIMM = 11,
+
+        /// <summary>
+        /// Represents a Small Outline Dual In-line Memory Module (SODIMM) form factor.
+        /// </summary>
         SODIMM = 12,
+
+        /// <summary>
+        /// Represents a Static Random-Access Memory Inline Memory Module (SRIMM) form factor.
+        /// </summary>
         SRIMM = 13,
+
+        /// <summary>
+        /// Represents a Surface Mount Device (SMD) form factor.
+        /// </summary>
         SMD = 14,
+
+        /// <summary>
+        /// Represents a Shrink Small-Outline Package (SSMP) form factor.
+        /// </summary>
         SSMP = 15,
+
+        /// <summary>
+        /// Represents a Quad Flat Package (QFP) form factor.
+        /// </summary>
         QFP = 16,
+
+        /// <summary>
+        /// Represents a Thin Quad Flat Package (TQFP) form factor.
+        /// </summary>
         TQFP = 17,
+
+        /// <summary>
+        /// Represents a Small Outline Integrated Circuit (SOIC) form factor.
+        /// </summary>
         SOIC = 18,
+
+        /// <summary>
+        /// Represents a Leadless Chip Carrier (LCC) form factor.
+        /// </summary>
         LCC = 19,
+
+        /// <summary>
+        /// Represents a Plastic Leaded Chip Carrier (PLCC) form factor.
+        /// </summary>
         PLCC = 20,
+
+        /// <summary>
+        /// Represents a Ball Grid Array (BGA) form factor.
+        /// </summary>
         BGA = 21,
+
+        /// <summary>
+        /// Represents a Fine-Pitch Ball Grid Array (FPBGA) form factor.
+        /// </summary>
         FPBGA = 22,
+
+        /// <summary>
+        /// Represents a Land Grid Array (LGA) form factor.
+        /// </summary>
         LGA = 23
     }
 

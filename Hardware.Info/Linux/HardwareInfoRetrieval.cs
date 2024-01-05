@@ -280,25 +280,25 @@ namespace Hardware.Info.Linux
 
             foreach (var group in processorList.GroupBy(processor => processor.PhysicalId))
             {
-                CPU cpu = new CPU();
-
-                cpu.PercentProcessorTime = percentProcessorTime;
-
-                cpu.ProcessorId = group.Key.ToString();
-
                 Processor first = group.First();
 
-                cpu.Manufacturer = first.VendorId;
-                cpu.Name = first.ModelName;
-                cpu.CurrentClockSpeed = first.CpuMhz;
-                //cpu.L2CacheSize = first.CacheSize;
-                cpu.NumberOfLogicalProcessors = first.Siblings;
-                cpu.NumberOfCores = first.CpuCores;
+                CPU cpu = new CPU
+                {
+                    PercentProcessorTime = percentProcessorTime,
+                    ProcessorId = group.Key.ToString(),
+                    Manufacturer = first.VendorId,
+                    Name = first.ModelName,
+                    CurrentClockSpeed = first.CpuMhz,
+                    NumberOfLogicalProcessors = first.Siblings,
+                    NumberOfCores = first.CpuCores,
+                    L1DataCacheSize = first.L1DataCacheSize,
+                    L1InstructionCacheSize = first.L1InstructionCacheSize,
+                    L2CacheSize = first.L2CacheSize,
+                    L3CacheSize = first.L3CacheSize
+                };
 
-                cpu.L1DataCacheSize = first.L1DataCacheSize;
-                cpu.L1InstructionCacheSize = first.L1InstructionCacheSize;
-                cpu.L2CacheSize = first.L2CacheSize;
-                cpu.L3CacheSize = first.L3CacheSize;
+                if (cpu.L2CacheSize == 0)
+                    cpu.L2CacheSize = first.CacheSize;
 
                 foreach (Processor proc in group)
                 {

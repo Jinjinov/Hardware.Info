@@ -103,26 +103,29 @@ internal static class Edid
 
     static void Monitor()
     {
-        string resolution = null;
-        string refreshRate = null;
-        string edidFile = null;
+        string? resolution = null;
+        string? refreshRate = null;
+        string? edidFile = null;
 
         // Get the display resolution and refresh rate using xrandr
-        var xrandrProcess = Process.Start(new ProcessStartInfo
+        Process? xrandrProcess = Process.Start(new ProcessStartInfo
         {
             FileName = "xrandr",
             RedirectStandardOutput = true,
             UseShellExecute = false
         });
 
+        if (xrandrProcess == null)
+            return;
+
         while (!xrandrProcess.StandardOutput.EndOfStream)
         {
-            string line = xrandrProcess.StandardOutput.ReadLine();
+            string? line = xrandrProcess.StandardOutput.ReadLine();
 
-            if (line.Contains("*"))
+            if (line?.Contains('*') == true)
             {
-                resolution = line.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries)[0];
-                refreshRate = line.Split(new[] { " " }, StringSplitOptions.RemoveEmptyEntries)[1];
+                resolution = line.Split(" ", StringSplitOptions.RemoveEmptyEntries)[0];
+                refreshRate = line.Split(" ", StringSplitOptions.RemoveEmptyEntries)[1];
                 break;
             }
         }
@@ -131,12 +134,12 @@ internal static class Edid
         Console.WriteLine($"Monitor refreshRate: {refreshRate}");
 
         // Look up the EDID file based on the display configuration
-        var drmDirectory = new DirectoryInfo("/sys/class/drm");
-        foreach (var cardDirectory in drmDirectory.GetDirectories("card*"))
+        DirectoryInfo drmDirectory = new("/sys/class/drm");
+        foreach (DirectoryInfo cardDirectory in drmDirectory.GetDirectories("card*"))
         {
-            foreach (var connectorDirectory in cardDirectory.GetDirectories("card*"))
+            foreach (DirectoryInfo connectorDirectory in cardDirectory.GetDirectories("card*"))
             {
-                var edidPath = Path.Combine(connectorDirectory.FullName, "edid");
+                string edidPath = Path.Combine(connectorDirectory.FullName, "edid");
 
                 if (File.Exists(edidPath))
                 {
@@ -154,11 +157,11 @@ internal static class Edid
         // Read the EDID file and extract the manufacturer and model information
         if (edidFile != null)
         {
-            var edidBytes = File.ReadAllBytes(edidFile);
+            byte[] edidBytes = File.ReadAllBytes(edidFile);
             if (edidBytes.Length > 0)
             {
-                var manufacturerCode = BitConverter.ToUInt16(edidBytes, 0x08);
-                var modelCode = BitConverter.ToUInt16(edidBytes, 0x0a);
+                ushort manufacturerCode = BitConverter.ToUInt16(edidBytes, 0x08);
+                ushort modelCode = BitConverter.ToUInt16(edidBytes, 0x0a);
             }
         }
     }

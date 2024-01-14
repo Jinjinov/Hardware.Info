@@ -17,14 +17,13 @@
     <PackageProjectUrl>https://github.com/Jinjinov/Hardware.Info</PackageProjectUrl>
     <!--<PackageIcon></PackageIcon>-->
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <RepositoryUrl>https://github.com/Jinjinov/Hardware.Info.git</RepositoryUrl>
-    <RepositoryType>git</RepositoryType>
     <PackageTags>Computer;Device;Hardware;Info;Information;NET Standard;Windows;Linux;macOS</PackageTags>
     <!--<PackageReleaseNotes></PackageReleaseNotes>-->
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>HardwareInfo.snk</AssemblyOriginatorKeyFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
 
   <ItemGroup>
@@ -38,6 +37,7 @@
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />
     <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.0" />
     <PackageReference Include="System.Management" Version="8.0.0" />
+    <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All"/>
   </ItemGroup>
 
 </Project>

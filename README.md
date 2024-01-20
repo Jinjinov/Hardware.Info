@@ -14,27 +14,36 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 
         class Program
         {
-            static readonly IHardwareInfo hardwareInfo = new HardwareInfo();
+            static IHardwareInfo hardwareInfo;
 
             static void Main(string[] _)
             {
-                //hardwareInfo.RefreshOperatingSystem();
-                //hardwareInfo.RefreshMemoryStatus();
-                //hardwareInfo.RefreshBatteryList();
-                //hardwareInfo.RefreshBIOSList();
-                //hardwareInfo.RefreshCPUList();
-                //hardwareInfo.RefreshDriveList();
-                //hardwareInfo.RefreshKeyboardList();
-                //hardwareInfo.RefreshMemoryList();
-                //hardwareInfo.RefreshMonitorList();
-                //hardwareInfo.RefreshMotherboardList();
-                //hardwareInfo.RefreshMouseList();
-                //hardwareInfo.RefreshNetworkAdapterList();
-                //hardwareInfo.RefreshPrinterList();
-                //hardwareInfo.RefreshSoundDeviceList();
-                //hardwareInfo.RefreshVideoControllerList();
+                try
+                {
+                    hardwareInfo = new HardwareInfo();
 
-                hardwareInfo.RefreshAll();
+                    //hardwareInfo.RefreshOperatingSystem();
+                    //hardwareInfo.RefreshMemoryStatus();
+                    //hardwareInfo.RefreshBatteryList();
+                    //hardwareInfo.RefreshBIOSList();
+                    //hardwareInfo.RefreshCPUList();
+                    //hardwareInfo.RefreshDriveList();
+                    //hardwareInfo.RefreshKeyboardList();
+                    //hardwareInfo.RefreshMemoryList();
+                    //hardwareInfo.RefreshMonitorList();
+                    //hardwareInfo.RefreshMotherboardList();
+                    //hardwareInfo.RefreshMouseList();
+                    //hardwareInfo.RefreshNetworkAdapterList();
+                    //hardwareInfo.RefreshPrinterList();
+                    //hardwareInfo.RefreshSoundDeviceList();
+                    //hardwareInfo.RefreshVideoControllerList();
+
+                    hardwareInfo.RefreshAll();
+                }
+                catch (Exception ex)
+                {
+                    Console.WriteLine(ex);
+                }
 
                 Console.WriteLine(hardwareInfo.OperatingSystem);
 
@@ -54,8 +63,6 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
                         Console.WriteLine(cpuCore);
                 }
 
-                Console.ReadLine();
-
                 foreach (var drive in hardwareInfo.DriveList)
                 {
                     Console.WriteLine(drive);
@@ -68,8 +75,6 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
                             Console.WriteLine(volume);
                     }
                 }
-
-                Console.ReadLine();
 
                 foreach (var hardware in hardwareInfo.KeyboardList)
                     Console.WriteLine(hardware);
@@ -97,8 +102,6 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 
                 foreach (var hardware in hardwareInfo.VideoControllerList)
                     Console.WriteLine(hardware);
-
-                Console.ReadLine();
 
                 foreach (var address in HardwareInfo.GetLocalIPv4Addresses(NetworkInterfaceType.Ethernet, OperationalStatus.Up))
                     Console.WriteLine(address);
@@ -150,7 +153,20 @@ HardwareInfo(bool useAsteriskInWMI = true, TimeSpan? timeoutInWMI = null)
 
 The construcotr accepts two settings for WMI:
 - `useAsteriskInWMI` causes WMI queries to use `SELECT * FROM` instead of `SELECT` with a list of property names. This is slower, but safer, more compatible with older Windows (XP, Vista, 7, 8) where a certain WMI property might be missing and throw an exception when queried by name. The default value is `true`.
-- `timeoutInWMI` sets the `Timeout` property of the `EnumerationOptions` in the `ManagementObjectSearcher` that executes the query. The default value is `EnumerationOptions.InfiniteTimeout`. Changing this could cause the query to return empty results in certain cases.
+- `timeoutInWMI` sets the `Timeout` property of the `EnumerationOptions` in the `ManagementObjectSearcher` that executes each query. The default value is `EnumerationOptions.InfiniteTimeout`. There are one or more queries for each hardware component, so there are more than 16 queries executed on `RefreshAll()`. If a query reaches the timeout it will throw a `System.Management.ManagementException` exception where `ErrorCode` will be `System.Management.ManagementStatus.Timedout`. If you set the `timeoutInWMI` then use a `try-catch` block like this:
+
+        IHardwareInfo hardwareInfo;
+
+        try
+        {
+            hardwareInfo = new HardwareInfo(timeoutInWMI: TimeSpan.FromMilliseconds(100));
+
+            hardwareInfo.RefreshAll();
+        }
+        catch (ManagementException ex) when (ex.ErrorCode == ManagementStatus.Timedout)
+        {
+            Console.WriteLine(ex);
+        }
 
 ### Refresh methods settings:
 

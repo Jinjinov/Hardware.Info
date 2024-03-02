@@ -442,7 +442,7 @@ namespace Hardware.Info.Linux
 
         public override List<Drive> GetDriveList()
         {
-            List<Drive> driveList = new List<Drive>();
+            List<Drive> driveList = base.GetDriveList();
 
             string processOutput = ReadProcessOutput("lshw", "-class disk");
 
@@ -454,19 +454,18 @@ namespace Hardware.Info.Linux
             {
                 string trimmed = line.Trim();
 
-                if (trimmed.StartsWith("*-"))
+                if (trimmed.StartsWith("*-cdrom") || trimmed.StartsWith("*-disk"))
                 {
-                    if (disk != null)
+                    if(driveList.Count > 0 && disk == null && trimmed.StartsWith("*-disk"))
                     {
+                        disk = driveList.First();
+                    }
+                    else
+                    {
+                        disk = new Drive();
                         driveList.Add(disk);
                     }
 
-                    disk = null;
-                }
-
-                if (trimmed.StartsWith("*-cdrom") || trimmed.StartsWith("*-disk"))
-                {
-                    disk = new Drive();
                     continue;
                 }
 
@@ -502,11 +501,6 @@ namespace Hardware.Info.Linux
                         disk.Size = ExtractSizeInBytes(size);
                     }
                 }
-            }
-
-            if (disk != null)
-            {
-                driveList.Add(disk);
             }
 
             return driveList;

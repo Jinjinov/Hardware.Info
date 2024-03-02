@@ -104,9 +104,8 @@ namespace Hardware.Info
 
                     partition.VolumeList.Add(volume);
                 }
-                catch(UnauthorizedAccessException)
+                catch (UnauthorizedAccessException)
                 {
-
                 }
             }
 

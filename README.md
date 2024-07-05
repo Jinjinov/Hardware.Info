@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="100.1.0.0" />
+            <PackageReference Include="Hardware.Info" Version="100.1.0.1" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -227,6 +227,8 @@ Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact 
 
 ## Version history:
 
+- 100.1.0.1
+    - Fixed `GetVideoControllerList` in Linux - thanks to [@NogginBops](https://github.com/NogginBops)
 - 100.1.0.0
     - Fixed `GetDriveList` in Linux - thanks to [@GusanoGris](https://github.com/GusanoGris)
     - Added `Microsoft.SourceLink.GitHub` - by [@andreas-eriksson](https://github.com/andreas-eriksson)

@@ -1161,7 +1161,7 @@ namespace Hardware.Info.Linux
 
             lines = processOutput.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
 
-            foreach (string line in lines.Where(l => l.Contains("VGA compatible controller")))
+            foreach (string line in lines.Where(l => l.Contains("VGA compatible controller") || l.Contains("3D controller") || l.Contains("Display controller")))
             {
                 string[] split = line.Split(':');
 

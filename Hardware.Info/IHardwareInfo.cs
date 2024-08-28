@@ -28,6 +28,11 @@ namespace Hardware.Info
         List<BIOS> BiosList { get; }
 
         /// <summary>
+        /// List of <see cref="ComputerSystem" />
+        /// </summary>
+        List<ComputerSystem> ComputerSystemList { get; }
+
+        /// <summary>
         /// List of <see cref="CPU" />
         /// </summary>
         List<CPU> CpuList { get; }
@@ -106,6 +111,11 @@ namespace Hardware.Info
         /// Refresh BIOS info
         /// </summary>
         void RefreshBIOSList();
+
+        /// <summary>
+        /// Refresh computer system info
+        /// </summary>
+        void RefreshComputerSystemList();
 
         /// <summary>
         /// Refresh CPU info

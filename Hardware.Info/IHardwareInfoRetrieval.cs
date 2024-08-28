@@ -9,6 +9,7 @@ namespace Hardware.Info
 
         List<Battery> GetBatteryList();
         List<BIOS> GetBiosList();
+        List<ComputerSystem> GetComputerSystemList();
         List<CPU> GetCpuList(bool includePercentProcessorTime = true);
         List<Drive> GetDriveList();
         List<Keyboard> GetKeyboardList();

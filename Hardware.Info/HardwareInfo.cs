@@ -34,6 +34,11 @@ namespace Hardware.Info
         public List<BIOS> BiosList { get; private set; } = new List<BIOS>();
 
         /// <summary>
+        /// List of <see cref="ComputerSystem" />
+        /// </summary>
+        public List<ComputerSystem> ComputerSystemList { get; private set; } = new List<ComputerSystem>();
+
+        /// <summary>
         /// List of <see cref="CPU" />
         /// </summary>
         public List<CPU> CpuList { get; private set; } = new List<CPU>();
@@ -123,6 +128,7 @@ namespace Hardware.Info
 
             RefreshBatteryList();
             RefreshBIOSList();
+            RefreshComputerSystemList();
             RefreshCPUList();
             RefreshDriveList();
             RefreshKeyboardList();
@@ -155,6 +161,11 @@ namespace Hardware.Info
         /// Refresh BIOS info
         /// </summary>
         public void RefreshBIOSList() => BiosList = _hardwareInfoRetrieval.GetBiosList();
+
+        /// <summary>
+        /// Refresh computer system info
+        /// </summary>
+        public void RefreshComputerSystemList() => ComputerSystemList = _hardwareInfoRetrieval.GetComputerSystemList();
 
         /// <summary>
         /// Refresh CPU info

@@ -145,6 +145,17 @@ namespace Hardware.Info.Linux
             return biosList;
         }
 
+        public List<ComputerSystem> GetComputerSystemList()
+        {
+            List<ComputerSystem> computerSystemList = new List<ComputerSystem>();
+
+            ComputerSystem computerSystem = new ComputerSystem();
+
+            computerSystemList.Add(computerSystem);
+
+            return computerSystemList;
+        }
+
         private class Processor
         {
             public string ProcessorId = string.Empty;

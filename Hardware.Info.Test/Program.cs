@@ -20,6 +20,7 @@ namespace Hardware.Info.Test
             hardwareInfo.RefreshMemoryStatus();
             hardwareInfo.RefreshBatteryList();
             hardwareInfo.RefreshBIOSList();
+            hardwareInfo.RefreshComputerSystemList();
             hardwareInfo.RefreshCPUList(includePercentProcessorTime: test);
             hardwareInfo.RefreshDriveList();
             hardwareInfo.RefreshKeyboardList();
@@ -42,6 +43,9 @@ namespace Hardware.Info.Test
                 Console.WriteLine(hardware);
 
             foreach (var hardware in hardwareInfo.BiosList)
+                Console.WriteLine(hardware);
+
+            foreach (var hardware in hardwareInfo.ComputerSystemList)
                 Console.WriteLine(hardware);
 
             foreach (var cpu in hardwareInfo.CpuList)

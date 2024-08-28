@@ -26,6 +26,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
                     //hardwareInfo.RefreshMemoryStatus();
                     //hardwareInfo.RefreshBatteryList();
                     //hardwareInfo.RefreshBIOSList();
+                    //hardwareInfo.RefreshComputerSystemList();
                     //hardwareInfo.RefreshCPUList();
                     //hardwareInfo.RefreshDriveList();
                     //hardwareInfo.RefreshKeyboardList();
@@ -53,6 +54,9 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
                     Console.WriteLine(hardware);
 
                 foreach (var hardware in hardwareInfo.BiosList)
+                    Console.WriteLine(hardware);
+
+                foreach (var hardware in hardwareInfo.ComputerSystemList)
                     Console.WriteLine(hardware);
 
                 foreach (var cpu in hardwareInfo.CpuList)

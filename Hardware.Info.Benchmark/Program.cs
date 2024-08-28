@@ -16,6 +16,8 @@ namespace Hardware.Info.Benchmark
         [Benchmark]
         public void RefreshBIOSList() => _hardwareInfo.RefreshBIOSList();
         [Benchmark]
+        public void RefreshComputerSystemList() => _hardwareInfo.RefreshComputerSystemList();
+        [Benchmark]
         public void RefreshCPUList() => _hardwareInfo.RefreshCPUList();
         [Benchmark]
         public void RefreshDriveList() => _hardwareInfo.RefreshDriveList();

@@ -487,7 +487,7 @@ SATA/SATA Express:
         VBOX HARDDISK:
 
           Capacity: 536,87 GB (536.870.912.000 bytes)
-          Model: VBOX HARDDISK                           
+          Model: VBOX HARDDISK
           Revision: 1,000000
           Serial Number: VBa308df62-62a2d2a0 
           Native Command Queuing: Yes
@@ -531,9 +531,9 @@ SATA/SATA Express:
 
         VBOX CD-ROM:
 
-          Model: VBOX CD-ROM                             
+          Model: VBOX CD-ROM
           Revision: 1,000000
-          Serial Number: VB1-1a2b3c4d        
+          Serial Number: VB1-1a2b3c4d
           Native Command Queuing: No
           Detachable Drive: No
           Power Off: No

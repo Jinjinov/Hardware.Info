@@ -149,7 +149,17 @@ namespace Hardware.Info.Linux
         {
             List<ComputerSystem> computerSystemList = new List<ComputerSystem>();
 
-            ComputerSystem computerSystem = new ComputerSystem();
+            ComputerSystem computerSystem = new ComputerSystem
+            {
+                Caption = TryReadTextFromFile("/sys/class/dmi/id/product_name"),
+                Description = TryReadTextFromFile("/sys/class/dmi/id/product_family"),
+                IdentifyingNumber = TryReadTextFromFile("/sys/class/dmi/id/product_serial"),
+                Name = TryReadTextFromFile("/sys/class/dmi/id/product_name"),
+                SKUNumber = TryReadTextFromFile("/sys/class/dmi/id/product_sku"),
+                UUID = TryReadTextFromFile("/sys/class/dmi/id/product_uuid"),
+                Vendor = TryReadTextFromFile("/sys/class/dmi/id/sys_vendor"),
+                Version = TryReadTextFromFile("/sys/class/dmi/id/product_version")
+            };
 
             computerSystemList.Add(computerSystem);
 

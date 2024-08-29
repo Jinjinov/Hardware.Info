@@ -327,7 +327,7 @@ Power:
         }
 
         /*
-        Urban@mac ~ % system_profiler SPHardwareDataType
+        system_profiler SPHardwareDataType
 Hardware:
 
     Hardware Overview:
@@ -344,52 +344,51 @@ Hardware:
       Hardware UUID: A7C8F6C7-C339-5904-B220-CF4C3D22FB1B
       Provisioning UDID: 00008103-001965521E60801E
       Activation Lock Status: Enabled
-
-Urban@mac ~ %  
         */
 
         public List<ComputerSystem> GetComputerSystemList()
         {
             List<ComputerSystem> computerSystemList = new List<ComputerSystem>();
 
-            ComputerSystem computerSystem = null!;
+            ComputerSystem computerSystem = new ComputerSystem
+            {
+                Vendor = "Apple"
+            };
 
-            StartProcess("system_profiler", "SPDisplaysDataType",
+            StartProcess("system_profiler", "SPHardwareDataType",
                 standardOutput =>
                 {
-                    int spaceCount = standardOutput.TakeWhile(c => c == ' ').Count();
-
                     string line = standardOutput.Trim();
 
-                    string[] split = line.Split(':');
-
-                    if (spaceCount == 8)
+                    if (line.StartsWith("Model Name: "))
                     {
-                        if (monitor != null)
-                            monitorList.Add(monitor);
-
-                        string name = line.TrimEnd(':');
-
-                        monitor = new Monitor
-                        {
-                            Caption = name,
-                            Description = name,
-                            Name = name
-                        };
+                        computerSystem.Caption = line.Replace("Model Name: ", string.Empty);
+                        computerSystem.Name = line.Replace("Model Name: ", string.Empty);
                     }
-
-                    if (monitor != null)
+                    else if (line.StartsWith("Model Identifier: "))
                     {
-                        if (line.StartsWith("Display Type: "))
-                        {
-                            monitor.MonitorType = line.Replace("Display Type: ", string.Empty);
-                        }
+                        computerSystem.Description = line.Replace("Model Identifier: ", string.Empty);
+                    }
+                    else if (line.StartsWith("Serial Number (system): "))
+                    {
+                        computerSystem.IdentifyingNumber = line.Replace("Serial Number (system): ", string.Empty);
+                    }
+                    else if (line.StartsWith("Model Number: "))
+                    {
+                        computerSystem.SKUNumber = line.Replace("Model Number: ", string.Empty);
+                    }
+                    else if (line.StartsWith("Hardware UUID: "))
+                    {
+                        computerSystem.UUID = line.Replace("Hardware UUID: ", string.Empty);
+                    }
+                    else if (line.StartsWith("System Firmware Version: "))
+                    {
+                        computerSystem.Version = line.Replace("System Firmware Version: ", string.Empty);
                     }
                 },
                 standardError => { });
 
-            if (computerSystem != null)
-                computerSystemList.Add(computerSystem);
+            computerSystemList.Add(computerSystem);
 
             return computerSystemList;
         }

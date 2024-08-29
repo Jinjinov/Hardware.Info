@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="100.1.0.1" />
+            <PackageReference Include="Hardware.Info" Version="100.1.1.0" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -231,6 +231,8 @@ Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact 
 
 ## Version history:
 
+- 100.1.1.0
+    - Added `ComputerSystem` info in Windows, macOS, Linux - thanks to [@Zagrthos](https://github.com/Zagrthos)
 - 100.1.0.1
     - Fixed `GetVideoControllerList` in Linux - thanks to [@NogginBops](https://github.com/NogginBops)
 - 100.1.0.0

@@ -326,13 +326,70 @@ Power:
             return biosList;
         }
 
+        /*
+        Urban@mac ~ % system_profiler SPHardwareDataType
+Hardware:
+
+    Hardware Overview:
+
+      Model Name: Mac mini
+      Model Identifier: Macmini9,1
+      Model Number: MGNR3ZE/A
+      Chip: Apple M1
+      Total Number of Cores: 8 (4 performance and 4 efficiency)
+      Memory: 8 GB
+      System Firmware Version: 10151.140.19
+      OS Loader Version: 10151.140.19
+      Serial Number (system): C07JG1XTQ6NV
+      Hardware UUID: A7C8F6C7-C339-5904-B220-CF4C3D22FB1B
+      Provisioning UDID: 00008103-001965521E60801E
+      Activation Lock Status: Enabled
+
+Urban@mac ~ %  
+        */
+
         public List<ComputerSystem> GetComputerSystemList()
         {
             List<ComputerSystem> computerSystemList = new List<ComputerSystem>();
 
-            ComputerSystem computerSystem = new ComputerSystem();
+            ComputerSystem computerSystem = null!;
 
-            computerSystemList.Add(computerSystem);
+            StartProcess("system_profiler", "SPDisplaysDataType",
+                standardOutput =>
+                {
+                    int spaceCount = standardOutput.TakeWhile(c => c == ' ').Count();
+
+                    string line = standardOutput.Trim();
+
+                    string[] split = line.Split(':');
+
+                    if (spaceCount == 8)
+                    {
+                        if (monitor != null)
+                            monitorList.Add(monitor);
+
+                        string name = line.TrimEnd(':');
+
+                        monitor = new Monitor
+                        {
+                            Caption = name,
+                            Description = name,
+                            Name = name
+                        };
+                    }
+
+                    if (monitor != null)
+                    {
+                        if (line.StartsWith("Display Type: "))
+                        {
+                            monitor.MonitorType = line.Replace("Display Type: ", string.Empty);
+                        }
+                    }
+                },
+                standardError => { });
+
+            if (computerSystem != null)
+                computerSystemList.Add(computerSystem);
 
             return computerSystemList;
         }

@@ -9,8 +9,8 @@
   <PropertyGroup>
     <Product>Hardware.Info</Product>
     <PackageId>Hardware.Info</PackageId>
-    <PackageVersion>100.1.1.0</PackageVersion>
-    <Version>100.1.1.0</Version>
+    <PackageVersion>100.1.1.1</PackageVersion>
+    <Version>100.1.1.1</Version>
     <Authors>Jinjinov</Authors>
     <Description>Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, motherboard, mouse, NIC - network adapter, printer, sound card - audio card, graphics card - video card. Hardware.Info is a .NET Standard 2.0 library and uses WMI on Windows, /dev, /proc, /sys on Linux and sysctl, system_profiler on macOS.</Description>
     <Copyright>Copyright (c) Jinjinov 2022</Copyright>

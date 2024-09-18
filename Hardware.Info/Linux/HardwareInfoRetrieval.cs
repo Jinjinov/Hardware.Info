@@ -817,7 +817,7 @@ namespace Hardware.Info.Linux
                     Caption = interfaceName,
                     Description = interfaceName,
                     Name = interfaceName,
-                    MACAddress = macAddress,
+                    MACAddress = macAddress.Replace(":", "").ToUpper(),
                     NetConnectionID = interfaceName,
                     ProductName = interfaceName,
                 };
@@ -912,16 +912,7 @@ namespace Hardware.Info.Linux
 
         public override List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)
         {
-            List<NetworkAdapter> networkAdapterList;
-
-            try
-            {
-                networkAdapterList = base.GetNetworkAdapterList(includeBytesPersec, includeNetworkAdapterConfiguration);
-            }
-            catch (NetworkInformationException)
-            {
-                networkAdapterList = GetNetworkAdapters();
-            }
+            List<NetworkAdapter> networkAdapterList = GetNetworkAdapters();
 
             if (includeBytesPersec)
             {

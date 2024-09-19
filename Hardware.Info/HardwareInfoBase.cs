@@ -116,7 +116,7 @@ namespace Hardware.Info
             return driveList;
         }
 
-        public virtual List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)
+        public virtual List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true, int millisecondsDelayBetweenTwoMeasurements = 1000)
         {
             List<NetworkAdapter> networkAdapterList = new List<NetworkAdapter>();
 

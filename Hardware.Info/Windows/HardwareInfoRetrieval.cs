@@ -272,7 +272,7 @@ namespace Hardware.Info.Windows
             return computerSystemList;
         }
 
-        public List<CPU> GetCpuList(bool includePercentProcessorTime = true)
+        public List<CPU> GetCpuList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500)
         {
             List<CPU> cpuList = new List<CPU>();
 
@@ -658,7 +658,7 @@ namespace Hardware.Info.Windows
             return mouseList;
         }
 
-        public override List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)
+        public override List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true, int millisecondsDelayBetweenTwoMeasurements = 1000)
         {
             List<NetworkAdapter> networkAdapterList = new List<NetworkAdapter>();
 

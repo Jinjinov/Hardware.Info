@@ -8,9 +8,9 @@ using System.Runtime.InteropServices;
 
 namespace Hardware.Info
 {
-    internal class HardwareInfoBase
+    public class HardwareInfoBase
     {
-        internal static Process StartProcess(string cmd, string args)
+        protected internal static Process StartProcess(string cmd, string args)
         {
             ProcessStartInfo processStartInfo = new ProcessStartInfo(cmd, args)
             {
@@ -24,7 +24,7 @@ namespace Hardware.Info
             return Process.Start(processStartInfo);
         }
 
-        internal static string ReadProcessOutput(string cmd, string args)
+        protected internal static string ReadProcessOutput(string cmd, string args)
         {
             try
             {
@@ -40,7 +40,7 @@ namespace Hardware.Info
             }
         }
 
-        internal static string TryReadTextFromFile(string path)
+        protected internal static string TryReadTextFromFile(string path)
         {
             try
             {
@@ -52,7 +52,7 @@ namespace Hardware.Info
             }
         }
 
-        internal static uint TryReadIntegerFromFile(params string[] possiblePaths)
+        protected internal static uint TryReadIntegerFromFile(params string[] possiblePaths)
         {
             foreach (string path in possiblePaths)
             {
@@ -67,7 +67,7 @@ namespace Hardware.Info
             return 0;
         }
 
-        internal static string[] TryReadLinesFromFile(string path)
+        protected internal static string[] TryReadLinesFromFile(string path)
         {
             try
             {

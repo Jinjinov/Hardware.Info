@@ -1,0 +1,38 @@
+// COM initialization and security
+CoInitializeEx
+CoInitializeSecurity
+CoSetProxyBlanket
+CoUninitialize
+
+// WMI specific COM classes
+IWbemLocator
+IWbemServices
+IWbemClassObject
+IEnumWbemClassObject
+
+// COM helpers
+CoCreateInstance
+VARIANT
+VariantClear
+ClearVariantArray 
+BSTR
+SysAllocString
+SysFreeString
+
+VariantToUInt16Array
+VariantToStringArray
+
+VariantToInt16
+VariantToInt32
+VariantToString 
+VariantToUInt16
+VariantToUInt32
+VariantToUInt64
+VariantToBoolean
+VariantToInt32Array
+
+// Other functions
+GlobalMemoryStatusEx
+MEMORYSTATUSEX
+RtlGetVersion
+OSVERSIONINFOEXW

@@ -118,6 +118,11 @@ namespace Hardware.Info
             }
         }
 
+        public HardwareInfo(IHardwareInfoRetrieval implementation)
+        {
+            _hardwareInfoRetrieval = implementation;
+        }
+
         /// <summary>
         /// Refresh all hardware info
         /// </summary>

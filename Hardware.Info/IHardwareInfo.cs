@@ -121,7 +121,8 @@ namespace Hardware.Info
         /// Refresh CPU info
         /// </summary>
         /// <param name="includePercentProcessorTime">Include PercentProcessorTime info. This makes the method a bit slower.</param>
-        void RefreshCPUList(bool includePercentProcessorTime = true);
+        /// <param name="millisecondsDelayBetweenTwoMeasurements">Delay in milliseconds between two measurements in Linux</param>
+        void RefreshCPUList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500);
 
         /// <summary>
         /// Refresh drive info
@@ -158,7 +159,8 @@ namespace Hardware.Info
         /// </summary>
         /// <param name="includeBytesPerSec">Include BytesPerSec info. This makes the method a bit slower.</param>
         /// <param name="includeNetworkAdapterConfiguration">Include NetworkAdapterConfiguration info. This makes the method a bit slower.</param>
-        void RefreshNetworkAdapterList(bool includeBytesPerSec = true, bool includeNetworkAdapterConfiguration = true);
+        /// <param name="millisecondsDelayBetweenTwoMeasurements">Delay in milliseconds between two measurements in Linux</param>
+        void RefreshNetworkAdapterList(bool includeBytesPerSec = true, bool includeNetworkAdapterConfiguration = true, int millisecondsDelayBetweenTwoMeasurements = 1000);
 
         /// <summary>
         /// Refresh printer info

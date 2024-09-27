@@ -51,11 +51,12 @@ jobs:
             --configuration Release \
             -r "$RUN_TIME" \
             --verbosity quiet \
+            -p WarningLevel=0 \
             -- \
             --enable-test-mode \
             --expected-compiler jit \
             --expected-arch ${{ matrix.architecture }} \
-            --no-readline
+            --no-readline | tee ./output.jit
         
       # Run with aot
       - name: Compile ahead-of-time
@@ -75,4 +76,8 @@ jobs:
             --enable-test-mode \
             --expected-compiler aot \
             --expected-arch ${{ matrix.architecture }} \
-            --no-readline
+            --no-readline | tee ./output.aot
+          
+      - name: Verify that output is identical
+        shell: bash
+        run: diff ./output.jit ./output.aot

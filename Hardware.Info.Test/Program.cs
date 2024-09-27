@@ -17,35 +17,35 @@ namespace Hardware.Info.Test
             if (testMode)
             {
                 var isJit = RuntimeFeature.IsDynamicCodeCompiled;
-                Console.WriteLine($"Process Architecture: {RuntimeInformation.ProcessArchitecture}");
-                Console.WriteLine($"Operating System Architecture: {RuntimeInformation.OSArchitecture}");
-                Console.WriteLine($"Compiler: {(isJit ? "JIT" : "AOT")}");
-                Console.WriteLine($"Expected Compiler: {expectedCompiler}");
-                Console.WriteLine($"Expected Architecture: {expectedArch}");
+                Console.Error.WriteLine($"Process Architecture: {RuntimeInformation.ProcessArchitecture}");
+                Console.Error.WriteLine($"Operating System Architecture: {RuntimeInformation.OSArchitecture}");
+                Console.Error.WriteLine($"Compiler: {(isJit ? "JIT" : "AOT")}");
+                Console.Error.WriteLine($"Expected Compiler: {expectedCompiler}");
+                Console.Error.WriteLine($"Expected Architecture: {expectedArch}");
 
                 if (expectedCompiler == TestSuite.Compiler.Jit && !isJit)
                 {
-                    Console.WriteLine($"Expected JIT compiler but was {expectedCompiler}");
+                    Console.Error.WriteLine($"Expected JIT compiler but was {expectedCompiler}");
                     return 1;
                 }
 
                 if (expectedCompiler == TestSuite.Compiler.Aot && isJit)
                 {
-                    Console.WriteLine($"Expected AOT compiler but was {expectedCompiler}");
+                    Console.Error.WriteLine($"Expected AOT compiler but was {expectedCompiler}");
                     return 1;
                 }
 
                 if (expectedArch == TestSuite.Architecture.x64 && RuntimeInformation.ProcessArchitecture !=
-                    System.Runtime.InteropServices.Architecture.X64)
+                    Architecture.X64)
                 {
-                    Console.WriteLine($"Expected architecture: {expectedArch} but was {RuntimeInformation.ProcessArchitecture}");
+                    Console.Error.WriteLine($"Expected architecture: {expectedArch} but was {RuntimeInformation.ProcessArchitecture}");
                     return 1;
                 }
                 
                 if (expectedArch == TestSuite.Architecture.arm64 && RuntimeInformation.ProcessArchitecture !=
-                    System.Runtime.InteropServices.Architecture.Arm64)
+                    Architecture.Arm64)
                 {
-                    Console.WriteLine($"Expected architecture: {expectedArch} but was {RuntimeInformation.ProcessArchitecture}");
+                    Console.Error.WriteLine($"Expected architecture: {expectedArch} but was {RuntimeInformation.ProcessArchitecture}");
                     return 1;
                 }
             }

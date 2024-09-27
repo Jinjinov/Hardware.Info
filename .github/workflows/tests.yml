@@ -27,7 +27,7 @@ jobs:
         uses: actions/checkout@v3
         
       - name: Install deps on linux
-        if: {{ matrix.os == 'ubuntu-latest' }}
+        if: ${{ matrix.os == 'ubuntu-latest' }}
         shell: bash
         run: apt update && apt install clang zlib1g-dev
       

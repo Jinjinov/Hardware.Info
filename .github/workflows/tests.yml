@@ -25,6 +25,11 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
+        
+      - name: Install deps on linux
+        if: {{ matrix.os == 'ubuntu-latest' }}
+        shell: bash
+        run: apt update && apt install clang zlib1g-dev
       
       # Setup .NET SDK
       - name: Setup .NET SDK

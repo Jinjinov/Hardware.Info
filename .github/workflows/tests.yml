@@ -71,7 +71,7 @@ jobs:
       - name: Run tests with aot
         shell: bash
         run: |
-          .\Hardware.Info.Test\bin\Release\net8.0\$RUN_TIME\publish\Hardware.Info.Test \
+          ./Hardware.Info.Test/bin/Release/net8.0/$RUN_TIME/publish/Hardware.Info.Test \
             --enable-test-mode \
             --expected-compiler aot \
             --expected-arch ${{ matrix.architecture }} \

@@ -58,7 +58,7 @@ jobs:
             --no-readline
         
       # Run with aot
-      - name: Run tests with aot
+      - name: Compile ahead-of-time
         shell: bash
         run: |
           dotnet publish \
@@ -67,7 +67,10 @@ jobs:
             -r "$RUN_TIME" \
             -p PublishAot=true \
             --verbosity quiet
-          
+
+      - name: Run tests with aot
+        shell: bash
+        run: |
           .\Hardware.Info.Test\bin\Release\net8.0\$RUN_TIME\publish\Hardware.Info.Test \
             --enable-test-mode \
             --expected-compiler aot \

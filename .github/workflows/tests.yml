@@ -20,7 +20,7 @@ jobs:
         dotnet: ['8.x']
       fail-fast: false
     env: 
-      RUN_TIME: "${{ fromJson('{ \"ubuntu-latest\": \"linux-x64\", \"windows-latest\": \"win-x64\", \"macos-latest\": \"osx-x64\" }')[matrix.os] }}"
+      RUN_TIME: "${{ fromJson('{ \"ubuntu-latest\": \"linux-x64\", \"windows-latest\": \"win-x64\", \"macos-13\": \"osx-x64\" }')[matrix.os] }}"
 
     steps:
       - name: Checkout repository

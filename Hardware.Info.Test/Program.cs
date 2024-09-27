@@ -1,18 +1,63 @@
 ﻿using System;
 using System.Net.NetworkInformation;
+using System.Runtime.CompilerServices;
+using System.Runtime.InteropServices;
 
 namespace Hardware.Info.Test
 {
     class Program
     {
-        static void Main(string[] _)
+        static int Main(string[] args)
         {
-            Test(true);
+            bool testMode = TestSuite.HasFlag(args, "--enable-test-mode");
+            bool noReadLine = TestSuite.HasFlag(args, "--no-readline");
+            TestSuite.Compiler expectedCompiler = TestSuite.ReadOption(args, "--expected-compiler", TestSuite.Compiler.Unknown);
+            TestSuite.Architecture expectedArch = TestSuite.ReadOption(args, "--expected-arch", TestSuite.Architecture.Unknown);
+            
+            if (testMode)
+            {
+                var isJit = RuntimeFeature.IsDynamicCodeCompiled;
+                Console.WriteLine($"Process Architecture: {RuntimeInformation.ProcessArchitecture}");
+                Console.WriteLine($"Operating System Architecture: {RuntimeInformation.OSArchitecture}");
+                Console.WriteLine($"Compiler: {(isJit ? "JIT" : "AOT")}");
+                Console.WriteLine($"Expected Compiler: {expectedCompiler}");
+                Console.WriteLine($"Expected Architecture: {expectedArch}");
 
-            Test(false);
+                if (expectedCompiler == TestSuite.Compiler.Jit && !isJit)
+                {
+                    Console.WriteLine($"Expected JIT compiler but was {expectedCompiler}");
+                    return 1;
+                }
+
+                if (expectedCompiler == TestSuite.Compiler.Aot && isJit)
+                {
+                    Console.WriteLine($"Expected AOT compiler but was {expectedCompiler}");
+                    return 1;
+                }
+
+                if (expectedArch == TestSuite.Architecture.x64 && RuntimeInformation.ProcessArchitecture !=
+                    System.Runtime.InteropServices.Architecture.X64)
+                {
+                    Console.WriteLine($"Expected architecture: {expectedArch} but was {RuntimeInformation.ProcessArchitecture}");
+                    return 1;
+                }
+                
+                if (expectedArch == TestSuite.Architecture.arm64 && RuntimeInformation.ProcessArchitecture !=
+                    System.Runtime.InteropServices.Architecture.Arm64)
+                {
+                    Console.WriteLine($"Expected architecture: {expectedArch} but was {RuntimeInformation.ProcessArchitecture}");
+                    return 1;
+                }
+            }
+            
+            Test(true, noReadLine: noReadLine);
+
+            Test(false, noReadLine: noReadLine);
+
+            return 0;
         }
-
-        static void Test(bool test)
+        
+        static void Test(bool test, bool noReadLine)
         {
             IHardwareInfo hardwareInfo = new HardwareInfo(useAsteriskInWMI: test);
 
@@ -114,6 +159,11 @@ namespace Hardware.Info.Test
             foreach (var address in HardwareInfo.GetLocalIPv4Addresses())
                 Console.WriteLine(address);
 
+            if (!noReadLine)
+            {
+                return;
+            }
+            
             Console.ReadLine();
         }
     }

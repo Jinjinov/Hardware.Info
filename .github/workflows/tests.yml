@@ -24,7 +24,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
         
       - name: Install deps on linux
         if: ${{ matrix.os == 'ubuntu-latest' }}

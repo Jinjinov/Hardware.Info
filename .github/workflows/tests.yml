@@ -54,7 +54,21 @@ jobs:
         id: knownVariables
         shell: bash
         run: |
-          RUN_TIME="${{ fromJson('{ \"ubuntu-latest\": \"linux-x64\", \"windows-latest\": \"win-x64\", \"macos-13\": \"osx-x64\" }')[matrix.os] }}"
+         case "${{ matrix.os }}" in
+          "ubuntu-latest")
+            RUN_TIME="linux-x64"
+            ;;
+          "windows-latest")
+            RUN_TIME="win-x64"
+            ;;
+          "macos-13")
+            RUN_TIME="osx-x64"
+            ;;
+          *)
+            echo "Unknown operating system"
+            exit 1
+          ;;
+          esac
           echo "runTime=$RUN_TIME" >> "$GITHUB_OUTPUT"
           echo "publishDirectory=./Hardware.Info.Test/bin/Release/net8.0/$RUN_TIME/publish" >> "$GITHUB_OUTPUT"
         

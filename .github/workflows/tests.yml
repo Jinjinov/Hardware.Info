@@ -119,8 +119,7 @@ jobs:
             --configuration Release \
             -r "$RUN_TIME" \
             -p PublishAot=true \
-            -p PackageSource=nuget \
-            -p:TargetFrameworks=net8.0
+            -p PackageSource=nuget
 
       - name: Upload compiled artifacts
         uses: actions/upload-artifact@v4

@@ -4,6 +4,8 @@
         <TargetFrameworks>netstandard2.0;net8.0</TargetFrameworks>
         <LangVersion>8.0</LangVersion>
         <Nullable>enable</Nullable>
+
+        <IsAotCompatible>true</IsAotCompatible>
     </PropertyGroup>
 
     <ItemGroup>

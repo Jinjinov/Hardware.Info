@@ -34,10 +34,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Hardware.Info.Core\Hardware.Info.Core.csproj" />
-    <ProjectReference Include="..\Hardware.Info.Linux\Hardware.Info.Linux.csproj" />
-    <ProjectReference Include="..\Hardware.Info.Mac\Hardware.Info.Mac.csproj" />
-    <ProjectReference Include="..\Hardware.Info.Windows\Hardware.Info.Windows.csproj" />
+    <ProjectReference Include="..\Hardware.Info.Core\Hardware.Info.Core.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Hardware.Info.Linux\Hardware.Info.Linux.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Hardware.Info.Mac\Hardware.Info.Mac.csproj" PrivateAssets="all" />
+    <ProjectReference Include="..\Hardware.Info.Windows\Hardware.Info.Windows.csproj" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Tenekon.MSBuild.Packaging.ProjectBuildInPackage" Version="2.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

@@ -34,10 +34,17 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Hardware.Info.Aot.Windows\Hardware.Info.Aot.Windows.csproj" SetTargetFramework="TargetFramework=net8.0" />
-    <ProjectReference Include="..\Hardware.Info.Core\Hardware.Info.Core.csproj" SetTargetFramework="TargetFramework=net8.0" AdditionalProperties="TargetFramework=net8.0" />
-    <ProjectReference Include="..\Hardware.Info.Linux\Hardware.Info.Linux.csproj" SetTargetFramework="TargetFrameworks=net8.0" AdditionalProperties="TargetFramework=net8.0" />
-    <ProjectReference Include="..\Hardware.Info.Mac\Hardware.Info.Mac.csproj" SetTargetFramework="TargetFramework=net8.0" AdditionalProperties="TargetFramework=net8.0" />
+    <ProjectReference Include="..\Hardware.Info.Aot.Windows\Hardware.Info.Aot.Windows.csproj" SetTargetFramework="TargetFramework=net8.0" PrivateAssets="all" />
+    <ProjectReference Include="..\Hardware.Info.Core\Hardware.Info.Core.csproj" SetTargetFramework="TargetFramework=net8.0" AdditionalProperties="TargetFramework=net8.0" PrivateAssets="all" />
+    <ProjectReference Include="..\Hardware.Info.Linux\Hardware.Info.Linux.csproj" SetTargetFramework="TargetFramework=net8.0" AdditionalProperties="TargetFramework=net8.0" PrivateAssets="all" />
+    <ProjectReference Include="..\Hardware.Info.Mac\Hardware.Info.Mac.csproj" SetTargetFramework="TargetFramework=net8.0" AdditionalProperties="TargetFramework=net8.0" PrivateAssets="all" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="Tenekon.MSBuild.Packaging.ProjectBuildInPackage" Version="2.0.0">
+      <PrivateAssets>all</PrivateAssets>
+      <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
+    </PackageReference>
   </ItemGroup>
 
 </Project>

@@ -11,7 +11,7 @@ on:
     inputs: 
       version:
         description: The version of the build packages
-        default: local
+        default: 0.0.1
         type: string
 
 jobs:

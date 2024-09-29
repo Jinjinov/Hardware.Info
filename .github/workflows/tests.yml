@@ -52,6 +52,7 @@ jobs:
     steps:
       - name: Known variables
         id: knownVariables
+        shell: bash
         run: |
           RUN_TIME="${{ fromJson('{ \"ubuntu-latest\": \"linux-x64\", \"windows-latest\": \"win-x64\", \"macos-13\": \"osx-x64\" }')[matrix.os] }}"
           echo "runTime=$RUN_TIME" >> "$GITHUB_OUTPUT"

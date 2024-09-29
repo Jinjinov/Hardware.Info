@@ -64,7 +64,7 @@ jobs:
       - name: Add local nuget feed
         shell: bash
         run: |
-          cat >./NuGet.config <<EOL
+          cat >./nuget.config <<EOL
           <?xml version="1.0" encoding="utf-8"?>
           <configuration>
             <packageSources>
@@ -120,7 +120,6 @@ jobs:
             -r "$RUN_TIME" \
             -p PublishAot=true \
             -p PackageSource=nuget \
-            --verbosity quiet \
             -p:TargetFrameworks=net8.0
 
       - name: Upload compiled artifacts

@@ -37,7 +37,7 @@ namespace Hardware.Info.Test
 
                 if (expectedCompiler == TestSuite.Compiler.Aot && isJit)
                 {
-                    Console.Error.WriteLine($"Expected AOT compiler but was {expectedCompiler}");
+                    Console.Error.WriteLine($"Expected AOT compiler but was {(isJit ? "JIT" : "AOT")}");
                     return 1;
                 }
 

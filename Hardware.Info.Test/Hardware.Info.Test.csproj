@@ -14,7 +14,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Hardware.Info\Hardware.Info.csproj"  Condition="'$(PublishAot)' == 'false'" />
-    <ProjectReference Include="..\Hardware.Info.Aot\Hardware.Info.Aot.csproj"  Condition="'$(PublishAot)' == 'true'" SetTargetFramework="TargetFramework=net8.0" />
+    <ProjectReference Include="..\Hardware.Info.Aot\Hardware.Info.Aot.csproj"  Condition="'$(PublishAot)' == 'true'" SetTargetFramework="TargetFrameworks=net8.0" />
   </ItemGroup>
 
 </Project>

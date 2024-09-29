@@ -62,12 +62,22 @@ jobs:
       - name: Compile ahead-of-time
         shell: bash
         run: |
-          dotnet publish \
+          dotnet restore \
             Hardware.Info.Test/Hardware.Info.Test.csproj \
             --configuration Release \
             -r "$RUN_TIME" \
             -p PublishAot=true \
-            --verbosity quiet
+            --verbosity quiet \
+            -p:TargetFrameworks=net8.0
+          
+          dotnet publish \
+            Hardware.Info.Test/Hardware.Info.Test.csproj \
+            --no-restore \
+            --configuration Release \
+            -r "$RUN_TIME" \
+            -p PublishAot=true \
+            --verbosity quiet \
+            -p:TargetFrameworks=net8.0
 
       - name: Run tests with aot
         shell: bash

@@ -5,18 +5,16 @@
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>12.0</LangVersion>
     <Nullable>enable</Nullable>
-    <PublishAot>false</PublishAot>
+    <PublishAot>true</PublishAot>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(PublishAot)' == 'true'">
-    <DefineConstants>
-      PUBLISH_AOT
-    </DefineConstants>
+    <DefineConstants>PUBLISH_AOT</DefineConstants>
   </PropertyGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Hardware.Info\Hardware.Info.csproj"  Condition="'$(PublishAot)' == 'false'" />
-    <ProjectReference Include="..\Hardware.Info.Aot\Hardware.Info.Aot.csproj"  Condition="'$(PublishAot)' == 'true'" />
+    <ProjectReference Include="..\Hardware.Info.Aot\Hardware.Info.Aot.csproj"  Condition="'$(PublishAot)' == 'true'" SetTargetFramework="TargetFramework=net8.0" />
   </ItemGroup>
 
 </Project>

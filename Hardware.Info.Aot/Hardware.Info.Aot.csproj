@@ -34,10 +34,10 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\Hardware.Info.Aot.Windows\Hardware.Info.Aot.Windows.csproj" />
-    <ProjectReference Include="..\Hardware.Info.Core\Hardware.Info.Core.csproj" />
-    <ProjectReference Include="..\Hardware.Info.Linux\Hardware.Info.Linux.csproj" />
-    <ProjectReference Include="..\Hardware.Info.Mac\Hardware.Info.Mac.csproj" />
+    <ProjectReference Include="..\Hardware.Info.Aot.Windows\Hardware.Info.Aot.Windows.csproj" SetTargetFramework="TargetFramework=net8.0" />
+    <ProjectReference Include="..\Hardware.Info.Core\Hardware.Info.Core.csproj" SetTargetFramework="TargetFramework=net8.0" AdditionalProperties="TargetFramework=net8.0" />
+    <ProjectReference Include="..\Hardware.Info.Linux\Hardware.Info.Linux.csproj" SetTargetFramework="TargetFrameworks=net8.0" AdditionalProperties="TargetFramework=net8.0" />
+    <ProjectReference Include="..\Hardware.Info.Mac\Hardware.Info.Mac.csproj" SetTargetFramework="TargetFramework=net8.0" AdditionalProperties="TargetFramework=net8.0" />
   </ItemGroup>
 
 </Project>

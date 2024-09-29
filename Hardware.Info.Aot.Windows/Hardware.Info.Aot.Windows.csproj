@@ -9,6 +9,8 @@
         <IsTrimmable>true</IsTrimmable>
         <InvariantGlobalization>true</InvariantGlobalization>
         <IsAotCompatible>true</IsAotCompatible>
+        
+        <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     </PropertyGroup>
 
     <ItemGroup>

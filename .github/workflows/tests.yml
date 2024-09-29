@@ -63,7 +63,8 @@ jobs:
       - name: Add local nuget feed
         shell: bash
         run: |
-          echo "<?xml version="1.0" encoding="utf-8"?>
+          cat >./NuGet.config <<EOL
+          <?xml version="1.0" encoding="utf-8"?>
           <configuration>
           <packageSources>
           <add key="LocalPackages" value="./dist" />
@@ -72,8 +73,9 @@ jobs:
           <!-- this tells that all of them are active -->
           <add key="All" value="(Aggregate source)" />
           </activePackageSource>
-          </configuration>" > NuGet.config
-        
+          </configuration>
+          EOL
+
       - name: Install deps on linux
         if: ${{ matrix.os == 'ubuntu-latest' }}
         shell: bash

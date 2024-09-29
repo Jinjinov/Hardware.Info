@@ -143,9 +143,7 @@ jobs:
           
       - name: Clean up
         shell: bash
-        run: dotnet clean \
-          Hardware.Info.Test/Hardware.Info.Test.csproj && \
-          rm -rf ./Hardware.Info.Test/bin/Release
+        run: rm -rf ./Hardware.Info.Test/bin/Release
         
       # Run with aot
       - name: Publish with ahead-of-time compiler

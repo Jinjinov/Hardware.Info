@@ -1,14 +1,14 @@
 ﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
-    <TargetFramework>netstandard2.0</TargetFramework>
+    <TargetFramework>net8.0</TargetFramework>
     <LangVersion>8.0</LangVersion>
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
   <PropertyGroup>
-    <Product>Hardware.Info</Product>
-    <PackageId>Hardware.Info</PackageId>
+    <Product>Hardware.Info.Aot</Product>
+    <PackageId>Hardware.Info.Aot</PackageId>
     <PackageVersion>100.1.1.1</PackageVersion>
     <Version>100.1.1.1</Version>
     <Authors>Jinjinov</Authors>
@@ -17,7 +17,7 @@
     <PackageProjectUrl>https://github.com/Jinjinov/Hardware.Info</PackageProjectUrl>
     <!--<PackageIcon></PackageIcon>-->
     <PackageReadmeFile>README.md</PackageReadmeFile>
-    <PackageTags>Computer;Device;Hardware;Info;Information;NET Standard;Windows;Linux;macOS</PackageTags>
+    <PackageTags>Computer;Device;Hardware;Info;Information;NET;Windows;Linux;macOS</PackageTags>
     <!--<PackageReleaseNotes></PackageReleaseNotes>-->
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <SignAssembly>True</SignAssembly>
@@ -34,10 +34,10 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Hardware.Info.Aot.Windows\Hardware.Info.Aot.Windows.csproj" />
     <ProjectReference Include="..\Hardware.Info.Core\Hardware.Info.Core.csproj" />
     <ProjectReference Include="..\Hardware.Info.Linux\Hardware.Info.Linux.csproj" />
     <ProjectReference Include="..\Hardware.Info.Mac\Hardware.Info.Mac.csproj" />
-    <ProjectReference Include="..\Hardware.Info.Windows\Hardware.Info.Windows.csproj" />
   </ItemGroup>
 
 </Project>

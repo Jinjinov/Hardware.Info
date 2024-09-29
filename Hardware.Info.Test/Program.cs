@@ -3,6 +3,12 @@ using System.Net.NetworkInformation;
 using System.Runtime.CompilerServices;
 using System.Runtime.InteropServices;
 
+#if PUBLISH_AOT
+using Hardware.Info.Aot;
+#else
+using Hardware.Info;
+#endif
+
 namespace Hardware.Info.Test
 {
     class Program

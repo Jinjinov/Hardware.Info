@@ -8,8 +8,15 @@
     <PublishAot>false</PublishAot>
   </PropertyGroup>
 
+  <PropertyGroup Condition="'$(PublishAot)' == 'true'">
+    <DefineConstants>
+      PUBLISH_AOT
+    </DefineConstants>
+  </PropertyGroup>
+
   <ItemGroup>
-    <ProjectReference Include="..\Hardware.Info\Hardware.Info.csproj" />
+    <ProjectReference Include="..\Hardware.Info\Hardware.Info.csproj"  Condition="'$(PublishAot)' == 'false'" />
+    <ProjectReference Include="..\Hardware.Info.Aot\Hardware.Info.Aot.csproj"  Condition="'$(PublishAot)' == 'true'" />
   </ItemGroup>
 
 </Project>

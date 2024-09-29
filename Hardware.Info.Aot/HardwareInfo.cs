@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using Hardware.Info.Core;
 
-namespace Hardware.Info
+namespace Hardware.Info.Aot
 {
     /// <summary>
     /// Main Hardware.Info class
@@ -105,7 +105,7 @@ namespace Hardware.Info
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                _platformHardwareInfo = new Hardware.Info.Windows.PlatformHardwareInfo(timeoutInWMI) { UseAsteriskInWMI = useAsteriskInWMI };
+                _platformHardwareInfo = new Hardware.Info.Aot.Windows.PlatformHardwareInfo(timeoutInWMI) { UseAsteriskInWMI = useAsteriskInWMI };
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) // Environment.OSVersion.Platform == PlatformID.MacOSX)

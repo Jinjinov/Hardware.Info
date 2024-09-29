@@ -1,4 +1,4 @@
-name: Run Tests on all supported platforms
+name: Build & Test
 
 on:
   push:
@@ -11,28 +11,28 @@ on:
     inputs: 
       version:
         description: The version of the build packages
-        default: 0.0.1
+        default: local
         type: string
 
 jobs:
   build: 
     name: Build libraries
     runs-on: ubuntu-latest
-  steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-
-    - name: Build .net standard package
-      run: ./build.sh -t netstandard2.0 -v 0.5.1
-      
-    - name: Build .net 8.0 package
-      run: ./build.sh -t netstandard2.0 -v 0.8.0 --aot
-      
-    - name: Upload artifacts
-      uses: actions/upload-artifact@v4
-      with:
-        name: nuget-packages
-        path: ./dist/*.nupkg
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+  
+      - name: Build .net standard package
+        run: ./build.sh -t netstandard2.0 -v 0.5.1
+        
+      - name: Build .net 8.0 package
+        run: ./build.sh -t netstandard2.0 -v 0.8.0 --aot
+        
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: ./dist/*.nupkg
   
   test:
     needs: build

@@ -23,10 +23,14 @@ jobs:
         uses: actions/checkout@v4
   
       - name: Build .net standard package
-        run: chmod +x ./build.sh && ./build.sh -t netstandard2.0 -v 0.5.1
+        run: chmod +x ./build.sh && ./build.sh -t netstandard2.0 -v $VERSION
+        env:
+          VERSION: ${{ inputs.version }}
         
       - name: Build .net 8.0 package
-        run: ./build.sh -t netstandard2.0 -v 0.8.0 --aot
+        run: ./build.sh -t net8.0 -v $VERSION --aot
+        env:
+          VERSION: ${{ inputs.version }}
         
       - name: Upload artifacts
         uses: actions/upload-artifact@v4

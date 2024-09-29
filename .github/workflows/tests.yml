@@ -132,6 +132,12 @@ jobs:
             --verbosity quiet \
             -p:TargetFrameworks=net8.0
 
+      - name: Upload compiled artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-app-${{ matrix.os }}-${{ matrix.architecture }}
+          path: ./Hardware.Info.Test/bin/Release/net8.0/$RUN_TIME/publish/Hardware.Info.Test/*
+
       - name: Run tests with aot
         shell: bash
         run: |

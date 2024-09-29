@@ -116,7 +116,6 @@ jobs:
         run: |
           dotnet restore \
             Hardware.Info.Test/Hardware.Info.Test.csproj \
-            --configuration Release \
             -r "$RUN_TIME" \
             -p PublishAot=true \
             -p PackageSource=nuget \

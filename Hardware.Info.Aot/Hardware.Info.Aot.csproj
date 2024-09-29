@@ -45,6 +45,9 @@
       <PrivateAssets>all</PrivateAssets>
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
+
+    <!-- Transitive dependencies aren't supported, see https://github.com/tenekon/Tenekon.MSBuild.Packaging.ProjectBuildInPackage?tab=readme-ov-file#frequent-questions -->
+    <PackageReference Include="System.Diagnostics.PerformanceCounter" Version="8.0.0" />
   </ItemGroup>
 
 </Project>

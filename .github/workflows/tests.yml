@@ -103,7 +103,7 @@ jobs:
             --verbosity quiet \
             -p WarningLevel=0 \
             -p PublishAot=false \
-            -p PACKAGE_SOURCE=nuget \
+            -p PackageSource=nuget \
             -- \
             --enable-test-mode \
             --expected-compiler jit \
@@ -119,7 +119,7 @@ jobs:
             --configuration Release \
             -r "$RUN_TIME" \
             -p PublishAot=true \
-            -p PACKAGE_SOURCE=nuget \
+            -p PackageSource=nuget \
             --verbosity quiet \
             -p:TargetFrameworks=net8.0
           
@@ -129,7 +129,7 @@ jobs:
             --configuration Release \
             -r "$RUN_TIME" \
             -p PublishAot=true \
-            -p PACKAGE_SOURCE=nuget \
+            -p PackageSource=nuget \
             --verbosity quiet \
             -p:TargetFrameworks=net8.0
 

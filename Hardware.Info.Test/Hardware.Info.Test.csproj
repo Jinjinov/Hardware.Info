@@ -8,18 +8,20 @@
     <PublishAot>false</PublishAot>
 
     <IsAotCompatible>true</IsAotCompatible>
+    
+    <PackageSource>project</PackageSource>
   </PropertyGroup>
 
   <PropertyGroup Condition="'$(PublishAot)' == 'true'">
     <DefineConstants>PUBLISH_AOT</DefineConstants>
   </PropertyGroup>
 
-  <ItemGroup Condition="'$(PACKAGE_SOURCE)' == 'project' OR '$(PACKAGE_SOURCE)' == ''">
+  <ItemGroup Condition="'$(PackageSource)' == 'project' OR '$(PackageSource)' == ''">
     <ProjectReference Include="..\Hardware.Info\Hardware.Info.csproj" Condition="'$(PublishAot)' == 'false'" />
     <ProjectReference Include="..\Hardware.Info.Aot\Hardware.Info.Aot.csproj" Condition="'$(PublishAot)' == 'true'" SetTargetFramework="TargetFrameworks=net8.0" />
   </ItemGroup>
 
-  <ItemGroup Condition="'$(PACKAGE_SOURCE)' == 'nuget'">
+  <ItemGroup Condition="'$(PackageSource)' == 'nuget'">
     <PackageReference Include="Hardware.Info" Version="*" Condition="'$(PublishAot)' == 'false'" />
     <PackageReference Include="Hardware.Info.Aot" Version="*" Condition="'$(PublishAot)' == 'true'" />
   </ItemGroup>

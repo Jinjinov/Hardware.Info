@@ -14,6 +14,11 @@
   <PropertyGroup Condition="'$(PublishAot)' == 'true'">
     <DefineConstants>PUBLISH_AOT</DefineConstants>
   </PropertyGroup>
+  
+  <PropertyGroup>
+    <DefineConstants Condition="'$(PackageSource)' == 'nuget'">PACKAGE_SOURCE_NUGET</DefineConstants>
+    <DefineConstants Condition="'$(PackageSource)' == 'project' OR '$(PackageSource)' == ''">PACKAGE_SOURCE_PROJECT</DefineConstants>
+  </PropertyGroup>
 
   <ItemGroup Condition="'$(PackageSource)' == 'project' OR '$(PackageSource)' == ''">
     <ProjectReference Include="..\Hardware.Info\Hardware.Info.csproj" Condition="'$(PublishAot)' == 'false'" />

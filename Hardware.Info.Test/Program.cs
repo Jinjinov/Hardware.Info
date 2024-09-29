@@ -28,6 +28,19 @@ namespace Hardware.Info.Test
                 Console.Error.WriteLine($"Compiler: {(isJit ? "JIT" : "AOT")}");
                 Console.Error.WriteLine($"Expected Compiler: {expectedCompiler}");
                 Console.Error.WriteLine($"Expected Architecture: {expectedArch}");
+#if PUBLISH_AOT
+                Console.Error.WriteLine($"Preprocessor Flags: publishAot=true");
+#else
+                Console.Error.WriteLine($"Preprocessor Flags: publishAot=false");
+#endif
+                
+#if PACKAGE_SOURCE_NUGET
+                Console.Error.WriteLine($"Preprocessor Flags: packageSource=nuget");
+#endif
+                
+#if PACKAGE_SOURCE_PROJECT
+                Console.Error.WriteLine($"Preprocessor Flags: packageSource=project");
+#endif
 
                 if (expectedCompiler == TestSuite.Compiler.Jit && !isJit)
                 {

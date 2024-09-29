@@ -48,10 +48,15 @@ jobs:
         architecture: [x64] # add arm64 when such runner are available
         dotnet: ['8.x']
       fail-fast: false
-    env: 
-      RUN_TIME: "${{ fromJson('{ \"ubuntu-latest\": \"linux-x64\", \"windows-latest\": \"win-x64\", \"macos-13\": \"osx-x64\" }')[matrix.os] }}"
-
+  
     steps:
+      - name: Known variables
+        id: knownVariables
+        run: |
+          RUN_TIME="${{ fromJson('{ \"ubuntu-latest\": \"linux-x64\", \"windows-latest\": \"win-x64\", \"macos-13\": \"osx-x64\" }')[matrix.os] }}"
+          echo "runTime=$RUN_TIME" >> "$GITHUB_OUTPUT"
+          echo "publishDirectory=./Hardware.Info.Test/bin/Release/net8.0/$RUN_TIME/publish" >> "$GITHUB_OUTPUT"
+        
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -92,26 +97,43 @@ jobs:
       - name: Display .NET SDK version
         run: dotnet --info
 
-      # Run with jit
-      - name: Run tests with jit
+      - name: Publish with just-in-time compiler
         shell: bash
         run: |
-          dotnet run \
-            --project Hardware.Info.Test/Hardware.Info.Test.csproj \
+          dotnet publish \
+            Hardware.Info.Test/Hardware.Info.Test.csproj \
             --configuration Release \
             -r "$RUN_TIME" \
-            --verbosity quiet \
-            -p WarningLevel=0 \
             -p PublishAot=false \
-            -p PackageSource=nuget \
-            -- \
+            -p PackageSource=nuget
+        env: 
+          RUN_TIME: ${{ steps.knownVariables.outcome.runTime }}
+
+      - name: Upload jit compiled test app
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-app-jit-${{ matrix.os }}-${{ matrix.architecture }}
+          path: ${{ steps.knownVariables.outputs.publishDirectory }}/*
+
+      - name: Verify hardware info are fetched is using just-in-time compiler
+        shell: bash
+        run: |
+          $PUBLISH_DIR/Hardware.Info.Test \
             --enable-test-mode \
             --expected-compiler jit \
             --expected-arch ${{ matrix.architecture }} \
             --no-readline | tee ./output.jit
+        env:
+          PUBLISH_DIR: ${{ steps.knownVariables.outputs.publishDirectory }}
+          
+      - name: Clean up
+        shell: bash
+        run: dotnet clean \
+          Hardware.Info.Test/Hardware.Info.Test.csproj && \
+          rm -rf ./Hardware.Info.Test/bin/Release
         
       # Run with aot
-      - name: Compile ahead-of-time
+      - name: Publish with ahead-of-time compiler
         shell: bash
         run: |
           dotnet publish \
@@ -120,21 +142,25 @@ jobs:
             -r "$RUN_TIME" \
             -p PublishAot=true \
             -p PackageSource=nuget
+        env:
+          RUN_TIME: ${{ steps.knownVariables.outcome.runTime }}
 
-      - name: Upload compiled artifacts
+      - name: Upload aot compiled test app
         uses: actions/upload-artifact@v4
         with:
-          name: test-app-${{ matrix.os }}-${{ matrix.architecture }}
-          path: ./Hardware.Info.Test/bin/Release/net8.0/$RUN_TIME/publish/Hardware.Info.Test/*
+          name: test-app-aot-${{ matrix.os }}-${{ matrix.architecture }}
+          path: ${{ steps.knownVariables.outputs.publishDirectory }}/*
 
-      - name: Run tests with aot
+      - name: Verify hardware info are fetched is using ahead-of-time compiler
         shell: bash
         run: |
-          ./Hardware.Info.Test/bin/Release/net8.0/$RUN_TIME/publish/Hardware.Info.Test \
+          $PUBLISH_DIR/Hardware.Info.Test \
             --enable-test-mode \
             --expected-compiler aot \
             --expected-arch ${{ matrix.architecture }} \
             --no-readline | tee ./output.aot
+        env:
+          PUBLISH_DIR: ${{ steps.knownVariables.outputs.publishDirectory }}
           
       - name: Verify that output is identical
         if: ${{ false }}

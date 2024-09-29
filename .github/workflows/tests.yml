@@ -114,17 +114,8 @@ jobs:
       - name: Compile ahead-of-time
         shell: bash
         run: |
-          dotnet restore \
-            Hardware.Info.Test/Hardware.Info.Test.csproj \
-            -r "$RUN_TIME" \
-            -p PublishAot=true \
-            -p PackageSource=nuget \
-            --verbosity quiet \
-            -p:TargetFrameworks=net8.0
-          
           dotnet publish \
             Hardware.Info.Test/Hardware.Info.Test.csproj \
-            --no-restore \
             --configuration Release \
             -r "$RUN_TIME" \
             -p PublishAot=true \

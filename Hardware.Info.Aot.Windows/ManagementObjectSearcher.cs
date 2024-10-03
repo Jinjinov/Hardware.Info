@@ -346,6 +346,8 @@ namespace Hardware.Info.Aot.Windows
             {
                 if (!IsVariantOfType(in vtProp, VARENUM.VT_I4))
                 {
+                    Console.Error.WriteLine(vtProp.Anonymous.Anonymous.vt + " is not an int array");
+                    Console.Error.Flush();
                     errorReason = ArrayPropertyError.InvalidIntType;
                     return false;
                 }

@@ -104,7 +104,7 @@ jobs:
       
       # Setup .NET SDK
       - name: Setup .NET SDK
-        uses: actions/setup-dotnet@v3
+        uses: actions/setup-dotnet@v4
         with:
           dotnet-version: '${{ matrix.dotnet }}'  # Adjust the version to the one required by Hardware.Info project
       

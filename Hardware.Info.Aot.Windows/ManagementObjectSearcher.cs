@@ -296,7 +296,8 @@ namespace Hardware.Info.Aot.Windows
 
             if ((vtProp.Anonymous.Anonymous.vt & VARENUM.VT_ARRAY) != VARENUM.VT_ARRAY)
             {
-                Console.WriteLine(vtProp.Anonymous.Anonymous.vt + " is not an array");
+                Console.Error.WriteLine(vtProp.Anonymous.Anonymous.vt + " is not an array");
+                Console.Error.Flush();
                 errorReason = ArrayPropertyError.NotArrayType;
                 return false;
             }

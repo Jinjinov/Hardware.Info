@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="100.1.1.1" />
+            <PackageReference Include="Hardware.Info" Version="101.0.0.0" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -174,12 +174,15 @@ The construcotr accepts two settings for WMI:
 
 ### Refresh methods settings:
 
-In these two methods you can exclude some slow queries by setting the parameters to `false`:
-
 ```
-RefreshCPUList(bool includePercentProcessorTime = true)
+RefreshCPUList(
+    bool includePercentProcessorTime = true, 
+    int millisecondsDelayBetweenTwoMeasurements = 500)
 
-RefreshNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)
+RefreshNetworkAdapterList(
+    bool includeBytesPersec = true, 
+    bool includeNetworkAdapterConfiguration = true, 
+    int millisecondsDelayBetweenTwoMeasurements = 1000)
 ```
 
 Setting `includePercentProcessorTime` and `includeBytesPersec` to `false` will exclude the queries that:
@@ -187,6 +190,24 @@ Setting `includePercentProcessorTime` and `includeBytesPersec` to `false` will e
 - cause a 1 second delay every time they are called in Linux
 
 Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact on performance.
+
+Delay in milliseconds between two measurements in Linux:
+
+For `PercentProcessorTime` in Linux:
+```
+string[] cpuUsageLineLast = TryReadLinesFromFile("/proc/stat");
+Task.Delay(millisecondsDelayBetweenTwoMeasurements).Wait();
+string[] cpuUsageLineNow = TryReadLinesFromFile("/proc/stat");
+```
+If `includePercentProcessorTime` is false, `millisecondsDelayBetweenTwoMeasurements` has no effect.
+
+For `BytesSentPersec` and `BytesReceivedPersec` in Linux:
+```
+string[] procNetDevLast = TryReadLinesFromFile("/proc/net/dev");
+Task.Delay(millisecondsDelayBetweenTwoMeasurements).Wait();
+string[] procNetDevNow = TryReadLinesFromFile("/proc/net/dev");
+```
+If `includeBytesPersec` is false, `millisecondsDelayBetweenTwoMeasurements` has no effect.
 
 ## Benchmarks
 
@@ -231,6 +252,10 @@ Setting `includeNetworkAdapterConfiguration` to `false` has only a small impact 
 
 ## Version history:
 
+- 101.0.0.0
+    - Fixed `GetCpuList` in Linux - thanks to [@inelisoni](https://github.com/inelisoni)
+    - Added `int millisecondsDelayBetweenTwoMeasurements` to `GetCpuList`
+    - Added `int millisecondsDelayBetweenTwoMeasurements` to `GetNetworkAdapterList`
 - 100.1.1.1
     - Fixed `GetNetworkAdapterList` in Linux - thanks to [@Pregath0r](https://github.com/Pregath0r)
 - 100.1.1.0

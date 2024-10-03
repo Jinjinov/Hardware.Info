@@ -415,7 +415,7 @@ Hardware:
       Hardware UUID: F6D9C340-725A-224A-8855-99AB8348F745
         /**/
 
-        public List<CPU> GetCpuList(bool includePercentProcessorTime = true)
+        public List<CPU> GetCpuList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500)
         {
             List<CPU> cpuList = new List<CPU>();
 
@@ -940,7 +940,7 @@ USB:
             return mouseList;
         }
 
-        public override List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true)
+        public override List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true, int millisecondsDelayBetweenTwoMeasurements = 1000)
         {
             /*
             SPNetworkDataType

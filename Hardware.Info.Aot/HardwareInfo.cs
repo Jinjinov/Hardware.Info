@@ -172,8 +172,10 @@ namespace Hardware.Info.Aot
         /// Refresh CPU info
         /// </summary>
         /// <param name="includePercentProcessorTime">Include PercentProcessorTime info. This makes the method a bit slower.</param>
-        public void RefreshCPUList(bool includePercentProcessorTime = true) => CpuList = _platformHardwareInfo.GetCpuList(includePercentProcessorTime);
-
+        /// <param name="millisecondsDelayBetweenTwoMeasurements">Delay in milliseconds between two measurements in Linux</param>
+        public void RefreshCPUList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500) 
+            => CpuList = _platformHardwareInfo.GetCpuList(includePercentProcessorTime, millisecondsDelayBetweenTwoMeasurements);
+        
         /// <summary>
         /// Refresh drive info
         /// </summary>
@@ -209,8 +211,11 @@ namespace Hardware.Info.Aot
         /// </summary>
         /// <param name="includeBytesPerSec">Include BytesPerSec info. This makes the method a bit slower.</param>
         /// <param name="includeNetworkAdapterConfiguration">Include NetworkAdapterConfiguration info. This makes the method a bit slower.</param>
-        public void RefreshNetworkAdapterList(bool includeBytesPerSec = true, bool includeNetworkAdapterConfiguration = true) => NetworkAdapterList = _platformHardwareInfo.GetNetworkAdapterList(includeBytesPerSec, includeNetworkAdapterConfiguration);
-
+        /// <param name="millisecondsDelayBetweenTwoMeasurements">Delay in milliseconds between two measurements in Linux</param>
+        public void RefreshNetworkAdapterList(bool includeBytesPerSec = true, bool includeNetworkAdapterConfiguration = true, 
+            int millisecondsDelayBetweenTwoMeasurements = 1000) 
+            => NetworkAdapterList = _platformHardwareInfo.GetNetworkAdapterList(includeBytesPerSec, includeNetworkAdapterConfiguration, millisecondsDelayBetweenTwoMeasurements);
+        
         /// <summary>
         /// Refresh printer info
         /// </summary>

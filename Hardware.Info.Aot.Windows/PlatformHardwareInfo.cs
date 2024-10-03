@@ -255,11 +255,11 @@ namespace Hardware.Info.Aot.Windows
             {
                 string queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name != '_Total'"
                                                       : "SELECT Name, PercentProcessorTime FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name != '_Total'";
-                ManagementObjectSearcher percentProcessorTimeMOS = new ManagementObjectSearcher(_managementScope, queryString, _timeout);
+                using ManagementObjectSearcher percentProcessorTimeMOS = new ManagementObjectSearcher(_managementScope, queryString, _timeout);
 
                 queryString = UseAsteriskInWMI ? "SELECT * FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name = '_Total'"
                                                : "SELECT PercentProcessorTime FROM Win32_PerfFormattedData_PerfOS_Processor WHERE Name = '_Total'";
-                ManagementObjectSearcher totalPercentProcessorTimeMOS = new ManagementObjectSearcher(_managementScope, queryString, _timeout);
+                using ManagementObjectSearcher totalPercentProcessorTimeMOS = new ManagementObjectSearcher(_managementScope, queryString, _timeout);
 
                 try
                 {

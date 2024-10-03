@@ -267,39 +267,55 @@ namespace Hardware.Info.Aot.Windows
             return array.Slice(0, (int)length).ToArray();
         }
 
-        public unsafe T[] GetArrayProperty<T>(string name)
+        public enum ArrayPropertyError
+        {
+            None,
+            NullProperty,
+            NotArrayType,
+            UnsupportedType,
+            InvalidStringType,
+            InvalidUShortType,
+            InvalidIntType
+        }
+
+        public bool TryGetArrayProperty<T>(string name, out T[] value, out ArrayPropertyError errorReason)
         {
             VARIANT vtProp = new VARIANT();
             var hr = _item->Get(name, 0, ref vtProp, (int*)0, (int*)0);
-            hr.ThrowOnFailure();
+
+            // Default the output values
+            value = Array.Empty<T>();
+            errorReason = ArrayPropertyError.None;
+
+            if (hr.Failed) return false;
 
             if (vtProp.Anonymous.Anonymous.vt == VARENUM.VT_NULL)
             {
-                return Array.Empty<T>();
+                errorReason = ArrayPropertyError.NullProperty;
+                return true;
             }
 
             if ((vtProp.Anonymous.Anonymous.vt & VARENUM.VT_ARRAY) != VARENUM.VT_ARRAY)
             {
-                throw new InvalidOperationException(
-                    $"Property {name} is not an array of values.");
+                errorReason = ArrayPropertyError.NotArrayType;
+                return false;
             }
 
             if (typeof(T) == typeof(string))
             {
                 if ((vtProp.Anonymous.Anonymous.vt & VARENUM.VT_BSTR) != VARENUM.VT_BSTR)
                 {
-                    throw new InvalidOperationException(
-                        $"Property {name} is of type {vtProp.Anonymous.Anonymous.vt} and not bstr.");
+                    errorReason = ArrayPropertyError.InvalidStringType;
+                    return false;
                 }
 
                 const uint BUFFER_SIZE = 10;
                 Span<PWSTR> buffer = stackalloc PWSTR[(int)BUFFER_SIZE];
-
                 uint usedBufferLength;
 
                 hr = PInvoke.VariantToStringArray(in vtProp, buffer, out usedBufferLength);
 
-                hr.ThrowOnFailure();
+                if (hr.Failed) return false;
 
                 var usedArray = buffer.Slice(0, (int)usedBufferLength);
                 var strArray = new string[usedArray.Length];
@@ -308,21 +324,72 @@ namespace Hardware.Info.Aot.Windows
                     strArray[i] = usedArray[i].AsSpan().ToString();
                 }
 
-                return (T[])(object)strArray;
+                value = (T[])(object)strArray;
+                return true;
             }
 
             if (typeof(T) == typeof(ushort))
             {
-                return (T[]) (object) this.ExtractArrayValue<ushort>(name, ref vtProp, VARENUM.VT_UI2, PInvoke.VariantToUInt16Array);
+                value = (T[])(object)this.ExtractArrayValue<ushort>(name, ref vtProp, VARENUM.VT_UI2, PInvoke.VariantToUInt16Array);
+                if (value == null)
+                {
+                    errorReason = ArrayPropertyError.InvalidUShortType;
+                    return false;
+                }
+                return true;
             }
 
             if (typeof(T) == typeof(int))
             {
-                return (T[])(object)this.ExtractArrayValue<int>(name, ref vtProp, VARENUM.VT_I4, PInvoke.VariantToInt32Array);
+                value = (T[])(object)this.ExtractArrayValue<int>(name, ref vtProp, VARENUM.VT_I4, PInvoke.VariantToInt32Array);
+                if (value == null)
+                {
+                    errorReason = ArrayPropertyError.InvalidIntType;
+                    return false;
+                }
+                return true;
             }
 
-            throw new NotSupportedException($"Type {typeof(T).FullName} is not supported.");
+            errorReason = ArrayPropertyError.UnsupportedType;
+            return false;
         }
+        
+        public static void HandleArrayPropertyError<T>(string name, ArrayPropertyError errorReason)
+        {
+            switch (errorReason)
+            {
+                case ArrayPropertyError.NullProperty:
+                    return; // Null property is acceptable, just return (equivalent to returning an empty array).
+                case ArrayPropertyError.NotArrayType:
+                    throw new InvalidOperationException($"Property {name} is not an array of values.");
+                case ArrayPropertyError.InvalidStringType:
+                    throw new InvalidOperationException($"Property {name} is of type BSTR and not an array of strings.");
+                case ArrayPropertyError.InvalidUShortType:
+                    throw new InvalidOperationException($"Property {name} is not an array of ushort values.");
+                case ArrayPropertyError.InvalidIntType:
+                    throw new InvalidOperationException($"Property {name} is not an array of int values.");
+                case ArrayPropertyError.UnsupportedType:
+                    throw new NotSupportedException($"Type {typeof(T).FullName} is not supported.");
+                default:
+                    throw new InvalidOperationException($"Failed to get property {name}.");
+            }
+        }
+
+        public T[] GetArrayProperty<T>(string name)
+        {
+            if (TryGetArrayProperty(name, out T[] value, out ArrayPropertyError errorReason))
+            {
+                return value;
+            }
+
+            // Call the new helper function for error handling
+            HandleArrayPropertyError<T>(name, errorReason);
+
+            // If no exception is thrown, return an empty array (for NullProperty case)
+            return Array.Empty<T>();
+        }
+
+
     }
 
     public unsafe ref struct WmiSearchResultsEnumerator

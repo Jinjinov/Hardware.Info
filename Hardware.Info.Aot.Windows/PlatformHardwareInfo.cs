@@ -149,11 +149,11 @@ namespace Hardware.Info.Aot.Windows
             return (obj is string str) ? str : string.Empty;
         }
 
-        public static string GetStringFromUInt16Array(ushort[] array)
+        public static string GetStringFromArray(ushort[] array)
         {
             return Encoding.Unicode.GetString(MemoryMarshal.AsBytes(array.AsSpan()));
         }
-        public static string GetStringFromUInt16Array(int[] array)
+        public static string GetStringFromArray(int[] array)
         {
             return Encoding.Unicode.GetString(MemoryMarshal.AsBytes(array.AsSpan()));
         }
@@ -564,10 +564,23 @@ namespace Hardware.Info.Aot.Windows
                 foreach (var wmiMonitorIdMo in wmiMonitorIdMos.Get())
                 {
                     monitor.Active = wmiMonitorIdMo.GetProperty<bool>("Active");
-                    monitor.ProductCodeID = GetStringFromUInt16Array(wmiMonitorIdMo.GetArrayProperty<int>("ProductCodeID"));
-                    monitor.UserFriendlyName = GetStringFromUInt16Array(wmiMonitorIdMo.GetArrayProperty<ushort>("UserFriendlyName"));
-                    monitor.SerialNumberID = GetStringFromUInt16Array(wmiMonitorIdMo.GetArrayProperty<int>("SerialNumberID"));
-                    monitor.ManufacturerName = GetStringFromUInt16Array(wmiMonitorIdMo.GetArrayProperty<int>("ManufacturerName"));
+                    monitor.ProductCodeID = GetStringFromArray(wmiMonitorIdMo.GetArrayProperty<int>("ProductCodeID"));
+                    if (wmiMonitorIdMo.TryGetArrayProperty<ushort>("UserFriendlyName", out var userFriendlyNameUint16,
+                            out var errorReason))
+                    {
+                        monitor.UserFriendlyName = GetStringFromArray(userFriendlyNameUint16);
+                    } else if (wmiMonitorIdMo.TryGetArrayProperty<int>("UserFriendlyName", out var userFriendlyNameInt4,
+                                      out _))
+                    {
+                        monitor.UserFriendlyName = GetStringFromArray(userFriendlyNameInt4);
+                    }
+                    else
+                    {
+                        WmiSearchResultItem.HandleArrayPropertyError<ushort>("UserFriendlyName", errorReason);
+                    }
+                    monitor.UserFriendlyName = GetStringFromArray(wmiMonitorIdMo.GetArrayProperty<ushort>("UserFriendlyName"));
+                    monitor.SerialNumberID = GetStringFromArray(wmiMonitorIdMo.GetArrayProperty<int>("SerialNumberID"));
+                    monitor.ManufacturerName = GetStringFromArray(wmiMonitorIdMo.GetArrayProperty<int>("ManufacturerName"));
                     monitor.WeekOfManufacture = (ushort) wmiMonitorIdMo.GetProperty<byte>("WeekOfManufacture");
                     monitor.YearOfManufacture = (ushort) wmiMonitorIdMo.GetProperty<int>("YearOfManufacture");
 

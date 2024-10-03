@@ -174,93 +174,80 @@ namespace Hardware.Info.Aot.Windows
 
             hr.ThrowOnFailure();
 
-            if ((vtProp.Anonymous.Anonymous.vt & VARENUM.VT_ARRAY) == VARENUM.VT_ARRAY)
+            try
             {
-                PInvoke.VariantClear(ref vtProp);
-                
-                throw new InvalidOperationException(
-                    $"Property {name} is an array of values.");
-            }
-
-            if (typeof(T) == typeof(string))
-            {
-                if (vtProp.Anonymous.Anonymous.vt != VARENUM.VT_BSTR)
+                if ((vtProp.Anonymous.Anonymous.vt & VARENUM.VT_ARRAY) == VARENUM.VT_ARRAY)
                 {
-                    PInvoke.VariantClear(ref vtProp);
-                    
                     throw new InvalidOperationException(
-                        $"Property {name} is of type {vtProp.Anonymous.Anonymous.vt} and not BSTR.");
+                        $"Property {name} is an array of values.");
                 }
 
-                var strValue = vtProp.Anonymous.Anonymous.Anonymous.bstrVal.AsSpan().ToString();
-
-                PInvoke.VariantClear(ref vtProp);
-
-                return (T)(object)strValue;
-            }
-
-            if (typeof(T) == typeof(ushort))
-            {
-                var value = (T)(object)this.ExtractValue<ushort>(name, ref vtProp, VARENUM.VT_UI2, PInvoke.VariantToUInt16);
-                
-                PInvoke.VariantClear(ref vtProp);
-                
-                return value;
-            }
-
-            if (typeof(T) == typeof(uint))
-            {
-                var value = (T)(object)this.ExtractValue<uint>(name, ref vtProp, VARENUM.VT_I4, PInvoke.VariantToUInt32);
-                
-                PInvoke.VariantClear(ref vtProp);
-                
-                return value;
-            }
-
-            if (typeof(T) == typeof(int))
-            {
-                var value = (T)(object)this.ExtractValue<int>(name, ref vtProp, VARENUM.VT_I4, PInvoke.VariantToInt32);
-                
-                PInvoke.VariantClear(ref vtProp);
-                
-                return value;
-            }
-
-            if (typeof(T) == typeof(UInt64))
-            {
-                var value = (T)(object)this.ExtractValue<UInt64>(name, ref vtProp, VARENUM.VT_UI8, PInvoke.VariantToUInt64);
-                
-                PInvoke.VariantClear(ref vtProp);
-                
-                return value;
-            }
-
-            if (typeof(T) == typeof(byte))
-            {
-                var value = (T)(object)this.ExtractValue<byte>(name, ref vtProp, VARENUM.VT_UI1,
-                    (in VARIANT v, out byte value) =>
+                if (typeof(T) == typeof(string))
+                {
+                    if (vtProp.Anonymous.Anonymous.vt != VARENUM.VT_BSTR)
                     {
-                        value = v.Anonymous.Anonymous.Anonymous.bVal;
-                        return new HRESULT(0);
-                    });
-                
-                PInvoke.VariantClear(ref vtProp);
-                
-                return value;
-            }
+                        throw new InvalidOperationException(
+                            $"Property {name} is of type {vtProp.Anonymous.Anonymous.vt} and not BSTR.");
+                    }
 
-            if (typeof(T) == typeof(bool))
+                    var strValue = vtProp.Anonymous.Anonymous.Anonymous.bstrVal.AsSpan().ToString();
+                    
+                    return (T)(object)strValue;
+                }
+
+                if (typeof(T) == typeof(ushort))
+                {
+                    var value = (T)(object)this.ExtractValue<ushort>(name, ref vtProp, VARENUM.VT_UI2, PInvoke.VariantToUInt16);
+                    
+                    return value;
+                }
+
+                if (typeof(T) == typeof(uint))
+                {
+                    var value = (T)(object)this.ExtractValue<uint>(name, ref vtProp, VARENUM.VT_I4, PInvoke.VariantToUInt32);
+                    
+                    return value;
+                }
+
+                if (typeof(T) == typeof(int))
+                {
+                    var value = (T)(object)this.ExtractValue<int>(name, ref vtProp, VARENUM.VT_I4, PInvoke.VariantToInt32);
+                    
+                    return value;
+                }
+
+                if (typeof(T) == typeof(UInt64))
+                {
+                    var value = (T)(object)this.ExtractValue<UInt64>(name, ref vtProp, VARENUM.VT_UI8, PInvoke.VariantToUInt64);
+                    
+                    return value;
+                }
+
+                if (typeof(T) == typeof(byte))
+                {
+                    var value = (T)(object)this.ExtractValue<byte>(name, ref vtProp, VARENUM.VT_UI1,
+                        (in VARIANT v, out byte value) =>
+                        {
+                            value = v.Anonymous.Anonymous.Anonymous.bVal;
+                            return new HRESULT(0);
+                        });
+                    
+                    return value;
+                }
+
+                if (typeof(T) == typeof(bool))
+                {
+                    var boolValue = this.ExtractValue<BOOL>(name, ref vtProp, VARENUM.VT_BOOL, PInvoke.VariantToBoolean);
+                    
+                    return (T) (object) (bool) boolValue;
+                }
+                
+                throw new NotSupportedException($"Type {typeof(T).FullName} is not supported.");
+            }
+            finally
             {
-                var boolValue = this.ExtractValue<BOOL>(name, ref vtProp, VARENUM.VT_BOOL, PInvoke.VariantToBoolean);
-                
                 PInvoke.VariantClear(ref vtProp);
-
-                return (T) (object) (bool) boolValue;
             }
-            
-            PInvoke.VariantClear(ref vtProp);
-
-            throw new NotSupportedException($"Type {typeof(T).FullName} is not supported.");
         }
 
         private T ExtractValue<T>(string propertyName, ref VARIANT variant, VARENUM expectedType, ExtractValueDelegate<T> extractFunc) where T:struct
@@ -305,6 +292,7 @@ namespace Hardware.Info.Aot.Windows
         public bool TryGetArrayProperty<T>(string name, out T[] value, out ArrayPropertyError errorReason)
         {
             VARIANT vtProp = new VARIANT();
+            
             var hr = _item->Get(name, 0, ref vtProp, (int*)0, (int*)0);
 
             // Default the output values
@@ -317,96 +305,83 @@ namespace Hardware.Info.Aot.Windows
                 return false;
             }
 
-            if (vtProp.Anonymous.Anonymous.vt == VARENUM.VT_NULL)
+            try
             {
-                PInvoke.VariantClear(ref vtProp);
-                
-                errorReason = ArrayPropertyError.NullProperty;
-                return true;
-            }
+                if (vtProp.Anonymous.Anonymous.vt == VARENUM.VT_NULL)
+                {
+                    errorReason = ArrayPropertyError.NullProperty;
+                    return true;
+                }
 
-            if ((vtProp.Anonymous.Anonymous.vt & VARENUM.VT_ARRAY) != VARENUM.VT_ARRAY)
-            {
-                PInvoke.VariantClear(ref vtProp);
+                if ((vtProp.Anonymous.Anonymous.vt & VARENUM.VT_ARRAY) != VARENUM.VT_ARRAY)
+                {
+                    errorReason = ArrayPropertyError.NotArrayType;
+                    return false;
+                }
+
+                if (typeof(T) == typeof(string))
+                {
+                    if ((vtProp.Anonymous.Anonymous.vt & VARENUM.VT_BSTR) != VARENUM.VT_BSTR)
+                    {
+                        errorReason = ArrayPropertyError.InvalidStringType;
+                        return false;
+                    }
+
+                    const uint BUFFER_SIZE = 10;
+                    Span<PWSTR> buffer = stackalloc PWSTR[(int)BUFFER_SIZE];
+                    uint usedBufferLength;
+
+                    hr = PInvoke.VariantToStringArray(in vtProp, buffer, out usedBufferLength);
+
+                    if (hr.Failed)
+                    {
+                        errorReason = ArrayPropertyError.InteropError;
+                    
+                        return false;
+                    }
+
+                    var usedArray = buffer.Slice(0, (int)usedBufferLength);
+                    var strArray = new string[usedArray.Length];
+                    for (var i = 0; i < usedArray.Length; i++)
+                    {
+                        strArray[i] = usedArray[i].AsSpan().ToString();
+                    }
                 
-                errorReason = ArrayPropertyError.NotArrayType;
+                    value = (T[])(object)strArray;
+                    return true;
+                }
+
+                if (typeof(T) == typeof(ushort))
+                {
+                    if (!IsVariantOfType(in vtProp, VARENUM.VT_UI2))
+                    {
+                        errorReason = ArrayPropertyError.InvalidUShortType;
+                        return false;
+                    }
+                
+                    value = (T[])(object)this.ExtractArrayValue<ushort>(ref vtProp, PInvoke.VariantToUInt16Array);
+                    return true;
+                }
+
+                if (typeof(T) == typeof(int))
+                {
+                    if (!IsVariantOfType(in vtProp, VARENUM.VT_I4))
+                    {
+                        errorReason = ArrayPropertyError.InvalidIntType;
+                        return false;
+                    }
+                
+                    value = (T[])(object)this.ExtractArrayValue<int>(ref vtProp, PInvoke.VariantToInt32Array);
+                    return true;
+                }
+
+                errorReason = ArrayPropertyError.UnsupportedType;
                 return false;
             }
-
-            if (typeof(T) == typeof(string))
+            finally
             {
-                if ((vtProp.Anonymous.Anonymous.vt & VARENUM.VT_BSTR) != VARENUM.VT_BSTR)
-                {
-                    PInvoke.VariantClear(ref vtProp);
-                    
-                    errorReason = ArrayPropertyError.InvalidStringType;
-                    return false;
-                }
-
-                const uint BUFFER_SIZE = 10;
-                Span<PWSTR> buffer = stackalloc PWSTR[(int)BUFFER_SIZE];
-                uint usedBufferLength;
-
-                hr = PInvoke.VariantToStringArray(in vtProp, buffer, out usedBufferLength);
-
-                if (hr.Failed)
-                {
-                    PInvoke.VariantClear(ref vtProp);
-
-                    errorReason = ArrayPropertyError.InteropError;
-                    
-                    return false;
-                }
-
-                var usedArray = buffer.Slice(0, (int)usedBufferLength);
-                var strArray = new string[usedArray.Length];
-                for (var i = 0; i < usedArray.Length; i++)
-                {
-                    strArray[i] = usedArray[i].AsSpan().ToString();
-                }
-                
-                value = (T[])(object)strArray;
-                
                 PInvoke.VariantClear(ref vtProp);
-                return true;
             }
-
-            if (typeof(T) == typeof(ushort))
-            {
-                if (!IsVariantOfType(in vtProp, VARENUM.VT_UI2))
-                {
-                    PInvoke.VariantClear(ref vtProp);
-                    
-                    errorReason = ArrayPropertyError.InvalidUShortType;
-                    return false;
-                }
-                
-                value = (T[])(object)this.ExtractArrayValue<ushort>(ref vtProp, PInvoke.VariantToUInt16Array);
-
-                PInvoke.VariantClear(ref vtProp);
-                return true;
-            }
-
-            if (typeof(T) == typeof(int))
-            {
-                if (!IsVariantOfType(in vtProp, VARENUM.VT_I4))
-                {
-                    PInvoke.VariantClear(ref vtProp);
-                    
-                    errorReason = ArrayPropertyError.InvalidIntType;
-                    return false;
-                }
-                
-                value = (T[])(object)this.ExtractArrayValue<int>(ref vtProp, PInvoke.VariantToInt32Array);
-                
-                PInvoke.VariantClear(ref vtProp);
-                return true;
-            }
-            
-            PInvoke.VariantClear(ref vtProp);
-
-            errorReason = ArrayPropertyError.UnsupportedType;
-            return false;
         }
         
         public static void HandleArrayPropertyError<T>(string name, ArrayPropertyError errorReason)

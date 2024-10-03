@@ -565,19 +565,19 @@ namespace Hardware.Info.Aot.Windows
                 {
                     monitor.Active = wmiMonitorIdMo.GetProperty<bool>("Active");
                     monitor.ProductCodeID = GetStringFromArray(wmiMonitorIdMo.GetArrayProperty<int>("ProductCodeID"));
-                    if (wmiMonitorIdMo.TryGetArrayProperty<ushort>("UserFriendlyName", out var userFriendlyNameUint16,
-                            out _))
-                    {
-                        monitor.UserFriendlyName = GetStringFromArray(userFriendlyNameUint16);
-                    } else if (wmiMonitorIdMo.TryGetArrayProperty<int>("UserFriendlyName", out var userFriendlyNameInt4,
-                                   out var errorReason))
-                    {
-                        monitor.UserFriendlyName = GetStringFromArray(userFriendlyNameInt4);
-                    }
-                    else
-                    {
-                        WmiSearchResultItem.HandleArrayPropertyError<ushort>("UserFriendlyName", errorReason);
-                    }
+                    // if (wmiMonitorIdMo.TryGetArrayProperty<ushort>("UserFriendlyName", out var userFriendlyNameUint16,
+                    //         out _))
+                    // {
+                    //     monitor.UserFriendlyName = GetStringFromArray(userFriendlyNameUint16);
+                    // } else if (wmiMonitorIdMo.TryGetArrayProperty<int>("UserFriendlyName", out var userFriendlyNameInt4,
+                    //                out var errorReason))
+                    // {
+                    //     monitor.UserFriendlyName = GetStringFromArray(userFriendlyNameInt4);
+                    // }
+                    // else
+                    // {
+                    //     WmiSearchResultItem.HandleArrayPropertyError<ushort>("UserFriendlyName", errorReason);
+                    // }
                     monitor.UserFriendlyName = GetStringFromArray(wmiMonitorIdMo.GetArrayProperty<ushort>("UserFriendlyName"));
                     monitor.SerialNumberID = GetStringFromArray(wmiMonitorIdMo.GetArrayProperty<int>("SerialNumberID"));
                     monitor.ManufacturerName = GetStringFromArray(wmiMonitorIdMo.GetArrayProperty<int>("ManufacturerName"));

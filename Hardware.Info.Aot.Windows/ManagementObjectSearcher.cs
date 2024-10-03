@@ -251,14 +251,13 @@ namespace Hardware.Info.Aot.Windows
             return (T)value;
         }
 
-        private T[] ExtractArrayValue<T>(string propertyName, ref VARIANT variant, VARENUM expectedType, ExtractArrayValueDelegate<T> extractFunc) where T : unmanaged
+        private bool IsVariantOfType(in VARIANT variant, VARENUM expectedType)
         {
-            if ((variant.Anonymous.Anonymous.vt & expectedType) != expectedType)
-            {
-                throw new InvalidOperationException(
-                    $"Property {propertyName} is of type {variant.Anonymous.Anonymous.vt} and not {typeof(T).FullName}.");
-            }
+            return (variant.Anonymous.Anonymous.vt & expectedType) != expectedType;
+        }
 
+        private T[] ExtractArrayValue<T>(ref VARIANT variant, ExtractArrayValueDelegate<T> extractFunc) where T : unmanaged
+        {
             Span<T> array = stackalloc T[10];
             extractFunc(in variant, array, out uint length);
 
@@ -330,23 +329,26 @@ namespace Hardware.Info.Aot.Windows
 
             if (typeof(T) == typeof(ushort))
             {
-                value = (T[])(object)this.ExtractArrayValue<ushort>(name, ref vtProp, VARENUM.VT_UI2, PInvoke.VariantToUInt16Array);
-                if (value == null)
+                if (!IsVariantOfType(in vtProp, VARENUM.VT_UI2))
                 {
                     errorReason = ArrayPropertyError.InvalidUShortType;
                     return false;
                 }
+                
+                value = (T[])(object)this.ExtractArrayValue<ushort>(ref vtProp, PInvoke.VariantToUInt16Array);
+
                 return true;
             }
 
             if (typeof(T) == typeof(int))
             {
-                value = (T[])(object)this.ExtractArrayValue<int>(name, ref vtProp, VARENUM.VT_I4, PInvoke.VariantToInt32Array);
-                if (value == null)
+                if (!IsVariantOfType(in vtProp, VARENUM.VT_I4))
                 {
                     errorReason = ArrayPropertyError.InvalidIntType;
                     return false;
                 }
+                
+                value = (T[])(object)this.ExtractArrayValue<int>(ref vtProp, PInvoke.VariantToInt32Array);
                 return true;
             }
 

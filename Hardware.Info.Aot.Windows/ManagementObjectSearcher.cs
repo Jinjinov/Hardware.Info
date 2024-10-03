@@ -176,6 +176,8 @@ namespace Hardware.Info.Aot.Windows
 
             if ((vtProp.Anonymous.Anonymous.vt & VARENUM.VT_ARRAY) == VARENUM.VT_ARRAY)
             {
+                PInvoke.VariantClear(ref vtProp);
+                
                 throw new InvalidOperationException(
                     $"Property {name} is an array of values.");
             }
@@ -184,6 +186,8 @@ namespace Hardware.Info.Aot.Windows
             {
                 if (vtProp.Anonymous.Anonymous.vt != VARENUM.VT_BSTR)
                 {
+                    PInvoke.VariantClear(ref vtProp);
+                    
                     throw new InvalidOperationException(
                         $"Property {name} is of type {vtProp.Anonymous.Anonymous.vt} and not BSTR.");
                 }
@@ -197,40 +201,64 @@ namespace Hardware.Info.Aot.Windows
 
             if (typeof(T) == typeof(ushort))
             {
-                return (T)(object)this.ExtractValue<ushort>(name, ref vtProp, VARENUM.VT_UI2, PInvoke.VariantToUInt16);
+                var value = (T)(object)this.ExtractValue<ushort>(name, ref vtProp, VARENUM.VT_UI2, PInvoke.VariantToUInt16);
+                
+                PInvoke.VariantClear(ref vtProp);
+                
+                return value;
             }
 
             if (typeof(T) == typeof(uint))
             {
-                return (T)(object)this.ExtractValue<uint>(name, ref vtProp, VARENUM.VT_I4, PInvoke.VariantToUInt32);
+                var value = (T)(object)this.ExtractValue<uint>(name, ref vtProp, VARENUM.VT_I4, PInvoke.VariantToUInt32);
+                
+                PInvoke.VariantClear(ref vtProp);
+                
+                return value;
             }
 
             if (typeof(T) == typeof(int))
             {
-                return (T)(object)this.ExtractValue<int>(name, ref vtProp, VARENUM.VT_I4, PInvoke.VariantToInt32);
+                var value = (T)(object)this.ExtractValue<int>(name, ref vtProp, VARENUM.VT_I4, PInvoke.VariantToInt32);
+                
+                PInvoke.VariantClear(ref vtProp);
+                
+                return value;
             }
 
             if (typeof(T) == typeof(UInt64))
             {
-                return (T)(object)this.ExtractValue<UInt64>(name, ref vtProp, VARENUM.VT_UI8, PInvoke.VariantToUInt64);
+                var value = (T)(object)this.ExtractValue<UInt64>(name, ref vtProp, VARENUM.VT_UI8, PInvoke.VariantToUInt64);
+                
+                PInvoke.VariantClear(ref vtProp);
+                
+                return value;
             }
 
             if (typeof(T) == typeof(byte))
             {
-                return (T)(object)this.ExtractValue<byte>(name, ref vtProp, VARENUM.VT_UI1,
+                var value = (T)(object)this.ExtractValue<byte>(name, ref vtProp, VARENUM.VT_UI1,
                     (in VARIANT v, out byte value) =>
                     {
                         value = v.Anonymous.Anonymous.Anonymous.bVal;
                         return new HRESULT(0);
                     });
+                
+                PInvoke.VariantClear(ref vtProp);
+                
+                return value;
             }
 
             if (typeof(T) == typeof(bool))
             {
                 var boolValue = this.ExtractValue<BOOL>(name, ref vtProp, VARENUM.VT_BOOL, PInvoke.VariantToBoolean);
+                
+                PInvoke.VariantClear(ref vtProp);
 
-                return defaultValue;
+                return (T) (object) (bool) boolValue;
             }
+            
+            PInvoke.VariantClear(ref vtProp);
 
             throw new NotSupportedException($"Type {typeof(T).FullName} is not supported.");
         }
@@ -246,8 +274,6 @@ namespace Hardware.Info.Aot.Windows
             T value;
             extractFunc(in variant, out value);
 
-            PInvoke.VariantClear(ref variant);
-
             return (T)value;
         }
 
@@ -261,8 +287,6 @@ namespace Hardware.Info.Aot.Windows
             Span<T> array = stackalloc T[10];
             extractFunc(in variant, array, out uint length);
 
-            PInvoke.VariantClear(ref variant);
-
             return array.Slice(0, (int)length).ToArray();
         }
 
@@ -274,7 +298,8 @@ namespace Hardware.Info.Aot.Windows
             UnsupportedType,
             InvalidStringType,
             InvalidUShortType,
-            InvalidIntType
+            InvalidIntType,
+            InteropError
         }
 
         public bool TryGetArrayProperty<T>(string name, out T[] value, out ArrayPropertyError errorReason)
@@ -286,18 +311,24 @@ namespace Hardware.Info.Aot.Windows
             value = Array.Empty<T>();
             errorReason = ArrayPropertyError.None;
 
-            if (hr.Failed) return false;
+            if (hr.Failed)
+            {
+                errorReason = ArrayPropertyError.InteropError;
+                return false;
+            }
 
             if (vtProp.Anonymous.Anonymous.vt == VARENUM.VT_NULL)
             {
+                PInvoke.VariantClear(ref vtProp);
+                
                 errorReason = ArrayPropertyError.NullProperty;
                 return true;
             }
 
             if ((vtProp.Anonymous.Anonymous.vt & VARENUM.VT_ARRAY) != VARENUM.VT_ARRAY)
             {
-                Console.Error.WriteLine(vtProp.Anonymous.Anonymous.vt + " is not an array");
-                Console.Error.Flush();
+                PInvoke.VariantClear(ref vtProp);
+                
                 errorReason = ArrayPropertyError.NotArrayType;
                 return false;
             }
@@ -306,6 +337,8 @@ namespace Hardware.Info.Aot.Windows
             {
                 if ((vtProp.Anonymous.Anonymous.vt & VARENUM.VT_BSTR) != VARENUM.VT_BSTR)
                 {
+                    PInvoke.VariantClear(ref vtProp);
+                    
                     errorReason = ArrayPropertyError.InvalidStringType;
                     return false;
                 }
@@ -316,7 +349,14 @@ namespace Hardware.Info.Aot.Windows
 
                 hr = PInvoke.VariantToStringArray(in vtProp, buffer, out usedBufferLength);
 
-                if (hr.Failed) return false;
+                if (hr.Failed)
+                {
+                    PInvoke.VariantClear(ref vtProp);
+
+                    errorReason = ArrayPropertyError.InteropError;
+                    
+                    return false;
+                }
 
                 var usedArray = buffer.Slice(0, (int)usedBufferLength);
                 var strArray = new string[usedArray.Length];
@@ -324,8 +364,10 @@ namespace Hardware.Info.Aot.Windows
                 {
                     strArray[i] = usedArray[i].AsSpan().ToString();
                 }
-
+                
                 value = (T[])(object)strArray;
+                
+                PInvoke.VariantClear(ref vtProp);
                 return true;
             }
 
@@ -333,12 +375,15 @@ namespace Hardware.Info.Aot.Windows
             {
                 if (!IsVariantOfType(in vtProp, VARENUM.VT_UI2))
                 {
+                    PInvoke.VariantClear(ref vtProp);
+                    
                     errorReason = ArrayPropertyError.InvalidUShortType;
                     return false;
                 }
                 
                 value = (T[])(object)this.ExtractArrayValue<ushort>(ref vtProp, PInvoke.VariantToUInt16Array);
 
+                PInvoke.VariantClear(ref vtProp);
                 return true;
             }
 
@@ -346,15 +391,19 @@ namespace Hardware.Info.Aot.Windows
             {
                 if (!IsVariantOfType(in vtProp, VARENUM.VT_I4))
                 {
-                    Console.Error.WriteLine(vtProp.Anonymous.Anonymous.vt + " is not an int array");
-                    Console.Error.Flush();
+                    PInvoke.VariantClear(ref vtProp);
+                    
                     errorReason = ArrayPropertyError.InvalidIntType;
                     return false;
                 }
                 
                 value = (T[])(object)this.ExtractArrayValue<int>(ref vtProp, PInvoke.VariantToInt32Array);
+                
+                PInvoke.VariantClear(ref vtProp);
                 return true;
             }
+            
+            PInvoke.VariantClear(ref vtProp);
 
             errorReason = ArrayPropertyError.UnsupportedType;
             return false;
@@ -376,6 +425,8 @@ namespace Hardware.Info.Aot.Windows
                     throw new InvalidOperationException($"Property {name} is not an array of int values.");
                 case ArrayPropertyError.UnsupportedType:
                     throw new NotSupportedException($"Type {typeof(T).FullName} is not supported.");
+                case ArrayPropertyError.InteropError:
+                    throw new NotSupportedException($"Property value from {name} could not be extracted.");
                 default:
                     throw new InvalidOperationException($"Failed to get property {name}.");
             }

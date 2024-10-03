@@ -566,11 +566,11 @@ namespace Hardware.Info.Aot.Windows
                     monitor.Active = wmiMonitorIdMo.GetProperty<bool>("Active");
                     monitor.ProductCodeID = GetStringFromArray(wmiMonitorIdMo.GetArrayProperty<int>("ProductCodeID"));
                     if (wmiMonitorIdMo.TryGetArrayProperty<ushort>("UserFriendlyName", out var userFriendlyNameUint16,
-                            out var errorReason))
+                            out _))
                     {
                         monitor.UserFriendlyName = GetStringFromArray(userFriendlyNameUint16);
                     } else if (wmiMonitorIdMo.TryGetArrayProperty<int>("UserFriendlyName", out var userFriendlyNameInt4,
-                                      out _))
+                                   out var errorReason))
                     {
                         monitor.UserFriendlyName = GetStringFromArray(userFriendlyNameInt4);
                     }

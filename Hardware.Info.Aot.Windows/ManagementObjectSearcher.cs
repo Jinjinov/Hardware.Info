@@ -253,7 +253,7 @@ namespace Hardware.Info.Aot.Windows
 
         private bool IsVariantOfType(in VARIANT variant, VARENUM expectedType)
         {
-            return (variant.Anonymous.Anonymous.vt & expectedType) != expectedType;
+            return (variant.Anonymous.Anonymous.vt & expectedType) == expectedType;
         }
 
         private T[] ExtractArrayValue<T>(ref VARIANT variant, ExtractArrayValueDelegate<T> extractFunc) where T : unmanaged

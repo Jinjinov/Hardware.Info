@@ -83,7 +83,6 @@ namespace Hardware.Info.Aot.Windows
 
             if (hr.Failed)
             {
-                Console.WriteLine($"Could not set proxy blanket. Error code = 0x{hr:X}");
                 pSvc->Release();
                 pLoc->Release();
                 PInvoke.CoUninitialize();
@@ -103,7 +102,6 @@ namespace Hardware.Info.Aot.Windows
 
             if (hr.Failed)
             {
-                Console.WriteLine($"WMI query failed. Error code = 0x{hr:X}");
                 pSvc->Release();
                 pLoc->Release();
                 PInvoke.CoUninitialize();
@@ -122,8 +120,9 @@ namespace Hardware.Info.Aot.Windows
 
         private void ReleaseUnmanagedResources()
         {
+            _queryString.Dispose();
+            _strQueryLanguage.Dispose();
             _managementScope.Dispose();
-             _queryString.Dispose();
         }
 
         private void Dispose(bool disposing)
@@ -489,7 +488,7 @@ namespace Hardware.Info.Aot.Windows
         }
     }
 
-    public unsafe ref struct WmiSearch
+    public unsafe ref struct WmiSearch: IDisposable
     {
         private IWbemServices* _wbemServices;
         private IWbemLocator* _wbemLocator;

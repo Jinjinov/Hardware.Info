@@ -11,8 +11,7 @@ namespace Hardware.Info.Aot.Windows
 {
     delegate HRESULT ExtractValueDelegate<T>(in VARIANT variant, out T value);
     delegate HRESULT ExtractArrayValueDelegate<T>(in VARIANT variant, Span<T> value, out uint length);
-
-
+    
     class ManagementObjectSearcher : IDisposable
     {
         private readonly int _timeout;
@@ -44,8 +43,8 @@ namespace Hardware.Info.Aot.Windows
             if (hr.Failed)
             {
                 PInvoke.CoUninitialize();
-                hr.ThrowOnFailure();
-                return WmiSearch.Null;
+                
+                throw new WmiSearchException(hr, "Could not create WBEM Locator.");
             }
 
             // Connect to WMI through the IWbemLocator::ConnectServer method
@@ -66,7 +65,8 @@ namespace Hardware.Info.Aot.Windows
             {
                 pLoc->Release();
                 PInvoke.CoUninitialize();
-                return WmiSearch.Null;
+                
+                throw new WmiSearchException(hr, "Could not connect to WMI through the WBEM Locator.");
             }
 
             // Set security levels on the proxy
@@ -86,7 +86,8 @@ namespace Hardware.Info.Aot.Windows
                 pSvc->Release();
                 pLoc->Release();
                 PInvoke.CoUninitialize();
-                return WmiSearch.Null;
+
+                throw new WmiSearchException(hr, "Could not set the authentication information of the locator.");
             }
 
             // Perform WMI query to get the Win32_OperatingSystem class
@@ -105,21 +106,18 @@ namespace Hardware.Info.Aot.Windows
                 pSvc->Release();
                 pLoc->Release();
                 PInvoke.CoUninitialize();
-                return WmiSearch.Null;
+                
+                throw new WmiSearchException(hr, "Could not perform wmi query operation.");
             }
 
             return new WmiSearch(
                 pSvc, pLoc, pEnumerator, _timeout);
         }
-
-        public void Close()
-        {
-            PInvoke.CoUninitialize();
-        }
-
-
+        
         private void ReleaseUnmanagedResources()
         {
+            PInvoke.CoUninitialize();
+            
             _queryString.Dispose();
             _strQueryLanguage.Dispose();
             _managementScope.Dispose();
@@ -155,7 +153,7 @@ namespace Hardware.Info.Aot.Windows
             _item = item;
         }
 
-        public unsafe T GetProperty<T>(string name, T defaultValue = default!)
+        public T GetProperty<T>(string name, T defaultValue = default!)
         {
             VARIANT vtProp = new VARIANT();
 
@@ -457,6 +455,7 @@ namespace Hardware.Info.Aot.Windows
 
             if (_isCurrentInUse)
             {
+                // dispose the previous search result before requesting the next one
                 IWbemClassObject** current = (IWbemClassObject**)_currentArrayHandle.Pointer;
                 current[0]->Release();
 
@@ -467,28 +466,27 @@ namespace Hardware.Info.Aot.Windows
 
             var hr = _enumerator->Next(_timeout, 1, array, &uReturn);
 
+            if (hr.Failed)
+            {
+                // dispose pinned memory on error
+                _currentArrayHandle.Dispose();
+            }
+            
             hr.ThrowOnFailure();
 
             _isCurrentInUse = uReturn > 0;
 
-            return uReturn > 0;
-        }
-
-        public void Dispose()
-        {
-            if (_isCurrentInUse)
+            if (!_isCurrentInUse)
             {
-                IWbemClassObject** current = (IWbemClassObject**)_currentArrayHandle.Pointer;
-                current[0]->Release();
-
-                _isCurrentInUse = false;
+                // dispose pinned memory when end of query
+                _currentArrayHandle.Dispose();
             }
 
-            _currentArrayHandle.Dispose();
+            return uReturn > 0;
         }
     }
 
-    public unsafe ref struct WmiSearch: IDisposable
+    public unsafe class WmiSearch: IDisposable
     {
         private IWbemServices* _wbemServices;
         private IWbemLocator* _wbemLocator;
@@ -503,6 +501,13 @@ namespace Hardware.Info.Aot.Windows
             _timeout = timeout;
         }
 
+        private WmiSearch()
+        {
+            _wbemServices = null;
+            _wbemLocator = null;
+            _wbemEnumerator = null;
+        }
+
         public WmiSearchResultsEnumerator GetEnumerator()
         {
             return new WmiSearchResultsEnumerator(_wbemEnumerator, _timeout);
@@ -512,9 +517,23 @@ namespace Hardware.Info.Aot.Windows
 
         public void Dispose()
         {
-            _wbemServices->Release();
-            _wbemLocator->Release();
-            _wbemEnumerator->Release();
+            if (_wbemServices != null)
+            {
+                _wbemServices->Release();
+                _wbemServices = null;
+            }
+
+            if (_wbemLocator != null)
+            {
+                _wbemLocator->Release();
+                _wbemLocator = null;
+            }
+
+            if (_wbemEnumerator != null)
+            {
+                _wbemEnumerator->Release();
+                _wbemEnumerator = null;
+            }
         }
     }
 }

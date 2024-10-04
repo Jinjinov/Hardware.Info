@@ -512,7 +512,7 @@ namespace Hardware.Info.Aot.Windows
                     Manufacturer = mo.GetProperty<string>("Manufacturer"),
                     PartNumber = mo.GetProperty<string>("PartNumber"),
                     SerialNumber = mo.GetProperty<string>("SerialNumber"),
-                                Speed = mo.GetProperty<uint>("Speed")
+                    Speed = mo.GetProperty<uint>("Speed")
                 };
 
                 if (_os.Version.Major >= 10)

@@ -31,6 +31,13 @@ namespace Hardware.Info.Aot.Windows
 
         public unsafe WmiSearch Get()
         {
+            // See https://github.com/microsoft/windows-rs/issues/1169#issuecomment-925107412
+            // for some remarks regarding CoInitializeEx & CoUninitialize.
+            // Important quote from that thread:
+            // Additional calls to CoInitialize paired with CoUninitialize are fine (and sometimes necessary when an
+            // STA is required) because they will simply act as additional references to the COM runtime and not
+            // cause the reference count to hit zero and begin unloading DLLs.
+            
             // Initialize COM
             var hr = PInvoke.CoInitializeEx(null, COINIT.COINIT_MULTITHREADED);
             if (hr.Failed)

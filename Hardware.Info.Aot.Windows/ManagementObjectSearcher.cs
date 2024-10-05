@@ -31,9 +31,16 @@ namespace Hardware.Info.Aot.Windows
 
         public unsafe WmiSearch Get()
         {
+            // Initialize COM
+            var hr = PInvoke.CoInitializeEx(null, COINIT.COINIT_MULTITHREADED);
+            if (hr.Failed)
+            {
+                throw new WmiSearchException(hr, "Failed to initialize COM library");
+            }
+            
             // Obtain the initial locator to WMI
             IWbemLocator* pLoc;
-            var hr = PInvoke.CoCreateInstance(
+            hr = PInvoke.CoCreateInstance(
                 CLSID_WbemLocator,
                 (IUnknown*)0,
                 CLSCTX.CLSCTX_INPROC_SERVER,

@@ -75,3 +75,6 @@ dotnet pack --no-restore \
   -p:PackageVersion="$VERSION" \
   -p:TargetFrameworks="$TFM" \
   -o ./dist
+
+echo "List of created artifacts:"
+ll ./dist/*

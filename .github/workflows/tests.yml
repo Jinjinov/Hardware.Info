@@ -6,7 +6,7 @@ on:
       - main
   pull_request:
     branches:
-      - main
+      - *
   workflow_dispatch:
     inputs: 
       version:
@@ -174,8 +174,3 @@ jobs:
             --no-readline | tee ./output.aot
         env:
           PUBLISH_DIR: ${{ steps.knownVariables.outputs.publishDirectory }}
-          
-      - name: Verify that output is identical
-        if: ${{ false }}
-        shell: bash
-        run: diff ./output.jit ./output.aot

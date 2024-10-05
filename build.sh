@@ -77,4 +77,4 @@ dotnet pack --no-restore \
   -o ./dist
 
 echo "List of created artifacts:"
-ll ./dist/*
+ls -al ./dist/*

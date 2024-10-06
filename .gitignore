@@ -3,3 +3,5 @@
 .vscode
 bin
 obj
+
+dist

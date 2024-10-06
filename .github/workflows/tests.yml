@@ -1,0 +1,176 @@
+name: Build & Test
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - '*'
+  workflow_dispatch:
+    inputs: 
+      version:
+        description: The version of the build packages
+        default: 0.0.1
+        type: string
+
+jobs:
+  build: 
+    name: Build libraries
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+  
+      - name: Build .net standard package
+        run: chmod +x ./build.sh && ./build.sh -t netstandard2.0 -v $VERSION
+        env:
+          VERSION: ${{ inputs.version }}
+        
+      - name: Build .net 8.0 package
+        run: ./build.sh -t net8.0 -v $VERSION --aot
+        env:
+          VERSION: ${{ inputs.version }}
+        
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: nuget-packages
+          path: ./dist/*.nupkg
+  
+  test:
+    needs: build
+    name: test on ${{ matrix.os }} (${{ matrix.architecture }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-13]
+        architecture: [x64] # add arm64 when such runner are available
+        dotnet: ['8.x']
+      fail-fast: false
+  
+    steps:
+      - name: Known variables
+        id: knownVariables
+        shell: bash
+        run: |
+         case "${{ matrix.os }}" in
+          "ubuntu-latest")
+            RUN_TIME="linux-x64"
+            ;;
+          "windows-latest")
+            RUN_TIME="win-x64"
+            ;;
+          "macos-13")
+            RUN_TIME="osx-x64"
+            ;;
+          *)
+            echo "Unknown operating system"
+            exit 1
+          ;;
+          esac
+          echo "runTime=$RUN_TIME" >> "$GITHUB_OUTPUT"
+          echo "publishDirectory=./Hardware.Info.Test/bin/Release/net8.0/$RUN_TIME/publish" >> "$GITHUB_OUTPUT"
+        
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download nuget packages
+        uses: actions/download-artifact@v4
+        with:
+          name: nuget-packages
+          path: ./dist
+          
+      - name: Add local nuget feed
+        shell: bash
+        run: |
+          cat >./nuget.config <<EOL
+          <?xml version="1.0" encoding="utf-8"?>
+          <configuration>
+            <packageSources>
+             <add key="LocalPackages" value="./dist" />
+            </packageSources>
+            <activePackageSource>
+             <!-- this tells that all of them are active -->
+             <add key="All" value="(Aggregate source)" />
+            </activePackageSource>
+          </configuration>
+          EOL
+
+      - name: Install deps on linux
+        if: ${{ matrix.os == 'ubuntu-latest' }}
+        shell: bash
+        run: sudo apt update && sudo apt install clang zlib1g-dev
+      
+      # Setup .NET SDK
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v4
+        with:
+          dotnet-version: '${{ matrix.dotnet }}'  # Adjust the version to the one required by Hardware.Info project
+      
+      # Display installed .NET SDKs
+      - name: Display .NET SDK version
+        run: dotnet --info
+
+      - name: Publish with just-in-time compiler
+        shell: bash
+        run: |
+          dotnet publish \
+            Hardware.Info.Test/Hardware.Info.Test.csproj \
+            --configuration Release \
+            -r "$RUN_TIME" \
+            -p PublishAot=false \
+            -p PackageSource=nuget
+        env: 
+          RUN_TIME: ${{ steps.knownVariables.outputs.runTime }}
+
+      - name: Upload jit compiled test app
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-app-jit-${{ matrix.os }}-${{ matrix.architecture }}
+          path: ${{ steps.knownVariables.outputs.publishDirectory }}/*
+
+      - name: Verify hardware info are fetched is using just-in-time compiler
+        shell: bash
+        run: |
+          $PUBLISH_DIR/Hardware.Info.Test \
+            --enable-test-mode \
+            --expected-compiler jit \
+            --expected-arch ${{ matrix.architecture }} \
+            --no-readline | tee ./output.jit
+        env:
+          PUBLISH_DIR: ${{ steps.knownVariables.outputs.publishDirectory }}
+          
+      - name: Clean up
+        shell: bash
+        run: rm -rf ./Hardware.Info.Test/bin/Release
+        
+      # Run with aot
+      - name: Publish with ahead-of-time compiler
+        shell: bash
+        run: |
+          dotnet publish \
+            Hardware.Info.Test/Hardware.Info.Test.csproj \
+            --configuration Release \
+            -r "$RUN_TIME" \
+            -p PublishAot=true \
+            -p PackageSource=nuget
+        env:
+          RUN_TIME: ${{ steps.knownVariables.outputs.runTime }}
+
+      - name: Upload aot compiled test app
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-app-aot-${{ matrix.os }}-${{ matrix.architecture }}
+          path: ${{ steps.knownVariables.outputs.publishDirectory }}/*
+
+      - name: Verify hardware info are fetched is using ahead-of-time compiler
+        shell: bash
+        run: |
+          $PUBLISH_DIR/Hardware.Info.Test \
+            --enable-test-mode \
+            --expected-compiler aot \
+            --expected-arch ${{ matrix.architecture }} \
+            --no-readline | tee ./output.aot
+        env:
+          PUBLISH_DIR: ${{ steps.knownVariables.outputs.publishDirectory }}

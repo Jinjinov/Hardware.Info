@@ -5,10 +5,28 @@
     <TargetFramework>net8.0</TargetFramework>
     <LangVersion>12.0</LangVersion>
     <Nullable>enable</Nullable>
+    <PublishAot>false</PublishAot>
+    <IsAotCompatible>true</IsAotCompatible>
   </PropertyGroup>
 
-  <ItemGroup>
-    <ProjectReference Include="..\Hardware.Info\Hardware.Info.csproj" />
+  <PropertyGroup Condition="'$(PublishAot)' == 'true'">
+    <DefineConstants>$(DefineConstants);PUBLISH_AOT</DefineConstants>
+  </PropertyGroup>
+  
+  <PropertyGroup>
+    <DefineConstants Condition="'$(PackageSource)' == 'nuget'">$(DefineConstants);PACKAGE_SOURCE_NUGET</DefineConstants>
+    <DefineConstants Condition="'$(PackageSource)' == 'project' OR '$(PackageSource)' == ''">$(DefineConstants);PACKAGE_SOURCE_PROJECT</DefineConstants>
+  </PropertyGroup>
+
+  <ItemGroup Condition="'$(PackageSource)' == 'project' OR '$(PackageSource)' == ''">
+    <ProjectReference Include="..\Hardware.Info.Core\Hardware.Info.Core.csproj" />
+    <ProjectReference Include="..\Hardware.Info\Hardware.Info.csproj" Condition="'$(PublishAot)' == 'false'" />
+    <ProjectReference Include="..\Hardware.Info.Aot\Hardware.Info.Aot.csproj" Condition="'$(PublishAot)' == 'true'" SetTargetFramework="TargetFrameworks=net8.0" />
+  </ItemGroup>
+
+  <ItemGroup Condition="'$(PackageSource)' == 'nuget'">
+    <PackageReference Include="Hardware.Info" Version="*" Condition="'$(PublishAot)' == 'false'" />
+    <PackageReference Include="Hardware.Info.Aot" Version="*" Condition="'$(PublishAot)' == 'true'" />
   </ItemGroup>
 
 </Project>

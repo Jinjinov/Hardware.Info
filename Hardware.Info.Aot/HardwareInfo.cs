@@ -7,7 +7,7 @@ using System.Net.Sockets;
 using System.Runtime.InteropServices;
 using Hardware.Info.Core;
 
-namespace Hardware.Info
+namespace Hardware.Info.Aot
 {
     /// <summary>
     /// Main Hardware.Info class
@@ -105,7 +105,7 @@ namespace Hardware.Info
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                _platformHardwareInfo = new Hardware.Info.Windows.PlatformHardwareInfo(timeoutInWMI) { UseAsteriskInWMI = useAsteriskInWMI };
+                _platformHardwareInfo = new Hardware.Info.Aot.Windows.PlatformHardwareInfo(timeoutInWMI) { UseAsteriskInWMI = useAsteriskInWMI };
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) // Environment.OSVersion.Platform == PlatformID.MacOSX)
@@ -173,8 +173,9 @@ namespace Hardware.Info
         /// </summary>
         /// <param name="includePercentProcessorTime">Include PercentProcessorTime info. This makes the method a bit slower.</param>
         /// <param name="millisecondsDelayBetweenTwoMeasurements">Delay in milliseconds between two measurements in Linux</param>
-        public void RefreshCPUList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500) => CpuList = _platformHardwareInfo.GetCpuList(includePercentProcessorTime, millisecondsDelayBetweenTwoMeasurements);
-
+        public void RefreshCPUList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500) 
+            => CpuList = _platformHardwareInfo.GetCpuList(includePercentProcessorTime, millisecondsDelayBetweenTwoMeasurements);
+        
         /// <summary>
         /// Refresh drive info
         /// </summary>
@@ -211,8 +212,10 @@ namespace Hardware.Info
         /// <param name="includeBytesPerSec">Include BytesPerSec info. This makes the method a bit slower.</param>
         /// <param name="includeNetworkAdapterConfiguration">Include NetworkAdapterConfiguration info. This makes the method a bit slower.</param>
         /// <param name="millisecondsDelayBetweenTwoMeasurements">Delay in milliseconds between two measurements in Linux</param>
-        public void RefreshNetworkAdapterList(bool includeBytesPerSec = true, bool includeNetworkAdapterConfiguration = true, int millisecondsDelayBetweenTwoMeasurements = 1000) => NetworkAdapterList = _platformHardwareInfo.GetNetworkAdapterList(includeBytesPerSec, includeNetworkAdapterConfiguration, millisecondsDelayBetweenTwoMeasurements);
-
+        public void RefreshNetworkAdapterList(bool includeBytesPerSec = true, bool includeNetworkAdapterConfiguration = true, 
+            int millisecondsDelayBetweenTwoMeasurements = 1000) 
+            => NetworkAdapterList = _platformHardwareInfo.GetNetworkAdapterList(includeBytesPerSec, includeNetworkAdapterConfiguration, millisecondsDelayBetweenTwoMeasurements);
+        
         /// <summary>
         /// Refresh printer info
         /// </summary>

@@ -152,11 +152,10 @@ This is a known error: https://github.com/dotnet/core/issues/7051#issuecomment-1
 ### Constructor settings:
 
 ```
-HardwareInfo(bool useAsteriskInWMI = true, TimeSpan? timeoutInWMI = null)
+HardwareInfo(TimeSpan? timeoutInWMI = null)
 ```
 
 The construcotr accepts two settings for WMI:
-- `useAsteriskInWMI` causes WMI queries to use `SELECT * FROM` instead of `SELECT` with a list of property names. This is slower, but safer, more compatible with older Windows (XP, Vista, 7, 8) where a certain WMI property might be missing and throw an exception when queried by name. The default value is `true`.
 - `timeoutInWMI` sets the `Timeout` property of the `EnumerationOptions` in the `ManagementObjectSearcher` that executes each query. The default value is `EnumerationOptions.InfiniteTimeout`. There are one or more queries for each hardware component, so there are more than 16 queries executed on `RefreshAll()`. If a query reaches the timeout it will throw a `System.Management.ManagementException` exception where `ErrorCode` will be `System.Management.ManagementStatus.Timedout`. If you set the `timeoutInWMI` then use a `try-catch` block like this:
 
         IHardwareInfo hardwareInfo;

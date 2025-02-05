@@ -98,13 +98,12 @@ namespace Hardware.Info
         /// <summary>
         /// Main Hardware.Info class
         /// </summary>
-        /// <param name="useAsteriskInWMI">causes WMI queries to use SELECT * FROM instead of SELECT with a list of property names</param>
         /// <param name="timeoutInWMI">sets the Timeout property of the EnumerationOptions in the ManagementObjectSearcher that executes the query. The default value is EnumerationOptions.InfiniteTimeout</param>
-        public HardwareInfo(bool useAsteriskInWMI = true, TimeSpan? timeoutInWMI = null)
+        public HardwareInfo(TimeSpan? timeoutInWMI = null)
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                _hardwareInfoRetrieval = new Hardware.Info.Windows.HardwareInfoRetrieval(timeoutInWMI) { UseAsteriskInWMI = useAsteriskInWMI };
+                _hardwareInfoRetrieval = new Hardware.Info.Windows.HardwareInfoRetrieval(timeoutInWMI);
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) // Environment.OSVersion.Platform == PlatformID.MacOSX)

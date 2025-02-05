@@ -155,7 +155,7 @@ This is a known error: https://github.com/dotnet/core/issues/7051#issuecomment-1
 HardwareInfo(TimeSpan? timeoutInWMI = null)
 ```
 
-The construcotr accepts two settings for WMI:
+The construcotr accepts a setting for WMI:
 - `timeoutInWMI` sets the `Timeout` property of the `EnumerationOptions` in the `ManagementObjectSearcher` that executes each query. The default value is `EnumerationOptions.InfiniteTimeout`. There are one or more queries for each hardware component, so there are more than 16 queries executed on `RefreshAll()`. If a query reaches the timeout it will throw a `System.Management.ManagementException` exception where `ErrorCode` will be `System.Management.ManagementStatus.Timedout`. If you set the `timeoutInWMI` then use a `try-catch` block like this:
 
         IHardwareInfo hardwareInfo;

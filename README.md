@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="101.0.0.0" />
+            <PackageReference Include="Hardware.Info" Version="101.0.0.1" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -251,6 +251,9 @@ If `includeBytesPersec` is false, `millisecondsDelayBetweenTwoMeasurements` has 
 
 ## Version history:
 
+- 101.0.0.1
+    - Removed `UseAsteriskInWMI` in Windows - thanks to [@simonedd](https://github.com/simonedd)
+    - Fixed `GetMonitorList` in Windows - thanks to [@Agent-JY](https://github.com/Agent-JY)
 - 101.0.0.0
     - Fixed `GetCpuList` in Linux - thanks to [@inelisoni](https://github.com/inelisoni)
     - Added `int millisecondsDelayBetweenTwoMeasurements` to `GetCpuList`

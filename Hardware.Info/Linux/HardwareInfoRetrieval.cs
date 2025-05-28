@@ -186,7 +186,7 @@ namespace Hardware.Info.Linux
             public ulong PercentProcessorTime;
         }
 
-        public List<CPU> GetCpuList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500)
+        public List<CPU> GetCpuList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500, bool includePerformanceCounter = true)
         {
             string[] lines = TryReadLinesFromFile("/proc/cpuinfo");
 

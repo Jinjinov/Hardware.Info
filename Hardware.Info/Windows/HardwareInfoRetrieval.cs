@@ -335,8 +335,7 @@ namespace Hardware.Info.Windows
             {
                 try
                 {
-                    using PerformanceCounter cpuCounter =
-                        new PerformanceCounter("Processor Information", "% Processor Performance", "_Total");
+                    using PerformanceCounter cpuCounter = new PerformanceCounter("Processor Information", "% Processor Performance", "_Total");
                     processorPerformance = cpuCounter.NextValue();
                     System.Threading.Thread.Sleep(1); // the first call to NextValue() always returns 0
                     processorPerformance = cpuCounter.NextValue();

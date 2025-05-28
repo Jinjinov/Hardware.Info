@@ -413,7 +413,7 @@ Hardware:
       Hardware UUID: F6D9C340-725A-224A-8855-99AB8348F745
         /**/
 
-        public List<CPU> GetCpuList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500)
+        public List<CPU> GetCpuList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500, bool includePerformanceCounter = true)
         {
             List<CPU> cpuList = new List<CPU>();
 

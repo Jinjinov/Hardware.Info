@@ -10,7 +10,7 @@ namespace Hardware.Info
         List<Battery> GetBatteryList();
         List<BIOS> GetBiosList();
         List<ComputerSystem> GetComputerSystemList();
-        List<CPU> GetCpuList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500, bool includePerformanceCounter = false);
+        List<CPU> GetCpuList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500, bool includePerformanceCounter = true);
         List<Drive> GetDriveList();
         List<Keyboard> GetKeyboardList();
         List<Memory> GetMemoryList();

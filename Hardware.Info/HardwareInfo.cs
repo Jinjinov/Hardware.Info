@@ -171,7 +171,8 @@ namespace Hardware.Info
         /// </summary>
         /// <param name="includePercentProcessorTime">Include PercentProcessorTime info. This makes the method a bit slower.</param>
         /// <param name="millisecondsDelayBetweenTwoMeasurements">Delay in milliseconds between two measurements in Linux</param>
-        public void RefreshCPUList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500) => CpuList = _hardwareInfoRetrieval.GetCpuList(includePercentProcessorTime, millisecondsDelayBetweenTwoMeasurements);
+        /// <param name="includePerformanceCounter">Include PerformanceCounter in Windows.</param>
+        public void RefreshCPUList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500, bool includePerformanceCounter = true) => CpuList = _hardwareInfoRetrieval.GetCpuList(includePercentProcessorTime, millisecondsDelayBetweenTwoMeasurements, includePerformanceCounter);
 
         /// <summary>
         /// Refresh drive info

@@ -122,7 +122,8 @@ namespace Hardware.Info
         /// </summary>
         /// <param name="includePercentProcessorTime">Include PercentProcessorTime info. This makes the method a bit slower.</param>
         /// <param name="millisecondsDelayBetweenTwoMeasurements">Delay in milliseconds between two measurements in Linux</param>
-        void RefreshCPUList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500);
+        /// <param name="includePerformanceCounter">Include PerformanceCounter in Windows.</param>
+        void RefreshCPUList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500, bool includePerformanceCounter = true);
 
         /// <summary>
         /// Refresh drive info

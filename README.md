@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="101.0.1.0" />
+            <PackageReference Include="Hardware.Info" Version="101.0.1.1" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -147,6 +147,12 @@ Sometimes `NetworkAdapter.Speed` in `Win32_NetworkAdapter` can be `0` or `long.M
 
 This is a known error: https://github.com/dotnet/core/issues/7051#issuecomment-1071484354
 
+### msvcr80.dll may crash with an invalid-parameter exception
+
+When using `PerformanceCounter` on a machine without the Visual C++ 2005 CRT installed, the native shim pulls in msvcr80.dll and may crash with an invalid-parameter exception (0xc000000d).
+
+To skip the usage of `PerformanceCounter` set `includePerformanceCounter` to `false` (see Settings).
+
 ## Settings
 
 ### Constructor settings:
@@ -176,7 +182,8 @@ The construcotr accepts a setting for WMI:
 ```
 RefreshCPUList(
     bool includePercentProcessorTime = true, 
-    int millisecondsDelayBetweenTwoMeasurements = 500)
+    int millisecondsDelayBetweenTwoMeasurements = 500,
+    bool includePerformanceCounter = true)
 
 RefreshNetworkAdapterList(
     bool includeBytesPersec = true, 
@@ -207,6 +214,8 @@ Task.Delay(millisecondsDelayBetweenTwoMeasurements).Wait();
 string[] procNetDevNow = TryReadLinesFromFile("/proc/net/dev");
 ```
 If `includeBytesPersec` is false, `millisecondsDelayBetweenTwoMeasurements` has no effect.
+
+Setting `includePerformanceCounter` to `false` excludes `PerformanceCounter` in Windows and avoids the exception in case Visual C++ 2005 CRT is not installed.
 
 ## Benchmarks
 
@@ -251,6 +260,8 @@ If `includeBytesPersec` is false, `millisecondsDelayBetweenTwoMeasurements` has 
 
 ## Version history:
 
+- 101.0.1.1
+    - Fixed `GetCpuList` in Windows - by [@ilCosmico](https://github.com/ilCosmico)
 - 101.0.1.0
     - Fixed `GetCpuList` in macOS - thanks to [@OudomMunint](https://github.com/OudomMunint)
 - 101.0.0.1

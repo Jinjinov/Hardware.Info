@@ -147,7 +147,7 @@ Sometimes `NetworkAdapter.Speed` in `Win32_NetworkAdapter` can be `0` or `long.M
 
 This is a known error: https://github.com/dotnet/core/issues/7051#issuecomment-1071484354
 
-### msvcr80.dll may crash with an invalid-parameter exception
+### `PerformanceCounter` may crash msvcr80.dll with an invalid-parameter exception
 
 When using `PerformanceCounter` on a machine without the Visual C++ 2005 CRT installed, the native shim pulls in msvcr80.dll and may crash with an invalid-parameter exception (0xc000000d).
 

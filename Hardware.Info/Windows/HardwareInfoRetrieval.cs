@@ -266,7 +266,7 @@ namespace Hardware.Info.Windows
             return computerSystemList;
         }
 
-        public List<CPU> GetCpuList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500)
+        public List<CPU> GetCpuList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500, bool includePerformanceCounter = true)
         {
             List<CPU> cpuList = new List<CPU>();
 
@@ -331,16 +331,20 @@ namespace Hardware.Info.Windows
 
             float processorPerformance = 100f;
 
-            try
+            if (includePerformanceCounter)
             {
-                using PerformanceCounter cpuCounter = new PerformanceCounter("Processor Information", "% Processor Performance", "_Total");
-                processorPerformance = cpuCounter.NextValue();
-                System.Threading.Thread.Sleep(1); // the first call to NextValue() always returns 0
-                processorPerformance = cpuCounter.NextValue();
-            }
-            catch
-            {
-                // Ignore performance counter errors and just assume that it's at 100 %
+                try
+                {
+                    using PerformanceCounter cpuCounter =
+                        new PerformanceCounter("Processor Information", "% Processor Performance", "_Total");
+                    processorPerformance = cpuCounter.NextValue();
+                    System.Threading.Thread.Sleep(1); // the first call to NextValue() always returns 0
+                    processorPerformance = cpuCounter.NextValue();
+                }
+                catch
+                {
+                    // Ignore performance counter errors and just assume that it's at 100 %
+                }
             }
 
             uint L1InstructionCacheSize = 0;

@@ -1,0 +1,70 @@
+name: Run Tests on all supported platforms
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    name: Build on ${{ matrix.os }} (${{ matrix.architecture }})
+    runs-on: ${{ matrix.os }}
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        architecture: [x64] # add arm64 when such runner are available
+        dotnet: ['8.x']
+      fail-fast: false
+    env: 
+      RUN_TIME: "${{ fromJson('{ \"ubuntu-latest\": \"linux-x64\", \"windows-latest\": \"win-x64\", \"macos-latest\": \"osx-x64\" }')[matrix.os] }}"
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      
+      # Setup .NET SDK
+      - name: Setup .NET SDK
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '${{ matrix.dotnet }}'  # Adjust the version to the one required by Hardware.Info project
+          include-prerelease: false
+      
+      # Display installed .NET SDKs
+      - name: Display .NET SDK version
+        run: dotnet --info
+
+      # Run with jit
+      - name: Run tests with jit
+        shell: bash
+        run: |
+          dotnet run \
+            --project Hardware.Info.Test/Hardware.Info.Test.csproj \
+            --configuration Release \
+            -r "$RUN_TIME" \
+            --verbosity quiet \
+            -- \
+            --enable-test-mode \
+            --expected-compiler jit \
+            --expected-arch ${{ matrix.architecture }} \
+            --no-readline
+        
+      # Run with aot
+      - name: Run tests with aot
+        shell: bash
+        run: |
+          dotnet publish \
+            Hardware.Info.Test/Hardware.Info.Test.csproj \
+            --configuration Release \
+            -r "$RUN_TIME" \
+            -p PublishAot=true \
+            --verbosity quiet
+          
+          .\Hardware.Info.Test\bin\Release\net8.0\$RUN_TIME\publish\Hardware.Info.Test \
+            --enable-test-mode \
+            --expected-compiler aot \
+            --expected-arch ${{ matrix.architecture }} \
+            --no-readline

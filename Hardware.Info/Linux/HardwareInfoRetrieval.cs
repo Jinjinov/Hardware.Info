@@ -97,34 +97,42 @@ namespace Hardware.Info.Linux
             // /sys/class/power_supply/BAT0/manufacturer = Sony Corp.
             // /sys/class/power_supply/BAT0/serial_number = 
 
-            uint powerNow = TryReadIntegerFromFile("/sys/class/power_supply/BAT0/power_now", "/sys/class/power_supply/BAT0/voltage_now");
-            uint designCapacity = TryReadIntegerFromFile("/sys/class/power_supply/BAT0/energy_full_design", "/sys/class/power_supply/BAT0/charge_full_design");
-            uint fullChargeCapacity = TryReadIntegerFromFile("/sys/class/power_supply/BAT0/energy_full", "/sys/class/power_supply/BAT0/charge_full");
-            uint energyNow = TryReadIntegerFromFile("/sys/class/power_supply/BAT0/energy_now", "/sys/class/power_supply/BAT0/charge_now");
-
-            if (powerNow == 0)
-                powerNow = 1;
-
-            if (fullChargeCapacity == 0)
-                fullChargeCapacity = 1;
-
-            Battery battery = new Battery
+            for (int i = 0; i < 10; i++)
             {
-                DesignCapacity = designCapacity,
-                FullChargeCapacity = fullChargeCapacity,
-                BatteryStatusDescription = TryReadTextFromFile("/sys/class/power_supply/BAT0/status"),
+                if (!Directory.Exists($"/sys/class/power_supply/BAT{i}"))
+                {
+                    continue;
+                }
+                
+                uint powerNow = TryReadIntegerFromFile($"/sys/class/power_supply/BAT{i}/power_now", $"/sys/class/power_supply/BAT{i}/voltage_now");
+                uint designCapacity = TryReadIntegerFromFile($"/sys/class/power_supply/BAT{i}/energy_full_design", $"/sys/class/power_supply/BAT{i}/charge_full_design");
+                uint fullChargeCapacity = TryReadIntegerFromFile($"/sys/class/power_supply/BAT{i}/energy_full", $"/sys/class/power_supply/BAT{i}/charge_full");
+                uint energyNow = TryReadIntegerFromFile($"/sys/class/power_supply/BAT{i}/energy_now", $"/sys/class/power_supply/BAT{i}/charge_now");
 
-                EstimatedChargeRemaining = (ushort)(energyNow * 100 / fullChargeCapacity), // current charge remaining in percentage
-                EstimatedRunTime = energyNow / powerNow, // current remaining life in minutes
-                ExpectedLife = fullChargeCapacity / powerNow, // total expected lifetime in minutes
+                if (powerNow == 0)
+                    powerNow = 1;
 
-                //TimeOnBattery = 1, // Elapsed time in seconds since the computer last switched to battery power
+                if (fullChargeCapacity == 0)
+                    fullChargeCapacity = 1;
 
-                MaxRechargeTime = fullChargeCapacity / powerNow, // total time, in minutes, to fully charge the battery
-                TimeToFullCharge = (fullChargeCapacity - energyNow) / powerNow // Remaining time to charge the battery fully in minutes
-            };
+                Battery battery = new Battery
+                {
+                    DesignCapacity = designCapacity,
+                    FullChargeCapacity = fullChargeCapacity,
+                    BatteryStatusDescription = TryReadTextFromFile($"/sys/class/power_supply/BAT{i}/status"),
 
-            batteryList.Add(battery);
+                    EstimatedChargeRemaining = (ushort)(energyNow * 100 / fullChargeCapacity), // current charge remaining in percentage
+                    EstimatedRunTime = energyNow / powerNow, // current remaining life in minutes
+                    ExpectedLife = fullChargeCapacity / powerNow, // total expected lifetime in minutes
+
+                    //TimeOnBattery = 1, // Elapsed time in seconds since the computer last switched to battery power
+
+                    MaxRechargeTime = fullChargeCapacity / powerNow, // total time, in minutes, to fully charge the battery
+                    TimeToFullCharge = (fullChargeCapacity - energyNow) / powerNow // Remaining time to charge the battery fully in minutes
+                };
+
+                batteryList.Add(battery);
+            }
 
             return batteryList;
         }

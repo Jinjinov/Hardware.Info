@@ -99,7 +99,7 @@ namespace Hardware.Info.Linux
 
             for (int i = 0; i < 10; i++)
             {
-                if (!Directory.Exists($"/sys/class/power_suppy/BAT{i}"))
+                if (!Directory.Exists($"/sys/class/power_supply/BAT{i}"))
                 {
                     continue;
                 }

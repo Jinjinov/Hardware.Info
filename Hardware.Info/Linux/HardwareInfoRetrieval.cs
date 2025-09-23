@@ -734,6 +734,10 @@ namespace Hardware.Info.Linux
                                     }
                                 }
                             }
+                            else if (Enum.TryParse(part, out MemoryType memoryType))
+                            {
+                                ram.Type = memoryType;
+                            }
                         }
 
                         memoryList.Add(ram);

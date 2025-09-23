@@ -744,6 +744,8 @@ Memory:
                             {
                                 if (Enum.TryParse(split[1], out FormFactor formFactor))
                                     memory.FormFactor = formFactor;
+                                if (Enum.TryParse(split[1], out MemoryType memoryType))
+                                    memory.Type = memoryType;
                             }
                         }
 

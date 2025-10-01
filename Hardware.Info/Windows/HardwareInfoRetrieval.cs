@@ -518,8 +518,8 @@ namespace Hardware.Info.Windows
         {
             List<Memory> memoryList = new List<Memory>();
 
-            string queryString = _os.Version.Major >= 10 ? "SELECT BankLabel, Capacity, FormFactor, Manufacturer, MaxVoltage, MinVoltage, PartNumber, SerialNumber, Speed FROM Win32_PhysicalMemory"
-                                                         : "SELECT BankLabel, Capacity, FormFactor, Manufacturer, PartNumber, SerialNumber, Speed FROM Win32_PhysicalMemory";
+            string queryString = _os.Version.Major >= 10 ? "SELECT BankLabel, Capacity, FormFactor, Manufacturer, MaxVoltage, MinVoltage, PartNumber, SerialNumber, Speed, DataWidth, SMBIOSMemoryType FROM Win32_PhysicalMemory"
+                                                         : "SELECT BankLabel, Capacity, FormFactor, Manufacturer, PartNumber, SerialNumber, Speed, DataWidth FROM Win32_PhysicalMemory";
             using ManagementObjectSearcher mos = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
 
             foreach (ManagementBaseObject mo in mos.Get())
@@ -532,13 +532,41 @@ namespace Hardware.Info.Windows
                     Manufacturer = GetPropertyString(mo["Manufacturer"]),
                     PartNumber = GetPropertyString(mo["PartNumber"]),
                     SerialNumber = GetPropertyString(mo["SerialNumber"]),
-                    Speed = GetPropertyValue<uint>(mo["Speed"])
+                    Speed = GetPropertyValue<uint>(mo["Speed"]),
+                    DataWidth = GetPropertyValue<ushort>(mo["DataWidth"])
                 };
 
                 if (_os.Version.Major >= 10)
                 {
                     memory.MaxVoltage = GetPropertyValue<uint>(mo["MaxVoltage"]);
                     memory.MinVoltage = GetPropertyValue<uint>(mo["MinVoltage"]);
+                    
+                    memory.Type = GetPropertyValue<uint>(mo["SMBIOSMemoryType"]) switch
+                    {
+                        0x03 => MemoryType.DRAM,
+                        0x04 => MemoryType.EDRAM,
+                        0x05 => MemoryType.VRAM,
+                        0x06 => MemoryType.SRAM,
+                        0x07 => MemoryType.RAM,
+                        0x0F => MemoryType.SDRAM,
+                        0x10 => MemoryType.SGRAM,
+                        0x11 => MemoryType.RDRAM,
+                        0x12 => MemoryType.DDR,
+                        0x13 => MemoryType.DDR2,
+                        0x14 => MemoryType.DDR2,     // DDR2 FB-DIMM
+                        0x18 => MemoryType.DDR3,
+                        0x19 => MemoryType.FBD2,
+                        0x1A => MemoryType.DDR4,
+                        0x1B => MemoryType.LPDDR,
+                        0x1C => MemoryType.LPDDR2,
+                        0x1D => MemoryType.LPDDR3,
+                        0x1E => MemoryType.LPDDR4,
+                        0x20 => MemoryType.HBM,
+                        0x21 => MemoryType.HBM2,
+                        0x22 => MemoryType.DDR5,
+                        0x23 => MemoryType.LPDDR5,
+                        _ => MemoryType.UNKNOWN
+                    };
                 }
 
                 memoryList.Add(memory);

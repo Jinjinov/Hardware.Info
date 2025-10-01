@@ -679,69 +679,110 @@ namespace Hardware.Info.Linux
         {
             List<Memory> memoryList = new List<Memory>();
 
-            string processOutput = ReadProcessOutput("lshw", "-short -C memory");
+            string processOutput = ReadProcessOutput("lshw", "-C memory");
 
-            string[] lines = processOutput.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
-
-            string[] formFactorNames = Enum.GetNames(typeof(FormFactor));
-
-            foreach (string line in lines)
+            var cacheInfoIndex = processOutput.IndexOf("*-cache", StringComparison.Ordinal);
+            if (cacheInfoIndex != -1)
             {
-                string[] split = line.Split(new[] { "memory" }, StringSplitOptions.RemoveEmptyEntries);
+                processOutput = processOutput.Remove(cacheInfoIndex);
+            }
 
-                if (split.Length > 1)
+            string[] sections = processOutput.Split(new[] { "*-bank:" }, StringSplitOptions.RemoveEmptyEntries);
+
+            foreach (string section in sections)
+            {
+                if (section.Contains("size:") && (section.Contains("DIMM") || section.Contains("DDR")))
                 {
-                    string relevant = split[1].Trim();
-
-                    if (relevant.Contains("DDR") || relevant.Contains("DIMM") || relevant.Contains("System"))
+                    Memory ram = new Memory();
+                    
+                    string[] lines = section.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
+                    
+                    foreach (string line in lines)
                     {
-                        Memory ram = new Memory();
-
-                        string[] parts = relevant.Split(' ');
-
-                        foreach (string part in parts)
+                        string trimmedLine = line.Trim();
+                        
+                        if (trimmedLine.StartsWith("size:"))
                         {
-                            Regex sizeRegex = new Regex("^([0-9]+)(K|M|G|T)iB");
-
-                            if (formFactorNames.Any(name => name == part))
+                            string sizePart = trimmedLine.Substring(5).Trim();
+                            Regex sizeRegex = new Regex(@"^([0-9]+)(K|M|G|T)iB");
+                            Match match = sizeRegex.Match(sizePart);
+                            
+                            if (match.Success && match.Groups.Count > 2)
                             {
-                                if (Enum.TryParse(part, out FormFactor formFactor))
-                                    ram.FormFactor = formFactor;
-                            }
-                            else if (new Regex("^[0-9]+$").IsMatch(part))
-                            {
-                                if (uint.TryParse(part, out uint speed))
-                                    ram.Speed = speed;
-                            }
-                            else if (sizeRegex.IsMatch(part))
-                            {
-                                Match match = sizeRegex.Match(part);
-
-                                if (match.Groups.Count > 2)
+                                if (ulong.TryParse(match.Groups[1].Value, out ulong number))
                                 {
-                                    if (ulong.TryParse(match.Groups[1].Value, out ulong number))
+                                    string exponent = match.Groups[2].Value;
+                                    ram.Capacity = exponent switch
                                     {
-                                        string exponent = match.Groups[2].Value;
-
-                                        ram.Capacity = exponent switch
-                                        {
-                                            "T" => number * 1024uL * 1024uL * 1024uL * 1024uL,
-                                            "G" => number * 1024uL * 1024uL * 1024uL,
-                                            "M" => number * 1024uL * 1024uL,
-                                            "K" => number * 1024uL,
-                                            _ => number,
-                                        };
-                                    }
+                                        "T" => number * 1024uL * 1024uL * 1024uL * 1024uL,
+                                        "G" => number * 1024uL * 1024uL * 1024uL,
+                                        "M" => number * 1024uL * 1024uL,
+                                        "K" => number * 1024uL,
+                                        _ => number,
+                                    };
                                 }
                             }
-                            else if (Enum.TryParse(part, out MemoryType memoryType))
+                        }
+                        else if (trimmedLine.StartsWith("clock:"))
+                        {
+                            string clockPart = trimmedLine.Substring(6).Trim();
+                            Regex clockRegex = new Regex(@"([0-9]+)MHz");
+                            Match match = clockRegex.Match(clockPart);
+                            
+                            if (match.Success)
                             {
-                                ram.Type = memoryType;
+                                if (uint.TryParse(match.Groups[1].Value, out uint speed))
+                                {
+                                    ram.Speed = speed;
+                                }
                             }
                         }
-
-                        memoryList.Add(ram);
+                        else if (trimmedLine.StartsWith("description:"))
+                        {
+                            string description = trimmedLine.Substring(12).Trim();
+                            var descriptionParts = description.Split(' ');
+                            
+                            foreach (var descriptionPart in descriptionParts)
+                            {
+                                if (ram.Type != MemoryType.UNKNOWN && ram.FormFactor != FormFactor.UNKNOWN) break;
+                                
+                                if (Enum.TryParse(descriptionPart, out MemoryType memoryType))
+                                {
+                                    ram.Type = memoryType;
+                                }
+                                else if (Enum.TryParse(descriptionPart, out FormFactor formFactor))
+                                {
+                                    ram.FormFactor = formFactor;
+                                }
+                            }
+                        }
+                        else if (trimmedLine.StartsWith("width:"))
+                        {
+                            string widthPart = trimmedLine.Substring(6).Trim();
+                            Regex widthRegex = new Regex(@"([0-9]+)");
+                            Match match = widthRegex.Match(widthPart);
+                            
+                            if (match.Success)
+                            {
+                                if (uint.TryParse(match.Groups[1].Value, out var width))
+                                    ram.DataWidth = (ushort) width;
+                            }
+                        }
+                        else if (trimmedLine.StartsWith("product:"))
+                        {
+                            ram.PartNumber = trimmedLine.Substring(8).Trim();
+                        }
+                        else if (trimmedLine.StartsWith("vendor:"))
+                        {
+                            ram.Manufacturer = trimmedLine.Substring(7).Trim();
+                        }
+                        else if (trimmedLine.StartsWith("serial:"))
+                        {
+                            ram.SerialNumber = trimmedLine.Substring(7).Trim();
+                        }
                     }
+                    
+                    memoryList.Add(ram);
                 }
             }
 

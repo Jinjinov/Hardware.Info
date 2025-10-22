@@ -221,6 +221,11 @@ namespace Hardware.Info
         public UInt64 Size { get; set; }
 
         /// <summary>
+        /// Media Type of the disk, i.e., Fixed hard disk, External hard disk media, etc.
+        /// </summary>
+        public string MediaType { get; set; } = string.Empty;
+
+        /// <summary>
         /// Write all property values to a string
         /// </summary>
         /// <returns>Each property on a new line</returns>
@@ -236,7 +241,8 @@ namespace Hardware.Info
                 "Name: " + Name + Environment.NewLine +
                 "Partitions: " + Partitions + Environment.NewLine +
                 "SerialNumber: " + SerialNumber + Environment.NewLine +
-                "Size: " + Size + Environment.NewLine;
+                "Size: " + Size + Environment.NewLine +
+                "MediaType: " + MediaType + Environment.NewLine;
         }
     }
 }

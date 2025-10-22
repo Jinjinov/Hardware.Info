@@ -423,7 +423,7 @@ namespace Hardware.Info.Windows
         {
             List<Drive> driveList = new List<Drive>();
 
-            string queryString = "SELECT Caption, Description, DeviceID, FirmwareRevision, Index, Manufacturer, Model, Name, Partitions, SerialNumber, Size FROM Win32_DiskDrive";
+            string queryString = "SELECT Caption, Description, DeviceID, FirmwareRevision, Index, Manufacturer, Model, Name, Partitions, SerialNumber, Size, MediaType FROM Win32_DiskDrive";
             using ManagementObjectSearcher Win32_DiskDrive = new ManagementObjectSearcher(_managementScope, queryString, _enumerationOptions);
 
             foreach (ManagementBaseObject DiskDrive in Win32_DiskDrive.Get())
@@ -439,7 +439,8 @@ namespace Hardware.Info.Windows
                     Name = GetPropertyString(DiskDrive["Name"]),
                     Partitions = GetPropertyValue<uint>(DiskDrive["Partitions"]),
                     SerialNumber = GetPropertyString(DiskDrive["SerialNumber"]),
-                    Size = GetPropertyValue<ulong>(DiskDrive["Size"])
+                    Size = GetPropertyValue<ulong>(DiskDrive["Size"]),
+                    MediaType = GetPropertyString(DiskDrive["MediaType"])
                 };
 
                 string queryString1 = "ASSOCIATORS OF {Win32_DiskDrive.DeviceID='" + DiskDrive["DeviceID"] + "'} WHERE AssocClass = Win32_DiskDriveToDiskPartition";

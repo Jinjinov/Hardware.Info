@@ -7,7 +7,7 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="101.1.0.0" />
+            <PackageReference Include="Hardware.Info" Version="101.1.0.1" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -260,6 +260,8 @@ Setting `includePerformanceCounter` to `false` excludes `PerformanceCounter` in 
 
 ## Version history:
 
+- 101.1.0.1
+    - Added `Drive.MediaType` in Windows - by [@Bastani](https://github.com/Bastani)
 - 101.1.0.0
     - Fixed `GetBatteryList` in Linux - by [@jonko0493](https://github.com/jonko0493)
 - 101.0.1.1

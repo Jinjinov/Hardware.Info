@@ -196,6 +196,16 @@ namespace Hardware.Info
         public string Manufacturer { get; set; } = string.Empty;
 
         /// <summary>
+        /// <para>Type of media used or accessed by this device.</para>
+        /// <para>Possible values are:</para>
+        /// <para>- External hard disk media</para>
+        /// <para>- Removable media ("Removable media other than floppy")</para>
+        /// <para>- Fixed hard disk ("Fixed hard disk media")</para>
+        /// <para>- Unknown ("Format is unknown")</para>
+        /// </summary>
+        public string MediaType { get; set; } = string.Empty;
+
+        /// <summary>
         /// Manufacturer's model number of the disk drive.
         /// </summary>
         public string Model { get; set; } = string.Empty;
@@ -221,11 +231,6 @@ namespace Hardware.Info
         public UInt64 Size { get; set; }
 
         /// <summary>
-        /// Media Type of the disk, i.e., Fixed hard disk, External hard disk media, etc.
-        /// </summary>
-        public string MediaType { get; set; } = string.Empty;
-
-        /// <summary>
         /// Write all property values to a string
         /// </summary>
         /// <returns>Each property on a new line</returns>
@@ -237,12 +242,12 @@ namespace Hardware.Info
                 "FirmwareRevision: " + FirmwareRevision + Environment.NewLine +
                 "Index: " + Index + Environment.NewLine +
                 "Manufacturer: " + Manufacturer + Environment.NewLine +
+                "MediaType: " + MediaType + Environment.NewLine +
                 "Model: " + Model + Environment.NewLine +
                 "Name: " + Name + Environment.NewLine +
                 "Partitions: " + Partitions + Environment.NewLine +
                 "SerialNumber: " + SerialNumber + Environment.NewLine +
-                "Size: " + Size + Environment.NewLine +
-                "MediaType: " + MediaType + Environment.NewLine;
+                "Size: " + Size + Environment.NewLine;
         }
     }
 }

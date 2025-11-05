@@ -130,6 +130,36 @@ namespace Hardware.Info
         LGA = 23
     }
 
+    public enum MemoryType
+    {
+        /// <summary>
+        /// Represents an unknown or unspecified form factor.
+        /// </summary>
+        UNKNOWN,
+        
+        DRAM,
+        EDRAM,
+        VRAM,
+        SRAM,
+        RAM,
+        SDRAM,
+        SGRAM,
+        RDRAM,
+        FBD2,
+        DDR,
+        DDR2,
+        DDR3,
+        DDR4,
+        DDR5,
+        HBM,
+        HBM2,
+        LPDDR,
+        LPDDR2,
+        LPDDR3,
+        LPDDR4,
+        LPDDR5,
+    }
+
     /// <summary>
     /// WMI class: Win32_PhysicalMemory
     /// </summary>
@@ -179,6 +209,16 @@ namespace Hardware.Info
         /// Speed of the physical memory in nanoseconds.
         /// </summary>
         public UInt32 Speed { get; set; }
+        
+        /// <summary>
+        /// Type of memory
+        /// </summary>
+        public MemoryType Type { get; set; }
+        
+        /// <summary>
+        /// Data width of the physical memory—in bits
+        /// </summary>
+        public ushort DataWidth { get; set; }
 
         /// <summary>
         /// Write all property values to a string
@@ -188,6 +228,8 @@ namespace Hardware.Info
         {
             return
                 "BankLabel: " + BankLabel + Environment.NewLine +
+                "Type: " + Type + Environment.NewLine +
+                "Width: " + DataWidth + Environment.NewLine +
                 "Capacity: " + Capacity + Environment.NewLine +
                 "FormFactor: " + FormFactor + Environment.NewLine +
                 "Manufacturer: " + Manufacturer + Environment.NewLine +

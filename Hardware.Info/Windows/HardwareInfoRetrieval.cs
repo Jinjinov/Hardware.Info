@@ -82,6 +82,30 @@ namespace Hardware.Info.Windows
 
         }
 
+        private WmiQuery CreateQueryForRelated(WmiNamescpae namescpae, WmiObject wmiObject, string relatedClass)
+        {
+            switch (namescpae)
+            {
+                case WmiNamescpae.wmi:
+
+                    if (_enumeratorTimeout != null)
+                        return _wmiConnections.wmi.CreateQueryForRelated(wmiObject, relatedClass, _enumeratorTimeout.Value);
+                    else
+                        return _wmiConnections.wmi.CreateQueryForRelated(wmiObject, relatedClass);
+
+                case WmiNamescpae.cimv2:
+
+                    if (_enumeratorTimeout != null)
+                        return _wmiConnections.cimv2.CreateQueryForRelated(wmiObject, relatedClass, _enumeratorTimeout.Value);
+                    else
+                        return _wmiConnections.cimv2.CreateQueryForRelated(wmiObject, relatedClass);
+
+                default:
+                    throw new NotImplementedException();
+            }
+
+        }
+
         private enum WmiNamescpae
         {
             /// <summary>
@@ -712,11 +736,8 @@ namespace Hardware.Info.Windows
                 if (includeNetworkAdapterConfiguration)
                 {
                     IPAddress address;
-                    string deviceID = GetPropertyString(mo["DeviceID"]);
 
-                    string configQuery = $"SELECT DefaultIPGateway, DHCPServer, DNSServerSearchOrder, IPAddress, IPSubnet FROM Win32_NetworkAdapterConfiguration WHERE Index = {deviceID}";
-
-                    foreach (WmiObject configuration in CreateQuery(WmiNamescpae.cimv2, configQuery))
+                    foreach (WmiObject configuration in CreateQueryForRelated(WmiNamescpae.cimv2, mo, "Win32_NetworkAdapterConfiguration"))
                     {
                         foreach (string str in GetPropertyArray<string>(configuration["DefaultIPGateway"]))
                             if (IPAddress.TryParse(str, out address))

@@ -93,7 +93,7 @@ namespace Hardware.Info
         /// </summary>
         public List<VideoController> VideoControllerList { get; private set; } = new List<VideoController>();
 
-        private readonly IHardwareInfoRetrieval _hardwareInfoRetrieval = null!;
+        private readonly IPlatformHardwareInfo _platformHardwareInfo = null!;
 
         /// <summary>
         /// Main Hardware.Info class
@@ -103,17 +103,17 @@ namespace Hardware.Info
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                _hardwareInfoRetrieval = new Hardware.Info.Windows.HardwareInfoRetrieval(timeoutInWMI);
+                _platformHardwareInfo = new Hardware.Info.Windows.PlatformHardwareInfo(timeoutInWMI);
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) // Environment.OSVersion.Platform == PlatformID.MacOSX)
             {
-                _hardwareInfoRetrieval = new Hardware.Info.Mac.HardwareInfoRetrieval();
+                _platformHardwareInfo = new Hardware.Info.Mac.PlatformHardwareInfo();
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) // Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                _hardwareInfoRetrieval = new Hardware.Info.Linux.HardwareInfoRetrieval();
+                _platformHardwareInfo = new Hardware.Info.Linux.PlatformHardwareInfo();
             }
         }
 
@@ -144,27 +144,27 @@ namespace Hardware.Info
         /// <summary>
         /// Refresh operating system info
         /// </summary>
-        public void RefreshOperatingSystem() => OperatingSystem = _hardwareInfoRetrieval.GetOperatingSystem();
+        public void RefreshOperatingSystem() => OperatingSystem = _platformHardwareInfo.GetOperatingSystem();
 
         /// <summary>
         /// Refresh memory status info
         /// </summary>
-        public void RefreshMemoryStatus() => MemoryStatus = _hardwareInfoRetrieval.GetMemoryStatus();
+        public void RefreshMemoryStatus() => MemoryStatus = _platformHardwareInfo.GetMemoryStatus();
 
         /// <summary>
         /// Refresh battery info
         /// </summary>
-        public void RefreshBatteryList() => BatteryList = _hardwareInfoRetrieval.GetBatteryList();
+        public void RefreshBatteryList() => BatteryList = _platformHardwareInfo.GetBatteryList();
 
         /// <summary>
         /// Refresh BIOS info
         /// </summary>
-        public void RefreshBIOSList() => BiosList = _hardwareInfoRetrieval.GetBiosList();
+        public void RefreshBIOSList() => BiosList = _platformHardwareInfo.GetBiosList();
 
         /// <summary>
         /// Refresh computer system info
         /// </summary>
-        public void RefreshComputerSystemList() => ComputerSystemList = _hardwareInfoRetrieval.GetComputerSystemList();
+        public void RefreshComputerSystemList() => ComputerSystemList = _platformHardwareInfo.GetComputerSystemList();
 
         /// <summary>
         /// Refresh CPU info
@@ -172,37 +172,37 @@ namespace Hardware.Info
         /// <param name="includePercentProcessorTime">Include PercentProcessorTime info. This makes the method a bit slower.</param>
         /// <param name="millisecondsDelayBetweenTwoMeasurements">Delay in milliseconds between two measurements in Linux</param>
         /// <param name="includePerformanceCounter">Include PerformanceCounter in Windows.</param>
-        public void RefreshCPUList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500, bool includePerformanceCounter = true) => CpuList = _hardwareInfoRetrieval.GetCpuList(includePercentProcessorTime, millisecondsDelayBetweenTwoMeasurements, includePerformanceCounter);
+        public void RefreshCPUList(bool includePercentProcessorTime = true, int millisecondsDelayBetweenTwoMeasurements = 500, bool includePerformanceCounter = true) => CpuList = _platformHardwareInfo.GetCpuList(includePercentProcessorTime, millisecondsDelayBetweenTwoMeasurements, includePerformanceCounter);
 
         /// <summary>
         /// Refresh drive info
         /// </summary>
-        public void RefreshDriveList() => DriveList = _hardwareInfoRetrieval.GetDriveList();
+        public void RefreshDriveList() => DriveList = _platformHardwareInfo.GetDriveList();
 
         /// <summary>
         /// Refresh keyboard info
         /// </summary>
-        public void RefreshKeyboardList() => KeyboardList = _hardwareInfoRetrieval.GetKeyboardList();
+        public void RefreshKeyboardList() => KeyboardList = _platformHardwareInfo.GetKeyboardList();
 
         /// <summary>
         /// Refresh memory info
         /// </summary>
-        public void RefreshMemoryList() => MemoryList = _hardwareInfoRetrieval.GetMemoryList();
+        public void RefreshMemoryList() => MemoryList = _platformHardwareInfo.GetMemoryList();
 
         /// <summary>
         /// Refresh monitor info
         /// </summary>
-        public void RefreshMonitorList() => MonitorList = _hardwareInfoRetrieval.GetMonitorList();
+        public void RefreshMonitorList() => MonitorList = _platformHardwareInfo.GetMonitorList();
 
         /// <summary>
         /// Refresh motherboard info
         /// </summary>
-        public void RefreshMotherboardList() => MotherboardList = _hardwareInfoRetrieval.GetMotherboardList();
+        public void RefreshMotherboardList() => MotherboardList = _platformHardwareInfo.GetMotherboardList();
 
         /// <summary>
         /// Refresh mouse info
         /// </summary>
-        public void RefreshMouseList() => MouseList = _hardwareInfoRetrieval.GetMouseList();
+        public void RefreshMouseList() => MouseList = _platformHardwareInfo.GetMouseList();
 
         /// <summary>
         /// Refresh network adapter info
@@ -210,22 +210,22 @@ namespace Hardware.Info
         /// <param name="includeBytesPerSec">Include BytesPerSec info. This makes the method a bit slower.</param>
         /// <param name="includeNetworkAdapterConfiguration">Include NetworkAdapterConfiguration info. This makes the method a bit slower.</param>
         /// <param name="millisecondsDelayBetweenTwoMeasurements">Delay in milliseconds between two measurements in Linux</param>
-        public void RefreshNetworkAdapterList(bool includeBytesPerSec = true, bool includeNetworkAdapterConfiguration = true, int millisecondsDelayBetweenTwoMeasurements = 1000) => NetworkAdapterList = _hardwareInfoRetrieval.GetNetworkAdapterList(includeBytesPerSec, includeNetworkAdapterConfiguration, millisecondsDelayBetweenTwoMeasurements);
+        public void RefreshNetworkAdapterList(bool includeBytesPerSec = true, bool includeNetworkAdapterConfiguration = true, int millisecondsDelayBetweenTwoMeasurements = 1000) => NetworkAdapterList = _platformHardwareInfo.GetNetworkAdapterList(includeBytesPerSec, includeNetworkAdapterConfiguration, millisecondsDelayBetweenTwoMeasurements);
 
         /// <summary>
         /// Refresh printer info
         /// </summary>
-        public void RefreshPrinterList() => PrinterList = _hardwareInfoRetrieval.GetPrinterList();
+        public void RefreshPrinterList() => PrinterList = _platformHardwareInfo.GetPrinterList();
 
         /// <summary>
         /// Refresh sound device info
         /// </summary>
-        public void RefreshSoundDeviceList() => SoundDeviceList = _hardwareInfoRetrieval.GetSoundDeviceList();
+        public void RefreshSoundDeviceList() => SoundDeviceList = _platformHardwareInfo.GetSoundDeviceList();
 
         /// <summary>
         /// Refresh video controller info
         /// </summary>
-        public void RefreshVideoControllerList() => VideoControllerList = _hardwareInfoRetrieval.GetVideoControllerList();
+        public void RefreshVideoControllerList() => VideoControllerList = _platformHardwareInfo.GetVideoControllerList();
 
         #region Static
 

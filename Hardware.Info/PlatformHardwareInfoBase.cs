@@ -8,7 +8,7 @@ using System.Runtime.InteropServices;
 
 namespace Hardware.Info
 {
-    internal class HardwareInfoBase
+    internal class PlatformHardwareInfoBase
     {
         internal static Process StartProcess(string cmd, string args)
         {

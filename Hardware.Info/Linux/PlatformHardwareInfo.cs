@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Hardware.Info.Linux
 {
-    internal class HardwareInfoRetrieval : HardwareInfoBase, IHardwareInfoRetrieval
+    internal class PlatformHardwareInfo : PlatformHardwareInfoBase, IPlatformHardwareInfo
     {
         private readonly MemoryStatus _memoryStatus = new MemoryStatus();
 

@@ -2,7 +2,7 @@
 
 namespace Hardware.Info
 {
-    internal interface IHardwareInfoRetrieval
+    internal interface IPlatformHardwareInfo
     {
         OS GetOperatingSystem();
         MemoryStatus GetMemoryStatus();

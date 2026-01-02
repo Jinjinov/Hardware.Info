@@ -33,7 +33,7 @@ namespace Hardware.Info.Windows
         }
     }
 
-    internal class HardwareInfoRetrieval : HardwareInfoBase, IHardwareInfoRetrieval
+    internal class PlatformHardwareInfo : PlatformHardwareInfoBase, IPlatformHardwareInfo
     {
         private readonly MEMORYSTATUSEX _memoryStatusEx = new MEMORYSTATUSEX();
 
@@ -45,7 +45,7 @@ namespace Hardware.Info.Windows
         private readonly string _managementScopeWmi = "root\\wmi";
         private readonly EnumerationOptions _enumerationOptions = new EnumerationOptions() { ReturnImmediately = true, Rewindable = false, Timeout = EnumerationOptions.InfiniteTimeout };
 
-        public HardwareInfoRetrieval(TimeSpan? enumerationOptionsTimeout = null)
+        public PlatformHardwareInfo(TimeSpan? enumerationOptionsTimeout = null)
         {
             if (enumerationOptionsTimeout == null)
                 enumerationOptionsTimeout = EnumerationOptions.InfiniteTimeout;

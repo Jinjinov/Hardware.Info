@@ -15,7 +15,7 @@ using System.Threading;
 
 namespace Hardware.Info.Mac
 {
-    internal class HardwareInfoRetrieval : HardwareInfoBase, IHardwareInfoRetrieval
+    internal class PlatformHardwareInfo : PlatformHardwareInfoBase, IPlatformHardwareInfo
     {
         private readonly MemoryStatus _memoryStatus = new MemoryStatus();
 
@@ -36,7 +36,7 @@ namespace Hardware.Info.Mac
         static extern int sysctlbyname(string name, out IntPtr oldp, ref IntPtr oldlenp, IntPtr newp, IntPtr newlen);
 
         /*
-        public HardwareInfoRetrieval()
+        public PlatformHardwareInfo()
         {
             //SystemProfiler();
 

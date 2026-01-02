@@ -11,7 +11,7 @@ namespace Hardware.Info
     /// <summary>
     /// Main Hardware.Info class
     /// </summary>
-    public class HardwareInfo : IHardwareInfo
+    public class HardwareInfoBase : IHardwareInfo
     {
         /// <summary>
         /// Operating system
@@ -99,7 +99,7 @@ namespace Hardware.Info
         /// Main Hardware.Info class
         /// </summary>
         /// <param name="timeoutInWMI">sets the Timeout property of the EnumerationOptions in the ManagementObjectSearcher that executes the query. The default value is EnumerationOptions.InfiniteTimeout</param>
-        public HardwareInfo(TimeSpan? timeoutInWMI = null)
+        public HardwareInfoBase(TimeSpan? timeoutInWMI = null)
         {
             _platformHardwareInfo = CreatePlatformHardwareInfo(timeoutInWMI);
         }

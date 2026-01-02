@@ -101,20 +101,27 @@ namespace Hardware.Info
         /// <param name="timeoutInWMI">sets the Timeout property of the EnumerationOptions in the ManagementObjectSearcher that executes the query. The default value is EnumerationOptions.InfiniteTimeout</param>
         public HardwareInfo(TimeSpan? timeoutInWMI = null)
         {
+            _platformHardwareInfo = CreatePlatformHardwareInfo(timeoutInWMI);
+        }
+
+        private IPlatformHardwareInfo CreatePlatformHardwareInfo(TimeSpan? timeoutInWMI)
+        {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                _platformHardwareInfo = new Hardware.Info.Windows.PlatformHardwareInfo(timeoutInWMI);
+                return new Hardware.Info.Windows.PlatformHardwareInfo(timeoutInWMI);
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) // Environment.OSVersion.Platform == PlatformID.MacOSX)
             {
-                _platformHardwareInfo = new Hardware.Info.Mac.PlatformHardwareInfo();
+                return new Hardware.Info.Mac.PlatformHardwareInfo();
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Linux)) // Environment.OSVersion.Platform == PlatformID.Unix)
             {
-                _platformHardwareInfo = new Hardware.Info.Linux.PlatformHardwareInfo();
+                return new Hardware.Info.Linux.PlatformHardwareInfo();
             }
+
+            throw new PlatformNotSupportedException();
         }
 
         /// <summary>

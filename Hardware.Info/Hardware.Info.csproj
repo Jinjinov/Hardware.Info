@@ -21,7 +21,7 @@
     <!--<PackageReleaseNotes></PackageReleaseNotes>-->
     <PackageLicenseExpression>MIT</PackageLicenseExpression>
     <SignAssembly>True</SignAssembly>
-    <AssemblyOriginatorKeyFile>HardwareInfo.snk</AssemblyOriginatorKeyFile>
+    <AssemblyOriginatorKeyFile>..\HardwareInfo.snk</AssemblyOriginatorKeyFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
     <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>

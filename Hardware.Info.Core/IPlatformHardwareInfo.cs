@@ -1,8 +1,12 @@
 ﻿using System.Collections.Generic;
+using System.Runtime.CompilerServices;
+
+[assembly: InternalsVisibleTo("Hardware.Info")]
+[assembly: InternalsVisibleTo("Hardware.Info.Aot")]
 
 namespace Hardware.Info
 {
-    internal interface IPlatformHardwareInfo
+    public interface IPlatformHardwareInfo
     {
         OS GetOperatingSystem();
         MemoryStatus GetMemoryStatus();

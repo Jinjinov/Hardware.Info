@@ -1,4 +1,5 @@
-﻿using System;
+﻿using Hardware.Info.Windows;
+using System;
 using System.Runtime.InteropServices;
 
 namespace Hardware.Info
@@ -15,7 +16,7 @@ namespace Hardware.Info
         {
             if (RuntimeInformation.IsOSPlatform(OSPlatform.Windows)) // Environment.OSVersion.Platform == PlatformID.Win32NT)
             {
-                return new Hardware.Info.Windows.PlatformHardwareInfo(timeoutInWMI);
+                return new Hardware.Info.Windows.PlatformHardwareInfo(new ManagementQueryProvider(timeoutInWMI));
             }
 
             if (RuntimeInformation.IsOSPlatform(OSPlatform.OSX)) // Environment.OSVersion.Platform == PlatformID.MacOSX)

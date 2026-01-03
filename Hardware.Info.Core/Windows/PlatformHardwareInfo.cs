@@ -545,7 +545,7 @@ namespace Hardware.Info.Windows
                     string wmiMonitorIdQuery = $"SELECT Active, ProductCodeID, SerialNumberID, ManufacturerName, UserFriendlyName, WeekOfManufacture, YearOfManufacture FROM WmiMonitorID WHERE InstanceName LIKE '{deviceId}%'".Replace(@"\", "_");
 
                     IWmiPropertySource? desktopMonitorMo = _wmiQueryProvider.Query(_managementScope, win32DesktopMonitorQuery).FirstOrDefault();
-                    IWmiPropertySource? wmiMonitorIdMo = _wmiQueryProvider.Query(_managementScope, wmiMonitorIdQuery).FirstOrDefault();
+                    IWmiPropertySource? wmiMonitorIdMo = _wmiQueryProvider.Query(_managementScopeWmi, wmiMonitorIdQuery).FirstOrDefault();
 
                     Monitor monitor = new Monitor();
 

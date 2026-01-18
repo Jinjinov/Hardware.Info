@@ -6,11 +6,19 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
 
 ## How to use:
 
-1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
+1. Include `Hardware.Info` or `Hardware.Info.Aot` NuGet package
 
-        <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="101.1.1.0" />
-        </ItemGroup>
+    a. https://www.nuget.org/packages/Hardware.Info
+
+            <ItemGroup>
+                <PackageReference Include="Hardware.Info" Version="101.1.1.0" />
+            </ItemGroup>
+
+    b. https://www.nuget.org/packages/Hardware.Info.Aot
+
+            <ItemGroup>
+                <PackageReference Include="Hardware.Info.Aot" Version="101.1.1.0" />
+            </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
 
@@ -285,6 +293,7 @@ Setting `includePerformanceCounter` to `false` excludes `PerformanceCounter` in 
 
 - 101.1.1.0
     - Added `Hardware.Info.Aot` - thanks to [@MartinKuschnik](https://github.com/MartinKuschnik)
+    - Added `Memory.MemoryType` - thanks to [@loyvsc](https://github.com/loyvsc)
 - 101.1.0.1
     - Added `Drive.MediaType` in Windows - by [@Bastani](https://github.com/Bastani)
 - 101.1.0.0

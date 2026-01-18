@@ -2,12 +2,14 @@
 
 Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, motherboard, mouse, NIC - network adapter, printer, sound card - audio card, graphics card - video card. Hardware.Info is a .NET Standard 2.0 library and uses WMI on Windows, /dev, /proc, /sys on Linux and sysctl, system_profiler on macOS.
 
+`Hardware.Info.Aot` uses [WmiLight](https://github.com/MartinKuschnik/WmiLight) instead of `System.Management` and supports AOT.
+
 ## How to use:
 
 1. Include NuGet package from https://www.nuget.org/packages/Hardware.Info
 
         <ItemGroup>
-            <PackageReference Include="Hardware.Info" Version="101.1.0.1" />
+            <PackageReference Include="Hardware.Info" Version="101.1.1.0" />
         </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -258,8 +260,31 @@ Setting `includePerformanceCounter` to `false` excludes `PerformanceCounter` in 
 |     RefreshSoundDeviceList |     4,154,082.924 ns |      46,922.5501 ns |      41,595.6184 ns |
 | RefreshVideoControllerList |     8,784,372.500 ns |     125,080.5212 ns |     117,000.3971 ns |
 
+### Hardware.Info.Aot - Windows 10 (AMD Ryzen 5 5600G, 32 GB RAM):
+
+| Method                     | Mean               | Error             | StdDev            |
+|--------------------------- |-------------------:|------------------:|------------------:|
+| RefreshOperatingSystem     |           2.043 ns |         0.0106 ns |         0.0089 ns |
+| RefreshMemoryStatus        |         747.059 ns |         4.0881 ns |         3.6240 ns |
+| RefreshBatteryList         |     769,294.056 ns |     7,804.1659 ns |     7,300.0216 ns |
+| RefreshBIOSList            |     914,615.137 ns |     2,764.7719 ns |     2,586.1694 ns |
+| RefreshComputerSystemList  |     867,441.380 ns |     4,910.2677 ns |     4,593.0674 ns |
+| RefreshCPUList             | 547,666,150.000 ns | 3,834,134.5804 ns | 2,993,440.0817 ns |
+| RefreshDriveList           |  50,255,102.424 ns |   267,606.2273 ns |   250,319.0311 ns |
+| RefreshKeyboardList        |   3,576,457.729 ns |    13,472.4649 ns |    11,942.9892 ns |
+| RefreshMemoryList          |     975,401.730 ns |     6,965.8030 ns |     6,175.0029 ns |
+| RefreshMonitorList         |  13,044,668.229 ns |    69,062.1913 ns |    64,600.8166 ns |
+| RefreshMotherboardList     |     826,633.952 ns |     7,396.2197 ns |     6,918.4285 ns |
+| RefreshMouseList           |   3,956,703.385 ns |    18,345.2371 ns |    17,160.1462 ns |
+| RefreshNetworkAdapterList  | 964,918,471.429 ns | 8,276,711.3481 ns | 7,337,089.0269 ns |
+| RefreshPrinterList         |  40,490,665.385 ns |   240,725.9111 ns |   201,017.0383 ns |
+| RefreshSoundDeviceList     |   2,433,603.828 ns |     8,374.9648 ns |     7,833.9473 ns |
+| RefreshVideoControllerList |   7,884,823.398 ns |   392,809.5101 ns | 1,158,207.7031 ns |
+
 ## Version history:
 
+- 101.1.1.0
+    - Added `Hardware.Info.Aot` - thanks to [@MartinKuschnik](https://github.com/MartinKuschnik)
 - 101.1.0.1
     - Added `Drive.MediaType` in Windows - by [@Bastani](https://github.com/Bastani)
 - 101.1.0.0

@@ -24,9 +24,9 @@ namespace Hardware.Info.Windows
 
         public IEnumerable<IWmiPropertySource> QueryRelated(string scope, IWmiPropertySource wmiPropertySource, string relatedClass)
         {
-            ManagementObjectAdapter? managementObjectAdapter = wmiPropertySource as ManagementObjectAdapter;
+            using ManagementObjectAdapter? managementObjectAdapter = wmiPropertySource as ManagementObjectAdapter;
 
-            if(managementObjectAdapter is null)
+            if (managementObjectAdapter is null)
                 yield break;
 
             ManagementBaseObject managementBaseObject = managementObjectAdapter.GetManagementBaseObject();
@@ -38,6 +38,10 @@ namespace Hardware.Info.Windows
 
             foreach (ManagementBaseObject mo in managementObject.GetRelated(relatedClass))
                 yield return new ManagementObjectAdapter(mo);
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

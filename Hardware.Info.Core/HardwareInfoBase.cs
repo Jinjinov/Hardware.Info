@@ -216,6 +216,11 @@ namespace Hardware.Info
         /// </summary>
         public void RefreshVideoControllerList() => VideoControllerList = _platformHardwareInfo.GetVideoControllerList();
 
+        public void Dispose()
+        {
+            _platformHardwareInfo.Dispose();
+        }
+
         #region Static
 
         private static bool _pingInProgress;

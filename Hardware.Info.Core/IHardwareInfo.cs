@@ -1,11 +1,12 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Hardware.Info
 {
     /// <summary>
     /// Main Hardware.Info interface
     /// </summary>
-    public interface IHardwareInfo
+    public interface IHardwareInfo : IDisposable
     {
         /// <summary>
         /// Operating system

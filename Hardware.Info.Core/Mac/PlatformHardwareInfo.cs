@@ -1309,5 +1309,9 @@ Graphics/Displays:
 
             return videoControllerList;
         }
+
+        public void Dispose()
+        {
+        }
     }
 }

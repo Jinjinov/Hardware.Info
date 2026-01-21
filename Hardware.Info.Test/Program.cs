@@ -14,7 +14,7 @@ namespace Hardware.Info.Test
 
         static void Test(bool test)
         {
-            IHardwareInfo hardwareInfo = new HardwareInfo();
+            using IHardwareInfo hardwareInfo = new HardwareInfo();
 
             hardwareInfo.RefreshOperatingSystem();
             hardwareInfo.RefreshMemoryStatus();

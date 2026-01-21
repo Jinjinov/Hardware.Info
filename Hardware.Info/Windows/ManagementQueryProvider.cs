@@ -16,7 +16,7 @@ namespace Hardware.Info.Windows
 
         public IEnumerable<IWmiPropertySource> Query(string scope, string query)
         {
-            using var mos = new ManagementObjectSearcher(scope, query);
+            using var mos = new ManagementObjectSearcher(scope, query, _enumerationOptions);
 
             foreach (ManagementBaseObject mo in mos.Get())
                 yield return new ManagementObjectAdapter(mo);

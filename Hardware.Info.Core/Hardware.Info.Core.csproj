@@ -9,8 +9,8 @@
   <PropertyGroup>
     <Product>Hardware.Info.Core</Product>
     <PackageId>Hardware.Info.Core</PackageId>
-    <PackageVersion>101.1.1.0</PackageVersion>
-    <Version>101.1.1.0</Version>
+    <PackageVersion>101.1.1.1</PackageVersion>
+    <Version>101.1.1.1</Version>
     <Authors>Jinjinov</Authors>
     <Description>Core library for Hardware.Info - this package is not intended for direct use - please use Hardware.Info instead.</Description>
     <Copyright>Copyright (c) Jinjinov 2020-2026</Copyright>

@@ -11,13 +11,13 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
     a. https://www.nuget.org/packages/Hardware.Info
 
             <ItemGroup>
-                <PackageReference Include="Hardware.Info" Version="101.1.1.0" />
+                <PackageReference Include="Hardware.Info" Version="101.1.1.1" />
             </ItemGroup>
 
     b. https://www.nuget.org/packages/Hardware.Info.Aot
 
             <ItemGroup>
-                <PackageReference Include="Hardware.Info.Aot" Version="101.1.1.0" />
+                <PackageReference Include="Hardware.Info.Aot" Version="101.1.1.1" />
             </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -291,6 +291,8 @@ Setting `includePerformanceCounter` to `false` excludes `PerformanceCounter` in 
 
 ## Version history:
 
+- 101.1.1.1
+    - Fixed `EnumerationOptions` for `ManagementObjectSearcher` - by [@campersau](https://github.com/campersau)
 - 101.1.1.0
     - Added `Hardware.Info.Aot` - thanks to [@MartinKuschnik](https://github.com/MartinKuschnik)
     - Added `Memory.MemoryType` - thanks to [@loyvsc](https://github.com/loyvsc)

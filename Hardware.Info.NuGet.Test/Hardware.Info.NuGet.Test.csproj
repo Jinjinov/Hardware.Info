@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <PackageReference Include="Hardware.Info" Version="101.1.1.0" />
+    <PackageReference Include="Hardware.Info" Version="101.1.1.1" />
   </ItemGroup>
 
 </Project>

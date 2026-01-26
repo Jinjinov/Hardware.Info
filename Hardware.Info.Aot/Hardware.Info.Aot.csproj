@@ -38,7 +38,7 @@
   </ItemGroup>
   
   <ItemGroup>
-    <PackageReference Include="WmiLight" Version="6.21.0" />
+    <PackageReference Include="WmiLight" Version="7.1.0" />
     <PackageReference Include="Microsoft.SourceLink.GitHub" Version="8.0.0" PrivateAssets="All" />
   </ItemGroup>
 

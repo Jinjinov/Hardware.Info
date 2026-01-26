@@ -7,10 +7,31 @@
   </PropertyGroup>
 
   <PropertyGroup>
-    <SignAssembly>true</SignAssembly>
+    <Product>Hardware.Info.Core</Product>
+    <PackageId>Hardware.Info.Core</PackageId>
+    <PackageVersion>101.1.1.0</PackageVersion>
+    <Version>101.1.1.0</Version>
+    <Authors>Jinjinov</Authors>
+    <Description>Core library for Hardware.Info - this package is not intended for direct use - please use Hardware.Info instead.</Description>
+    <Copyright>Copyright (c) Jinjinov 2020-2026</Copyright>
+    <PackageProjectUrl>https://github.com/Jinjinov/Hardware.Info</PackageProjectUrl>
+    <!--<PackageIcon></PackageIcon>-->
+    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageTags>Computer;Device;Hardware;Info;Information;NET Standard;Windows;Linux;macOS</PackageTags>
+    <!--<PackageReleaseNotes></PackageReleaseNotes>-->
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <SignAssembly>True</SignAssembly>
     <AssemblyOriginatorKeyFile>..\HardwareInfo.snk</AssemblyOriginatorKeyFile>
     <GenerateDocumentationFile>true</GenerateDocumentationFile>
+    <PublishRepositoryUrl>true</PublishRepositoryUrl>
   </PropertyGroup>
+
+  <ItemGroup>
+    <None Include="..\README.md">
+      <Pack>True</Pack>
+      <PackagePath>\</PackagePath>
+    </None>
+  </ItemGroup>
 
   <ItemGroup>
     <PackageReference Include="Microsoft.Win32.Registry" Version="5.0.0" />

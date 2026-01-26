@@ -17,6 +17,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hardware.Info.Aot.Test", "H
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hardware.Info.Aot.Benchmark", "Hardware.Info.Aot.Benchmark\Hardware.Info.Aot.Benchmark.csproj", "{9B5943BB-6184-4130-D8C6-D13DD9CA6ABE}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Hardware.Info.NuGet.Test", "Hardware.Info.NuGet.Test\Hardware.Info.NuGet.Test.csproj", "{7A160785-4667-CCE1-64F5-01E1C2D71129}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -51,6 +53,10 @@ Global
 		{9B5943BB-6184-4130-D8C6-D13DD9CA6ABE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{9B5943BB-6184-4130-D8C6-D13DD9CA6ABE}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{9B5943BB-6184-4130-D8C6-D13DD9CA6ABE}.Release|Any CPU.Build.0 = Release|Any CPU
+		{7A160785-4667-CCE1-64F5-01E1C2D71129}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{7A160785-4667-CCE1-64F5-01E1C2D71129}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{7A160785-4667-CCE1-64F5-01E1C2D71129}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{7A160785-4667-CCE1-64F5-01E1C2D71129}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

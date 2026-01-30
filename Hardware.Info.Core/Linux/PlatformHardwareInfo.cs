@@ -4,7 +4,6 @@ using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
@@ -1232,6 +1231,10 @@ namespace Hardware.Info.Linux
             }
 
             return videoControllerList;
+        }
+
+        public void Dispose()
+        {
         }
     }
 }

@@ -1,8 +1,9 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 
 namespace Hardware.Info.Windows
 {
-    internal interface IWmiQueryProvider
+    internal interface IWmiQueryProvider : IDisposable
     {
         IEnumerable<IWmiPropertySource> Query(string scope, string query);
 

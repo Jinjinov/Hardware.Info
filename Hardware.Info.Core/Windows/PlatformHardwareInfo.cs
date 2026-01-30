@@ -92,6 +92,8 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, queryString))
             {
+                using var _ = mo;
+
                 _os.Name = GetPropertyString(mo["Caption"]);
                 _os.VersionString = GetPropertyString(mo["Version"]);
 
@@ -188,6 +190,8 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, queryString))
             {
+                using var _ = mo;
+
                 Battery battery = new Battery
                 {
                     FullChargeCapacity = GetPropertyValue<uint>(mo["FullChargeCapacity"]),
@@ -215,6 +219,8 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, queryString))
             {
+                using var _ = mo;
+
                 BIOS bios = new BIOS
                 {
                     Caption = GetPropertyString(mo["Caption"]),
@@ -241,6 +247,8 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, queryString))
             {
+                using var _ = mo;
+
                 ComputerSystem computerSystem = new ComputerSystem
                 {
                     Caption = GetPropertyString(mo["Caption"]),
@@ -277,6 +285,8 @@ namespace Hardware.Info.Windows
                 {
                     foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, queryString))
                     {
+                        using var _ = mo;
+
                         CpuCore core = new CpuCore
                         {
                             Name = GetPropertyString(mo["Name"]),
@@ -288,6 +298,8 @@ namespace Hardware.Info.Windows
 
                     foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, totalQueryString))
                     {
+                        using var _ = mo;
+
                         percentProcessorTime = GetPropertyValue<ulong>(mo["PercentProcessorTime"]);
                     }
                 }
@@ -302,6 +314,8 @@ namespace Hardware.Info.Windows
 
                     foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, processorQueryString))
                     {
+                        using var _ = mo;
+
                         percentProcessorTime = GetPropertyValue<ushort>(mo["LoadPercentage"]);
                     }
                 }
@@ -343,6 +357,8 @@ namespace Hardware.Info.Windows
             // Unified = 5
             foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, cacheMemoryquery))
             {
+                using var _ = mo;
+
                 ushort CacheType = GetPropertyValue<ushort>(mo["CacheType"]);
                 uint MaxCacheSize = 1024 * GetPropertyValue<uint>(mo["MaxCacheSize"]);
 
@@ -363,6 +379,8 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, processorQuery))
             {
+                using var _ = mo;
+
                 uint maxClockSpeed = GetPropertyValue<uint>(mo["MaxClockSpeed"]);
 
                 uint currentClockSpeed = (uint)(maxClockSpeed * (processorPerformance / 100));
@@ -409,6 +427,8 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource DiskDrive in _wmiQueryProvider.Query(_managementScope, diskDriveQueryString))
             {
+                using var _ = DiskDrive;
+
                 Drive drive = new Drive
                 {
                     Caption = GetPropertyString(DiskDrive["Caption"]),
@@ -428,6 +448,8 @@ namespace Hardware.Info.Windows
 
                 foreach (IWmiPropertySource DiskPartition in _wmiQueryProvider.Query(_managementScope, diskPartitionQueryString))
                 {
+                    using var __ = DiskPartition;
+
                     Partition partition = new Partition
                     {
                         Bootable = GetPropertyValue<bool>(DiskPartition["Bootable"]),
@@ -446,6 +468,8 @@ namespace Hardware.Info.Windows
 
                     foreach (IWmiPropertySource LogicalDisk in _wmiQueryProvider.Query(_managementScope, logicalDiskQueryString))
                     {
+                        using var ___ = LogicalDisk;
+
                         Volume volume = new Volume
                         {
                             Caption = GetPropertyString(LogicalDisk["Caption"]),
@@ -479,6 +503,8 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, queryString))
             {
+                using var _ = mo;
+
                 Keyboard keyboard = new Keyboard
                 {
                     Caption = GetPropertyString(mo["Caption"]),
@@ -502,6 +528,8 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, queryString))
             {
+                using var _ = mo;
+
                 Memory memory = new Memory
                 {
                     BankLabel = GetPropertyString(mo["BankLabel"]),
@@ -518,7 +546,7 @@ namespace Hardware.Info.Windows
                 {
                     memory.MaxVoltage = GetPropertyValue<uint>(mo["MaxVoltage"]);
                     memory.MinVoltage = GetPropertyValue<uint>(mo["MinVoltage"]);
-                    
+
                     memory.MemoryType = (MemoryType)GetPropertyValue<uint>(mo["SMBIOSMemoryType"]);
                 }
 
@@ -536,6 +564,8 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource win32PnpEntityMo in _wmiQueryProvider.Query(_managementScope, win32PnpEntityQuery))
             {
+                using var _ = win32PnpEntityMo;
+
                 try
                 {
                     string deviceId = GetPropertyString(win32PnpEntityMo["DeviceId"]);
@@ -543,8 +573,8 @@ namespace Hardware.Info.Windows
 
                     string wmiMonitorIdQuery = $"SELECT Active, ProductCodeID, SerialNumberID, ManufacturerName, UserFriendlyName, WeekOfManufacture, YearOfManufacture FROM WmiMonitorID WHERE InstanceName LIKE '{deviceId}%'".Replace(@"\", "_");
 
-                    IWmiPropertySource? desktopMonitorMo = _wmiQueryProvider.Query(_managementScope, win32DesktopMonitorQuery).FirstOrDefault();
-                    IWmiPropertySource? wmiMonitorIdMo = _wmiQueryProvider.Query(_managementScopeWmi, wmiMonitorIdQuery).FirstOrDefault();
+                    using IWmiPropertySource? desktopMonitorMo = _wmiQueryProvider.Query(_managementScope, win32DesktopMonitorQuery).FirstOrDefault();
+                    using IWmiPropertySource? wmiMonitorIdMo = _wmiQueryProvider.Query(_managementScopeWmi, wmiMonitorIdQuery).FirstOrDefault();
 
                     Monitor monitor = new Monitor();
 
@@ -588,6 +618,8 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, queryString))
             {
+                using var _ = mo;
+
                 Motherboard motherboard = new Motherboard
                 {
                     Manufacturer = GetPropertyString(mo["Manufacturer"]),
@@ -609,6 +641,8 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, queryString))
             {
+                using var _ = mo;
+
                 Mouse mouse = new Mouse
                 {
                     Caption = GetPropertyString(mo["Caption"]),
@@ -632,6 +666,8 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, queryString))
             {
+                using var _ = mo;
+
                 NetworkAdapter networkAdapter = new NetworkAdapter
                 {
                     AdapterType = GetPropertyString(mo["AdapterType"]),
@@ -655,6 +691,8 @@ namespace Hardware.Info.Windows
 
                     foreach (IWmiPropertySource managementObject in _wmiQueryProvider.Query(_managementScope, query))
                     {
+                        using var __ = managementObject;
+
                         networkAdapter.BytesSentPersec = GetPropertyValue<ulong>(managementObject["BytesSentPersec"]);
                         networkAdapter.BytesReceivedPersec = GetPropertyValue<ulong>(managementObject["BytesReceivedPersec"]);
 
@@ -671,6 +709,8 @@ namespace Hardware.Info.Windows
 
                     foreach (IWmiPropertySource configuration in _wmiQueryProvider.QueryRelated(_managementScope, mo, "Win32_NetworkAdapterConfiguration"))
                     {
+                        using var __ = configuration;
+
                         foreach (string str in GetPropertyArray<string>(configuration["DefaultIPGateway"]))
                             if (IPAddress.TryParse(str, out address))
                                 networkAdapter.DefaultIPGatewayList.Add(address);
@@ -706,6 +746,8 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, queryString))
             {
+                using var _ = mo;
+
                 Printer printer = new Printer
                 {
                     Caption = GetPropertyString(mo["Caption"]),
@@ -733,6 +775,8 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, queryString))
             {
+                using var _ = mo;
+
                 SoundDevice soundDevice = new SoundDevice
                 {
                     Caption = GetPropertyString(mo["Caption"]),
@@ -756,6 +800,8 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, queryString))
             {
+                using var _ = mo;
+
                 VideoController videoController = new VideoController
                 {
                     Manufacturer = GetPropertyString(mo["AdapterCompatibility"]),
@@ -806,6 +852,11 @@ namespace Hardware.Info.Windows
             }
 
             return videoControllerList;
+        }
+
+        public void Dispose()
+        {
+            _wmiQueryProvider.Dispose();
         }
     }
 }

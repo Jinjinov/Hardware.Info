@@ -43,7 +43,7 @@ namespace Hardware.Info.Windows
                 _wmiConnectionDict[scope] = wmiConnection;
             }
 
-            WmiLightObjectAdapter? wmiLightObjectAdapter = wmiPropertySource as WmiLightObjectAdapter;
+            using WmiLightObjectAdapter? wmiLightObjectAdapter = wmiPropertySource as WmiLightObjectAdapter;
 
             if (wmiLightObjectAdapter is null)
                 yield break;
@@ -60,6 +60,15 @@ namespace Hardware.Info.Windows
                 foreach (WmiObject mo in wmiConnection.CreateQueryForRelated(wmiObject, relatedClass))
                     yield return new WmiLightObjectAdapter(mo);
             }
+        }
+
+        public void Dispose()
+        {
+            foreach (var wmiConnection in _wmiConnectionDict.Values)
+            {
+                wmiConnection.Dispose();
+            }
+            _wmiConnectionDict.Clear();
         }
     }
 }

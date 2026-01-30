@@ -11,5 +11,7 @@ namespace Hardware.Info.Windows
         public object this[string propertyName] => _inner[propertyName];
 
         public ManagementBaseObject GetManagementBaseObject() => _inner;
+
+        public void Dispose() => _inner.Dispose();
     }
 }

@@ -320,6 +320,32 @@ Power:
                 }
             }
 
+            bool fullyCharged = false;
+            bool isCharging = false;
+
+            StartProcess("system_profiler", "SPPowerDataType",
+                standardOutput =>
+                {
+                    string line = standardOutput.Trim();
+
+                    if (line.StartsWith("Full Charge Capacity (mAh): "))
+                    {
+                        if (uint.TryParse(line.Replace("Full Charge Capacity (mAh): ", string.Empty), out uint fullChargeCapacity))
+                            battery.FullChargeCapacity = fullChargeCapacity;
+                    }
+                    else if (line.StartsWith("Fully Charged: "))
+                    {
+                        fullyCharged = line.EndsWith("Yes");
+                    }
+                    else if (line.StartsWith("Charging: "))
+                    {
+                        isCharging = line.EndsWith("Yes");
+                    }
+                },
+                standardError => { });
+
+            battery.BatteryStatus = fullyCharged ? (ushort)3 : isCharging ? (ushort)6 : (ushort)1;
+
             batteryList.Add(battery);
 
             return batteryList;
@@ -329,7 +355,20 @@ Power:
         {
             List<BIOS> biosList = new List<BIOS>();
 
-            BIOS bios = new BIOS();
+            BIOS bios = new BIOS
+            {
+                Manufacturer = "Apple Inc."
+            };
+
+            StartProcess("system_profiler", "SPHardwareDataType",
+                standardOutput =>
+                {
+                    string line = standardOutput.Trim();
+
+                    if (line.StartsWith("System Firmware Version: "))
+                        bios.Version = line.Replace("System Firmware Version: ", string.Empty);
+                },
+                standardError => { });
 
             biosList.Add(bios);
 
@@ -637,52 +676,207 @@ Storage:
           Partition Map Type: GPT (GUID Partition Table)
             /**/
 
-            return base.GetDriveList();
+            static ulong ParseBytesFromParentheses(string value)
+            {
+                int open = value.LastIndexOf('(');
+                int close = value.LastIndexOf(')');
+
+                if (open < 0 || close <= open)
+                    return 0;
+
+                string inner = value.Substring(open + 1, close - open - 1);
+                string[] parts = inner.Split(' ');
+
+                if (parts.Length < 1)
+                    return 0;
+
+                string digits = Regex.Replace(parts[0], @"\D", string.Empty);
+
+                return ulong.TryParse(digits, out ulong result) ? result : 0;
+            }
+
+            List<Drive> driveList = new List<Drive>();
+            Dictionary<string, Drive> drivesByDeviceName = new Dictionary<string, Drive>();
+            Dictionary<string, Partition> partitionsByDeviceName = new Dictionary<string, Partition>();
+
+            Volume? currentVolume = null;
+            string currentPhysicalDeviceName = string.Empty;
+            bool inPhysicalDriveSection = false;
+
+            void CommitCurrentVolume()
+            {
+                if (currentVolume == null)
+                    return;
+
+                string key = string.IsNullOrEmpty(currentPhysicalDeviceName) ? "__unknown__" : currentPhysicalDeviceName;
+
+                if (!partitionsByDeviceName.TryGetValue(key, out Partition? partition))
+                {
+                    partition = new Partition();
+                    partitionsByDeviceName[key] = partition;
+
+                    if (!drivesByDeviceName.ContainsKey(key))
+                        drivesByDeviceName[key] = new Drive { Caption = key, Model = key, Name = key };
+
+                    drivesByDeviceName[key].PartitionList.Add(partition);
+                }
+
+                partition.VolumeList.Add(currentVolume);
+                currentVolume = null;
+                currentPhysicalDeviceName = string.Empty;
+                inPhysicalDriveSection = false;
+            }
+
+            StartProcess("system_profiler", "SPStorageDataType",
+                standardOutput =>
+                {
+                    int spaceCount = standardOutput.TakeWhile(c => c == ' ').Count();
+                    string line = standardOutput.Trim();
+
+                    if (string.IsNullOrEmpty(line))
+                        return;
+
+                    if (spaceCount == 4 && line.EndsWith(":") && !line.Contains(": "))
+                    {
+                        CommitCurrentVolume();
+                        currentVolume = new Volume { VolumeName = line.TrimEnd(':') };
+                        return;
+                    }
+
+                    if (currentVolume == null)
+                        return;
+
+                    if (!inPhysicalDriveSection && spaceCount == 6 && line == "Physical Drive:")
+                    {
+                        inPhysicalDriveSection = true;
+                        return;
+                    }
+
+                    if (inPhysicalDriveSection)
+                    {
+                        if (line.StartsWith("Device Name: "))
+                        {
+                            currentPhysicalDeviceName = line.Replace("Device Name: ", string.Empty);
+
+                            if (!drivesByDeviceName.ContainsKey(currentPhysicalDeviceName))
+                                drivesByDeviceName[currentPhysicalDeviceName] = new Drive
+                                {
+                                    Caption = currentPhysicalDeviceName,
+                                    Model = currentPhysicalDeviceName,
+                                    Name = currentPhysicalDeviceName
+                                };
+                        }
+                        else if (line.StartsWith("Medium Type: "))
+                        {
+                            if (drivesByDeviceName.TryGetValue(currentPhysicalDeviceName, out Drive? drive))
+                                drive.MediaType = line.Replace("Medium Type: ", string.Empty);
+                        }
+                        else if (line.StartsWith("Protocol: "))
+                        {
+                            if (drivesByDeviceName.TryGetValue(currentPhysicalDeviceName, out Drive? drive))
+                                drive.Description = line.Replace("Protocol: ", string.Empty);
+                        }
+                    }
+                    else if (spaceCount == 6)
+                    {
+                        if (line.StartsWith("Available: "))
+                            currentVolume.FreeSpace = ParseBytesFromParentheses(line);
+                        else if (line.StartsWith("Capacity: "))
+                            currentVolume.Size = ParseBytesFromParentheses(line);
+                        else if (line.StartsWith("Mount Point: "))
+                        {
+                            string mountPoint = line.Replace("Mount Point: ", string.Empty);
+                            currentVolume.Caption = mountPoint;
+                            currentVolume.Name = mountPoint;
+                        }
+                        else if (line.StartsWith("File System: "))
+                            currentVolume.FileSystem = line.Replace("File System: ", string.Empty);
+                        else if (line.StartsWith("Volume UUID: "))
+                            currentVolume.VolumeSerialNumber = line.Replace("Volume UUID: ", string.Empty);
+                    }
+                },
+                standardError => { });
+
+            CommitCurrentVolume();
+
+            foreach (Drive drive in drivesByDeviceName.Values)
+                driveList.Add(drive);
+
+            if (driveList.Count == 0)
+                return base.GetDriveList();
+
+            return driveList;
         }
 
         public List<Keyboard> GetKeyboardList()
         {
             List<Keyboard> keyboardList = new List<Keyboard>();
 
-            Keyboard keyboard = new Keyboard();
+            StartProcess("system_profiler", "SPUSBDataType",
+                standardOutput =>
+                {
+                    string line = standardOutput.Trim();
 
-            /*
-            SPUSBDataType
-USB:
+                    if (string.IsNullOrEmpty(line))
+                        return;
 
-    USB Bus:
+                    if (line.EndsWith(":") && !line.Contains(": "))
+                    {
+                        string name = line.TrimEnd(':').Trim();
 
-      Host Controller Driver: AppleUSBOHCIPCI
-      PCI Device ID: 0x003f 
-      PCI Revision ID: 0x0000 
-      PCI Vendor ID: 0x106b 
+                        if (name.IndexOf("keyboard", StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            keyboardList.Add(new Keyboard
+                            {
+                                Caption = name,
+                                Description = name,
+                                Name = name
+                            });
+                        }
+                    }
+                },
+                standardError => { });
 
-        USB Tablet:
+            string btDeviceName = string.Empty;
+            bool btIsKeyboard = false;
 
-          Product ID: 0x0021
-          Vendor ID: 0x80ee
-          Version: 1.00
-          Speed: Up to 12 Mb/sec
-          Manufacturer: VirtualBox
-          Location ID: 0x06200000 / 2
-          Current Available (mA): 500
-          Current Required (mA): 100
-          Extra Operating Current (mA): 0
+            void CommitBtKeyboard()
+            {
+                if (btIsKeyboard && !string.IsNullOrEmpty(btDeviceName))
+                {
+                    keyboardList.Add(new Keyboard
+                    {
+                        Caption = btDeviceName,
+                        Description = btDeviceName,
+                        Name = btDeviceName
+                    });
+                }
 
-        USB Keyboard:
+                btDeviceName = string.Empty;
+                btIsKeyboard = false;
+            }
 
-          Product ID: 0x0010
-          Vendor ID: 0x80ee
-          Version: 1.00
-          Speed: Up to 12 Mb/sec
-          Manufacturer: VirtualBox
-          Location ID: 0x06100000 / 1
-          Current Available (mA): 500
-          Current Required (mA): 100
-          Extra Operating Current (mA): 0
-            /**/
+            StartProcess("system_profiler", "SPBluetoothDataType",
+                standardOutput =>
+                {
+                    string line = standardOutput.Trim();
 
-            keyboardList.Add(keyboard);
+                    if (string.IsNullOrEmpty(line))
+                        return;
+
+                    if (line.EndsWith(":") && !line.Contains(": "))
+                    {
+                        CommitBtKeyboard();
+                        btDeviceName = line.TrimEnd(':').Trim();
+                    }
+                    else if (line.StartsWith("Minor Type: ") && line.IndexOf("Keyboard", StringComparison.OrdinalIgnoreCase) >= 0)
+                    {
+                        btIsKeyboard = true;
+                    }
+                },
+                standardError => { });
+
+            CommitBtKeyboard();
 
             return keyboardList;
         }
@@ -828,7 +1022,8 @@ Memory:
                         {
                             Caption = name,
                             Description = name,
-                            Name = name
+                            Name = name,
+                            UserFriendlyName = name
                         };
                     }
 
@@ -837,6 +1032,18 @@ Memory:
                         if (line.StartsWith("Display Type: "))
                         {
                             monitor.MonitorType = line.Replace("Display Type: ", string.Empty);
+                        }
+                        else if (line.StartsWith("Connection Type: "))
+                        {
+                            monitor.MonitorType = line.Replace("Connection Type: ", string.Empty);
+                        }
+                        else if (line.StartsWith("Display Serial Number: "))
+                        {
+                            monitor.SerialNumberID = line.Replace("Display Serial Number: ", string.Empty);
+                        }
+                        else if (line == "Main Display: Yes")
+                        {
+                            monitor.Active = true;
                         }
                     }
                 },
@@ -958,7 +1165,22 @@ Graphics/Displays:
         {
             List<Motherboard> motherboardList = new List<Motherboard>();
 
-            Motherboard motherboard = new Motherboard();
+            Motherboard motherboard = new Motherboard
+            {
+                Manufacturer = "Apple Inc."
+            };
+
+            StartProcess("system_profiler", "SPHardwareDataType",
+                standardOutput =>
+                {
+                    string line = standardOutput.Trim();
+
+                    if (line.StartsWith("Model Identifier: "))
+                        motherboard.Product = line.Replace("Model Identifier: ", string.Empty);
+                    else if (line.StartsWith("Serial Number (system): "))
+                        motherboard.SerialNumber = line.Replace("Serial Number (system): ", string.Empty);
+                },
+                standardError => { });
 
             motherboardList.Add(motherboard);
 
@@ -969,45 +1191,94 @@ Graphics/Displays:
         {
             List<Mouse> mouseList = new List<Mouse>();
 
-            Mouse mouse = new Mouse();
+            Mouse? currentMouse = null;
 
-            /*
-            SPUSBDataType
-USB:
+            void CommitUsbMouse()
+            {
+                if (currentMouse != null)
+                    mouseList.Add(currentMouse);
 
-    USB Bus:
+                currentMouse = null;
+            }
 
-      Host Controller Driver: AppleUSBOHCIPCI
-      PCI Device ID: 0x003f 
-      PCI Revision ID: 0x0000 
-      PCI Vendor ID: 0x106b 
+            StartProcess("system_profiler", "SPUSBDataType",
+                standardOutput =>
+                {
+                    string line = standardOutput.Trim();
 
-        USB Tablet:
+                    if (string.IsNullOrEmpty(line))
+                        return;
 
-          Product ID: 0x0021
-          Vendor ID: 0x80ee
-          Version: 1.00
-          Speed: Up to 12 Mb/sec
-          Manufacturer: VirtualBox
-          Location ID: 0x06200000 / 2
-          Current Available (mA): 500
-          Current Required (mA): 100
-          Extra Operating Current (mA): 0
+                    if (line.EndsWith(":") && !line.Contains(": "))
+                    {
+                        CommitUsbMouse();
 
-        USB Keyboard:
+                        string name = line.TrimEnd(':').Trim();
 
-          Product ID: 0x0010
-          Vendor ID: 0x80ee
-          Version: 1.00
-          Speed: Up to 12 Mb/sec
-          Manufacturer: VirtualBox
-          Location ID: 0x06100000 / 1
-          Current Available (mA): 500
-          Current Required (mA): 100
-          Extra Operating Current (mA): 0
-            /**/
+                        if (name.IndexOf("mouse", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            name.IndexOf("trackball", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            name.IndexOf("trackpad", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                            name.IndexOf("pointing", StringComparison.OrdinalIgnoreCase) >= 0)
+                        {
+                            currentMouse = new Mouse
+                            {
+                                Caption = name,
+                                Description = name,
+                                Name = name
+                            };
+                        }
+                    }
+                    else if (currentMouse != null && line.StartsWith("Manufacturer: "))
+                    {
+                        currentMouse.Manufacturer = line.Replace("Manufacturer: ", string.Empty);
+                    }
+                },
+                standardError => { });
 
-            mouseList.Add(mouse);
+            CommitUsbMouse();
+
+            string btDeviceName = string.Empty;
+            bool btIsMouse = false;
+
+            void CommitBtMouse()
+            {
+                if (btIsMouse && !string.IsNullOrEmpty(btDeviceName))
+                {
+                    mouseList.Add(new Mouse
+                    {
+                        Caption = btDeviceName,
+                        Description = btDeviceName,
+                        Name = btDeviceName
+                    });
+                }
+
+                btDeviceName = string.Empty;
+                btIsMouse = false;
+            }
+
+            StartProcess("system_profiler", "SPBluetoothDataType",
+                standardOutput =>
+                {
+                    string line = standardOutput.Trim();
+
+                    if (string.IsNullOrEmpty(line))
+                        return;
+
+                    if (line.EndsWith(":") && !line.Contains(": "))
+                    {
+                        CommitBtMouse();
+                        btDeviceName = line.TrimEnd(':').Trim();
+                    }
+                    else if (line.StartsWith("Minor Type: ") &&
+                             (line.IndexOf("Mouse", StringComparison.OrdinalIgnoreCase) >= 0 ||
+                              line.IndexOf("Pointing", StringComparison.OrdinalIgnoreCase) >= 0))
+                    {
+                        btIsMouse = true;
+                    }
+                },
+                standardError => { });
+
+            CommitBtMouse();
 
             return mouseList;
         }
@@ -1067,20 +1338,82 @@ Network:
         {
             List<Printer> printerList = new List<Printer>();
 
-            Printer printer = new Printer();
+            Printer? printer = null;
 
-            // https://stackoverflow.com/questions/57617998/how-to-retrieve-installed-printers-on-macos-in-c-sharp
+            StartProcess("system_profiler", "SPPrintersDataType",
+                standardOutput =>
+                {
+                    int spaceCount = standardOutput.TakeWhile(c => c == ' ').Count();
+                    string line = standardOutput.Trim();
 
-            // https://developer.apple.com/documentation/appkit/nsprinter
+                    if (spaceCount == 4 && line.EndsWith(":") && !line.Contains(": "))
+                    {
+                        if (printer != null)
+                            printerList.Add(printer);
 
-            // https://developer.apple.com/documentation/iokit/1424817-printer_class_requests
+                        string name = line.TrimEnd(':');
 
-            /*
-            SPPrintersDataType
-Printers:
-            /**/
+                        printer = new Printer
+                        {
+                            Name = name,
+                            Caption = name,
+                            Description = name
+                        };
+                    }
+                    else if (printer != null)
+                    {
+                        if (line == "Default: Yes")
+                            printer.Default = true;
+                        else if (line == "Print Server: Local")
+                            printer.Local = true;
+                        else if (line == "Print Server: Network")
+                            printer.Network = true;
+                        else if (line == "Shared: Yes")
+                            printer.Shared = true;
+                    }
+                },
+                standardError => { });
 
-            printerList.Add(printer);
+            if (printer != null)
+                printerList.Add(printer);
+
+            if (printerList.Count == 0)
+            {
+                string lpstatOutput = ReadProcessOutput("lpstat", "-p");
+
+                foreach (string line in lpstatOutput.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
+                {
+                    // format: "printer <name> is idle." or "printer <name> disabled since ..."
+                    string[] parts = line.Split(' ');
+
+                    if (parts.Length >= 2 && parts[0] == "printer")
+                    {
+                        string name = parts[1];
+
+                        printerList.Add(new Printer
+                        {
+                            Name = name,
+                            Caption = name,
+                            Description = name,
+                            Local = true
+                        });
+                    }
+                }
+
+                string defaultOutput = ReadProcessOutput("lpstat", "-d");
+
+                const string defaultPrefix = "system default destination: ";
+
+                if (defaultOutput.StartsWith(defaultPrefix))
+                {
+                    string defaultName = defaultOutput.Substring(defaultPrefix.Length).Trim();
+
+                    Printer? defaultPrinter = printerList.FirstOrDefault(p => p.Name == defaultName);
+
+                    if (defaultPrinter != null)
+                        defaultPrinter.Default = true;
+                }
+            }
 
             return printerList;
         }
@@ -1089,16 +1422,74 @@ Printers:
         {
             List<SoundDevice> soundDeviceList = new List<SoundDevice>();
 
-            SoundDevice soundDevice = new SoundDevice();
+            bool inDevicesSection = false;
+            SoundDevice? soundDevice = null;
 
-            /*
-            SPAudioDataType
-Audio:
+            StartProcess("system_profiler", "SPAudioDataType",
+                standardOutput =>
+                {
+                    string line = standardOutput.Trim();
 
-    Devices:
-            /**/
+                    if (string.IsNullOrEmpty(line))
+                        return;
 
-            soundDeviceList.Add(soundDevice);
+                    if (line == "Devices:")
+                    {
+                        inDevicesSection = true;
+                        return;
+                    }
+
+                    if (!inDevicesSection)
+                        return;
+
+                    if (line.EndsWith(":") && !line.Contains(": "))
+                    {
+                        if (soundDevice != null)
+                            soundDeviceList.Add(soundDevice);
+
+                        string name = line.TrimEnd(':').Trim();
+
+                        soundDevice = new SoundDevice
+                        {
+                            Caption = name,
+                            Description = name,
+                            Name = name,
+                            ProductName = name
+                        };
+                    }
+                    else if (soundDevice != null && line.StartsWith("Manufacturer: "))
+                    {
+                        soundDevice.Manufacturer = line.Replace("Manufacturer: ", string.Empty);
+                    }
+                },
+                standardError => { });
+
+            if (soundDevice != null)
+                soundDeviceList.Add(soundDevice);
+
+            if (soundDeviceList.Count == 0)
+            {
+                StartProcess("system_profiler", "SPHardwareDataType",
+                    standardOutput =>
+                    {
+                        string line = standardOutput.Trim();
+
+                        if (line.StartsWith("Chip: "))
+                        {
+                            string name = line.Replace("Chip: ", string.Empty);
+
+                            soundDeviceList.Add(new SoundDevice
+                            {
+                                Caption = name,
+                                Description = name,
+                                Name = name,
+                                ProductName = name,
+                                Manufacturer = "Apple Inc."
+                            });
+                        }
+                    },
+                    standardError => { });
+            }
 
             return soundDeviceList;
         }
@@ -1319,5 +1710,6 @@ Graphics/Displays:
 
             return videoControllerList;
         }
+
     }
 }

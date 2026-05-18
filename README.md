@@ -295,6 +295,15 @@ Setting `includePerformanceCounter` to `false` excludes `PerformanceCounter` in 
     - Added `ILogger<HardwareInfo>? logger = null` to `HardwareInfo` - thanks to [@TekuSP](https://github.com/TekuSP)
     - Added `GetMonitorList` in Linux
     - Added `GetPrinterList` in Linux
+    - Added `GetBiosList` in macOS
+    - Added `GetKeyboardList` in macOS
+    - Added `GetMotherboardList` in macOS
+    - Added `GetMouseList` in macOS
+    - Added `GetPrinterList` in macOS
+    - Added `GetSoundDeviceList` in macOS
+    - Fixed `GetDriveList` in macOS
+    - Fixed `GetNetworkAdapterList` in macOS
+    - Fixed `GetMonitorList` in macOS
     - Fixed `GetBatteryList` in macOS
 - 101.1.1.1
     - Fixed `EnumerationOptions` for `ManagementObjectSearcher` - by [@campersau](https://github.com/campersau)

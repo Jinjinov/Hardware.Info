@@ -975,13 +975,64 @@ namespace Hardware.Info.Linux
         {
             List<Printer> printerList = new List<Printer>();
 
-            Printer printer = new Printer();
+            const string usbDevicesPath = "/sys/bus/usb/devices";
 
-            // /dev/usb/lp0
+            if (!Directory.Exists(usbDevicesPath))
+                return printerList;
 
-            // lpstat -p
+            foreach (string deviceDir in Directory.EnumerateDirectories(usbDevicesPath))
+            {
+                string dirName = Path.GetFileName(deviceDir);
 
-            printerList.Add(printer);
+                // Skip root hub dirs ("usbN") and interface dirs ("1-1:1.0") — only port-based device dirs like "1-1", "2-1.3"
+                if (!Regex.IsMatch(dirName, @"^\d+-[\d.]+$"))
+                    continue;
+
+                string deviceClass = TryReadTextFromFile(Path.Combine(deviceDir, "bDeviceClass"));
+
+                bool isPrinter = deviceClass == "07";
+
+                if (!isPrinter)
+                {
+                    // Composite/multi-function device: bDeviceClass is "00", printer class is on an interface
+                    foreach (string interfaceDir in Directory.EnumerateDirectories(deviceDir))
+                    {
+                        if (!Path.GetFileName(interfaceDir).StartsWith(dirName + ":"))
+                            continue;
+
+                        if (TryReadTextFromFile(Path.Combine(interfaceDir, "bInterfaceClass")) == "07")
+                        {
+                            isPrinter = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (!isPrinter)
+                    continue;
+
+                string manufacturer = TryReadTextFromFile(Path.Combine(deviceDir, "manufacturer"));
+                string product = TryReadTextFromFile(Path.Combine(deviceDir, "product"));
+                string idVendor = TryReadTextFromFile(Path.Combine(deviceDir, "idVendor"));
+                string idProduct = TryReadTextFromFile(Path.Combine(deviceDir, "idProduct"));
+
+                string name = !string.IsNullOrWhiteSpace(product) ? product
+                            : !string.IsNullOrEmpty(idVendor) || !string.IsNullOrEmpty(idProduct) ? $"{idVendor}:{idProduct}"
+                            : string.Empty;
+
+                if (string.IsNullOrWhiteSpace(name))
+                    continue;
+
+                string caption = string.IsNullOrWhiteSpace(manufacturer) ? name : $"{manufacturer} {product}".Trim();
+
+                printerList.Add(new Printer
+                {
+                    Name = name,
+                    Caption = caption,
+                    Description = "USB Printer",
+                    Local = true
+                });
+            }
 
             return printerList;
         }

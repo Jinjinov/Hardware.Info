@@ -292,7 +292,8 @@ Setting `includePerformanceCounter` to `false` excludes `PerformanceCounter` in 
 ## Version history:
 
 - 110.0.0.0
-    - Added `ILogger<HardwareInfo>? logger = null` to `HardwareInfo`
+    - Added `ILogger<HardwareInfo>? logger = null` to `HardwareInfo` - thanks to [@TekuSP](https://github.com/TekuSP)
+    - Fixed `GetBatteryList` in macOS
 - 101.1.1.1
     - Fixed `EnumerationOptions` for `ManagementObjectSearcher` - by [@campersau](https://github.com/campersau)
 - 101.1.1.0

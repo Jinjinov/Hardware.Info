@@ -293,6 +293,9 @@ Power:
 
             string processOutput = ReadProcessOutput("pmset", "-g batt");
 
+            if (!processOutput.Contains("InternalBattery"))
+                return batteryList;
+
             Regex estimatedChargeRemainingRegex = new Regex("(\\d+)%");
             Match match = estimatedChargeRemainingRegex.Match(processOutput);
 

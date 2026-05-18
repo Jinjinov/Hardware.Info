@@ -756,100 +756,119 @@ namespace Hardware.Info.Linux
         {
             List<Monitor> monitorList = new List<Monitor>();
 
-            const string drmPath = "/sys/class/drm";
+            string xrandrOutput = ReadProcessOutput("xrandr", "--props");
 
-            if (!Directory.Exists(drmPath))
-                return monitorList;
-
-            foreach (string connectorDir in Directory.EnumerateDirectories(drmPath))
+            if (!string.IsNullOrEmpty(xrandrOutput))
             {
-                string dirName = Path.GetFileName(connectorDir);
+                string? currentConnector = null;
+                StringBuilder edidHex = new StringBuilder();
+                bool inEdid = false;
+                uint currentHorizontalResolution = 0;
+                uint currentVerticalResolution = 0;
+                uint currentRefreshRate = 0;
 
-                Match connectorMatch = Regex.Match(dirName, @"^card\d+-(.+)$");
-                if (!connectorMatch.Success)
-                    continue;
+                void TryAddMonitorFromXrandrEdid()
+                {
+                    if (currentConnector == null || edidHex.Length < 256)
+                        return;
 
-                string connectorName = connectorMatch.Groups[1].Value;
+                    byte[] edid;
 
-                string status = TryReadTextFromFile(Path.Combine(connectorDir, "status"));
-                if (status != "connected")
-                    continue;
+                    try
+                    {
+                        string hex = edidHex.ToString();
+                        edid = new byte[hex.Length / 2];
+                        for (int i = 0; i < edid.Length; i++)
+                            edid[i] = Convert.ToByte(hex.Substring(i * 2, 2), 16);
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogDebug(ex, "Failed to decode xrandr EDID for connector: {connector}", currentConnector);
+                        return;
+                    }
 
-                byte[] edid = TryReadBytesFromFile(Path.Combine(connectorDir, "edid"));
-                AddMonitorFromEdid(edid, connectorName);
+                    AddMonitorFromEdid(edid, currentConnector, currentHorizontalResolution, currentVerticalResolution, currentRefreshRate);
+                }
+
+                foreach (string line in xrandrOutput.Split('\n'))
+                {
+                    Match connectedMatch = Regex.Match(line, @"^(\S+) connected");
+                    if (connectedMatch.Success)
+                    {
+                        TryAddMonitorFromXrandrEdid();
+                        currentConnector = connectedMatch.Groups[1].Value;
+                        edidHex.Clear();
+                        inEdid = false;
+                        currentHorizontalResolution = 0;
+                        currentVerticalResolution = 0;
+                        currentRefreshRate = 0;
+
+                        Match resMatch = Regex.Match(line, @"(\d+)x(\d+)\+\d+\+\d+");
+                        if (resMatch.Success)
+                        {
+                            uint.TryParse(resMatch.Groups[1].Value, out currentHorizontalResolution);
+                            uint.TryParse(resMatch.Groups[2].Value, out currentVerticalResolution);
+                        }
+                        continue;
+                    }
+
+                    if (currentConnector == null)
+                        continue;
+
+                    if (line.TrimStart().StartsWith("EDID:"))
+                    {
+                        inEdid = true;
+                        continue;
+                    }
+
+                    if (inEdid)
+                    {
+                        string trimmed = line.Trim();
+                        if (Regex.IsMatch(trimmed, @"^[0-9a-fA-F]+$"))
+                            edidHex.Append(trimmed);
+                        else
+                            inEdid = false;
+                    }
+                    else if (currentRefreshRate == 0)
+                    {
+                        Match rateMatch = Regex.Match(line, @"(\d+\.?\d*)\*");
+                        if (rateMatch.Success && double.TryParse(rateMatch.Groups[1].Value, NumberStyles.Any, CultureInfo.InvariantCulture, out double rr))
+                            currentRefreshRate = (uint)Math.Round(rr);
+                    }
+                }
+
+                TryAddMonitorFromXrandrEdid();
             }
 
             if (monitorList.Count == 0)
             {
-                string xrandrOutput = ReadProcessOutput("xrandr", "--props");
+                const string drmPath = "/sys/class/drm";
 
-                if (!string.IsNullOrEmpty(xrandrOutput))
+                if (Directory.Exists(drmPath))
                 {
-                    string? currentConnector = null;
-                    StringBuilder edidHex = new StringBuilder();
-                    bool inEdid = false;
-
-                    void TryAddMonitorFromXrandrEdid()
+                    foreach (string connectorDir in Directory.EnumerateDirectories(drmPath))
                     {
-                        if (currentConnector == null || edidHex.Length < 256)
-                            return;
+                        string dirName = Path.GetFileName(connectorDir);
 
-                        byte[] edid;
+                        Match connectorMatch = Regex.Match(dirName, @"^card\d+-(.+)$");
+                        if (!connectorMatch.Success)
+                            continue;
 
-                        try
-                        {
-                            string hex = edidHex.ToString();
-                            edid = new byte[hex.Length / 2];
-                            for (int i = 0; i < edid.Length; i++)
-                                edid[i] = Convert.ToByte(hex.Substring(i * 2, 2), 16);
-                        }
-                        catch (Exception ex)
-                        {
-                            _logger.LogDebug(ex, "Failed to decode xrandr EDID for connector: {connector}", currentConnector);
-                            return;
-                        }
+                        string connectorName = connectorMatch.Groups[1].Value;
 
-                        AddMonitorFromEdid(edid, currentConnector);
+                        string status = TryReadTextFromFile(Path.Combine(connectorDir, "status"));
+                        if (status != "connected")
+                            continue;
+
+                        byte[] edid = TryReadBytesFromFile(Path.Combine(connectorDir, "edid"));
+                        AddMonitorFromEdid(edid, connectorName);
                     }
-
-                    foreach (string line in xrandrOutput.Split('\n'))
-                    {
-                        Match connectedMatch = Regex.Match(line, @"^(\S+) connected");
-                        if (connectedMatch.Success)
-                        {
-                            TryAddMonitorFromXrandrEdid();
-                            currentConnector = connectedMatch.Groups[1].Value;
-                            edidHex.Clear();
-                            inEdid = false;
-                            continue;
-                        }
-
-                        if (currentConnector == null)
-                            continue;
-
-                        if (line.TrimStart().StartsWith("EDID:"))
-                        {
-                            inEdid = true;
-                            continue;
-                        }
-
-                        if (inEdid)
-                        {
-                            string trimmed = line.Trim();
-                            if (Regex.IsMatch(trimmed, @"^[0-9a-fA-F]+$"))
-                                edidHex.Append(trimmed);
-                            else
-                                inEdid = false;
-                        }
-                    }
-
-                    TryAddMonitorFromXrandrEdid();
                 }
             }
 
             return monitorList;
 
-            void AddMonitorFromEdid(byte[] edid, string connectorName)
+            void AddMonitorFromEdid(byte[] edid, string connectorName, uint horizontalResolution = 0, uint verticalResolution = 0, uint refreshRate = 0)
             {
                 if (edid.Length < 128)
                     return;
@@ -883,6 +902,9 @@ namespace Hardware.Info.Linux
                     UserFriendlyName = friendlyName,
                     WeekOfManufacture = week,
                     YearOfManufacture = year,
+                    CurrentHorizontalResolution = horizontalResolution,
+                    CurrentVerticalResolution = verticalResolution,
+                    CurrentRefreshRate = refreshRate,
                     Active = true
                 });
             }

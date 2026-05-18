@@ -168,7 +168,7 @@ To skip the usage of `PerformanceCounter` set `includePerformanceCounter` to `fa
 ### Constructor settings:
 
 ```
-HardwareInfo(TimeSpan? timeoutInWMI = null)
+HardwareInfo(TimeSpan? timeoutInWMI = null, ILogger<HardwareInfo>? logger = null)
 ```
 
 The construcotr accepts a setting for WMI:
@@ -291,6 +291,8 @@ Setting `includePerformanceCounter` to `false` excludes `PerformanceCounter` in 
 
 ## Version history:
 
+- 110.0.0.0
+    - Added `ILogger<HardwareInfo>? logger = null` to `HardwareInfo`
 - 101.1.1.1
     - Fixed `EnumerationOptions` for `ManagementObjectSearcher` - by [@campersau](https://github.com/campersau)
 - 101.1.1.0

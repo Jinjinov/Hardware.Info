@@ -1430,6 +1430,8 @@ namespace Hardware.Info.Linux
                1680x1050     59.88  
             /**/
 
+            Dictionary<string, VideoController> gpuByPciAddress = new Dictionary<string, VideoController>(StringComparer.OrdinalIgnoreCase);
+
             processOutput = ReadProcessOutput("lspci", string.Empty);
 
             lines = processOutput.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
@@ -1475,6 +1477,100 @@ namespace Hardware.Info.Linux
                         };
 
                         videoControllerList.Add(gpu);
+
+                        Match pciMatch = Regex.Match(line, @"^([0-9a-fA-F]{2}:[0-9a-fA-F]{2}\.[0-9a-fA-F])");
+                        if (pciMatch.Success)
+                            gpuByPciAddress["0000:" + pciMatch.Groups[1].Value] = gpu;
+                    }
+                }
+            }
+
+            if (refreshMonitorList && videoControllerList.Count > 0)
+            {
+                List<Monitor> monitorList = GetMonitorList();
+
+                if (monitorList.Count > 0)
+                {
+                    Dictionary<string, Monitor> monitorByConnector = monitorList
+                        .Where(m => !string.IsNullOrEmpty(m.Description))
+                        .ToDictionary(m => m.Description, StringComparer.OrdinalIgnoreCase);
+
+                    bool anyMapped = false;
+
+                    const string drmPath = "/sys/class/drm";
+
+                    if (Directory.Exists(drmPath) && gpuByPciAddress.Count > 0)
+                    {
+                        Dictionary<string, VideoController> gpuByCard = new Dictionary<string, VideoController>();
+
+                        foreach (string cardDir in Directory.EnumerateDirectories(drmPath))
+                        {
+                            string cardName = Path.GetFileName(cardDir);
+                            if (!Regex.IsMatch(cardName, @"^card\d+$"))
+                                continue;
+
+                            string uevent = TryReadTextFromFile(Path.Combine(cardDir, "device", "uevent"));
+                            Match slotMatch = Regex.Match(uevent, @"PCI_SLOT_NAME=(\S+)");
+
+                            if (slotMatch.Success && gpuByPciAddress.TryGetValue(slotMatch.Groups[1].Value, out VideoController? mappedGpu))
+                                gpuByCard[cardName] = mappedGpu;
+                        }
+
+                        foreach (string connectorDir in Directory.EnumerateDirectories(drmPath))
+                        {
+                            string dirName = Path.GetFileName(connectorDir);
+                            Match connectorMatch = Regex.Match(dirName, @"^(card\d+)-(.+)$");
+                            if (!connectorMatch.Success)
+                                continue;
+
+                            string cardName = connectorMatch.Groups[1].Value;
+                            string connectorName = connectorMatch.Groups[2].Value;
+
+                            if (gpuByCard.TryGetValue(cardName, out VideoController? gpu) &&
+                                monitorByConnector.TryGetValue(connectorName, out Monitor? monitor))
+                            {
+                                gpu.MonitorList.Add(monitor);
+                                anyMapped = true;
+                            }
+                        }
+                    }
+
+                    if (!anyMapped && gpuByPciAddress.Count > 0)
+                    {
+                        // DRM connector name matching fails with Nvidia proprietary drivers (xrandr uses DP-0,
+                        // DRM sysfs uses DP-1, DP-2, etc.). Use nvidia-smi to find the active display GPU.
+                        string nvidiaSmiOutput = ReadProcessOutput("nvidia-smi", "--query-gpu=pci.bus_id,display_active --format=csv,noheader");
+
+                        foreach (string nvLine in nvidiaSmiOutput.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries))
+                        {
+                            string[] parts = nvLine.Split(',');
+                            if (parts.Length < 2)
+                                continue;
+
+                            string rawBusId = parts[0].Trim();
+                            string displayActive = parts[1].Trim();
+
+                            if (!string.Equals(displayActive, "Enabled", StringComparison.OrdinalIgnoreCase))
+                                continue;
+
+                            // nvidia-smi reports "00000000:01:00.0"; normalize to "0000:01:00.0"
+                            int colonIdx = rawBusId.IndexOf(':');
+                            string normalizedBusId = colonIdx > 4 ? rawBusId.Substring(colonIdx - 4) : rawBusId;
+
+                            if (gpuByPciAddress.TryGetValue(normalizedBusId, out VideoController? activeGpu))
+                            {
+                                foreach (Monitor monitor in monitorList)
+                                    activeGpu.MonitorList.Add(monitor);
+                                anyMapped = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!anyMapped && videoControllerList.Count == 1)
+                    {
+                        foreach (Monitor monitor in monitorList)
+                            videoControllerList[0].MonitorList.Add(monitor);
                     }
                 }
             }

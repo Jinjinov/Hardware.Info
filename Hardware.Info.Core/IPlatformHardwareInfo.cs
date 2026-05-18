@@ -24,6 +24,6 @@ namespace Hardware.Info
         List<NetworkAdapter> GetNetworkAdapterList(bool includeBytesPersec = true, bool includeNetworkAdapterConfiguration = true, int millisecondsDelayBetweenTwoMeasurements = 1000);
         List<Printer> GetPrinterList();
         List<SoundDevice> GetSoundDeviceList();
-        List<VideoController> GetVideoControllerList();
+        List<VideoController> GetVideoControllerList(bool refreshMonitorList = true);
     }
 }

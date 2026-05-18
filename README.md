@@ -293,6 +293,10 @@ Setting `includePerformanceCounter` to `false` excludes `PerformanceCounter` in 
 
 - 110.0.0.0
     - Added `ILogger<HardwareInfo>? logger = null` to `HardwareInfo` - thanks to [@TekuSP](https://github.com/TekuSP)
+    - Added `CurrentHorizontalResolution` in `Monitor`
+    - Added `CurrentVerticalResolution` in `Monitor`
+    - Added `CurrentRefreshRate` in `Monitor`
+    - Added `MonitorList` in `VideoController`
     - Added `GetMonitorList` in Linux
     - Added `GetPrinterList` in Linux
     - Added `GetBiosList` in macOS

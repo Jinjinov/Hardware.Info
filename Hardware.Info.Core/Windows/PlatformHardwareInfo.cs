@@ -756,7 +756,7 @@ namespace Hardware.Info.Windows
             return soundDeviceList;
         }
 
-        public List<VideoController> GetVideoControllerList()
+        public List<VideoController> GetVideoControllerList(bool refreshMonitorList = true)
         {
             List<VideoController> videoControllerList = new List<VideoController>();
 

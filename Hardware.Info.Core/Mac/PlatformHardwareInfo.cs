@@ -1,6 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Runtime.InteropServices;
@@ -1030,7 +1031,30 @@ Memory:
 
                     if (monitor != null)
                     {
-                        if (line.StartsWith("Display Type: "))
+                        if (line.StartsWith("Resolution: "))
+                        {
+                            string[] resSplit = line.Replace("Resolution: ", string.Empty).Split(' ');
+
+                            if (resSplit.Length >= 3)
+                            {
+                                if (uint.TryParse(resSplit[0].Trim(), out uint x))
+                                    monitor.CurrentHorizontalResolution = x;
+
+                                if (uint.TryParse(resSplit[2].Trim(), out uint y))
+                                    monitor.CurrentVerticalResolution = y;
+                            }
+                        }
+                        else if (line.StartsWith("UI Looks like: "))
+                        {
+                            string[] hzSplit = line.Split('@');
+
+                            if (hzSplit.Length == 2)
+                            {
+                                if (double.TryParse(hzSplit[1].Replace("Hz", string.Empty).Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double hz))
+                                    monitor.CurrentRefreshRate = (uint)Math.Round(hz);
+                            }
+                        }
+                        else if (line.StartsWith("Display Type: "))
                         {
                             monitor.MonitorType = line.Replace("Display Type: ", string.Empty);
                         }
@@ -1640,11 +1664,13 @@ Network:
             return soundDeviceList;
         }
 
-        public List<VideoController> GetVideoControllerList()
+        public List<VideoController> GetVideoControllerList(bool refreshMonitorList = true)
         {
             List<VideoController> videoControllerList = new List<VideoController>();
 
             VideoController? videoController = null;
+            Monitor? monitor = null;
+            bool inDisplaysSection = false;
 
             // https://stackoverflow.com/questions/18077639/getting-graphic-card-information-in-objective-c
 
@@ -1659,6 +1685,13 @@ Network:
 
                     if (spaceCount == 4)
                     {
+                        if (refreshMonitorList && monitor != null && videoController != null)
+                        {
+                            videoController.MonitorList.Add(monitor);
+                            monitor = null;
+                        }
+                        inDisplaysSection = false;
+
                         if (videoController != null)
                             videoControllerList.Add(videoController);
 
@@ -1670,6 +1703,68 @@ Network:
                             Description = name,
                             Name = name
                         };
+                    }
+
+                    if (refreshMonitorList && videoController != null)
+                    {
+                        if (spaceCount == 6 && line == "Displays:")
+                        {
+                            inDisplaysSection = true;
+                        }
+                        else if (spaceCount == 6 && inDisplaysSection)
+                        {
+                            if (monitor != null)
+                                videoController.MonitorList.Add(monitor);
+                            monitor = null;
+                            inDisplaysSection = false;
+                        }
+                        else if (spaceCount == 8 && inDisplaysSection)
+                        {
+                            if (monitor != null)
+                                videoController.MonitorList.Add(monitor);
+                            string monitorName = line.TrimEnd(':');
+                            monitor = new Monitor
+                            {
+                                Caption = monitorName,
+                                Description = monitorName,
+                                Name = monitorName,
+                                UserFriendlyName = monitorName
+                            };
+                        }
+                        else if (spaceCount == 10 && monitor != null)
+                        {
+                            if (line.StartsWith("Resolution: "))
+                            {
+                                string[] split = line.Replace("Resolution: ", string.Empty).Split(' ');
+
+                                if (split.Length >= 3)
+                                {
+                                    if (uint.TryParse(split[0].Trim(), out uint x))
+                                        monitor.CurrentHorizontalResolution = x;
+
+                                    if (uint.TryParse(split[2].Trim(), out uint y))
+                                        monitor.CurrentVerticalResolution = y;
+                                }
+                            }
+                            else if (line.StartsWith("UI Looks like: "))
+                            {
+                                string[] split = line.Split('@');
+
+                                if (split.Length == 2)
+                                {
+                                    if (double.TryParse(split[1].Replace("Hz", string.Empty).Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double hz))
+                                        monitor.CurrentRefreshRate = (uint)Math.Round(hz);
+                                }
+                            }
+                            else if (line.StartsWith("Display Type: "))
+                                monitor.MonitorType = line.Replace("Display Type: ", string.Empty);
+                            else if (line.StartsWith("Connection Type: "))
+                                monitor.MonitorType = line.Replace("Connection Type: ", string.Empty);
+                            else if (line.StartsWith("Display Serial Number: "))
+                                monitor.SerialNumberID = line.Replace("Display Serial Number: ", string.Empty);
+                            else if (line == "Main Display: Yes")
+                                monitor.Active = true;
+                        }
                     }
 
                     if (videoController != null)
@@ -1715,8 +1810,8 @@ Network:
 
                             if (split.Length == 2)
                             {
-                                if (uint.TryParse(split[1].Replace("Hz", string.Empty).Trim(), out uint Hz))
-                                    videoController.CurrentRefreshRate = Hz;
+                                if (double.TryParse(split[1].Replace("Hz", string.Empty).Trim(), NumberStyles.Any, CultureInfo.InvariantCulture, out double Hz))
+                                    videoController.CurrentRefreshRate = (uint)Math.Round(Hz);
                             }
                         }
 
@@ -1850,6 +1945,9 @@ Graphics/Displays:
           Rotation: Supported
           Connection Type: DisplayPort
             /**/
+
+            if (refreshMonitorList && monitor != null && videoController != null)
+                videoController.MonitorList.Add(monitor);
 
             if (videoController != null)
                 videoControllerList.Add(videoController);

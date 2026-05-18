@@ -176,6 +176,6 @@ namespace Hardware.Info
         /// <summary>
         /// Refresh video controller info
         /// </summary>
-        void RefreshVideoControllerList();
+        void RefreshVideoControllerList(bool refreshMonitorList = true);
     }
 }

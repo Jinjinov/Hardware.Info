@@ -130,7 +130,6 @@ namespace Hardware.Info
             RefreshDriveList();
             RefreshKeyboardList();
             RefreshMemoryList();
-            RefreshMonitorList();
             RefreshMotherboardList();
             RefreshMouseList();
             RefreshNetworkAdapterList();
@@ -223,7 +222,12 @@ namespace Hardware.Info
         /// <summary>
         /// Refresh video controller info
         /// </summary>
-        public void RefreshVideoControllerList() => VideoControllerList = _platformHardwareInfo.GetVideoControllerList();
+        public void RefreshVideoControllerList(bool refreshMonitorList = true)
+        {
+            VideoControllerList = _platformHardwareInfo.GetVideoControllerList(refreshMonitorList);
+            if (refreshMonitorList)
+                MonitorList = VideoControllerList.SelectMany(vc => vc.MonitorList).ToList();
+        }
 
         #region Static
 

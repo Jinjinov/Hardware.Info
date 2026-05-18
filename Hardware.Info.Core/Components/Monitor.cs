@@ -46,6 +46,21 @@ namespace Hardware.Info
         public UInt32 PixelsPerYLogicalInch { get; set; }
 
         /// <summary>
+        /// Current number of horizontal pixels.
+        /// </summary>
+        public UInt32 CurrentHorizontalResolution { get; set; }
+
+        /// <summary>
+        /// Current number of vertical pixels.
+        /// </summary>
+        public UInt32 CurrentVerticalResolution { get; set; }
+
+        /// <summary>
+        /// Frequency at which the monitor refreshes the image.
+        /// </summary>
+        public UInt32 CurrentRefreshRate { get; set; }
+
+        /// <summary>
         /// Indicates the active monitor.
         /// </summary>
         public bool Active { get; set; }
@@ -94,6 +109,9 @@ namespace Hardware.Info
                 "Name: " + Name + Environment.NewLine +
                 "PixelsPerXLogicalInch: " + PixelsPerXLogicalInch + Environment.NewLine +
                 "PixelsPerYLogicalInch: " + PixelsPerYLogicalInch + Environment.NewLine +
+                "CurrentHorizontalResolution: " + CurrentHorizontalResolution + Environment.NewLine +
+                "CurrentVerticalResolution: " + CurrentVerticalResolution + Environment.NewLine +
+                "CurrentRefreshRate: " + CurrentRefreshRate + Environment.NewLine +
                 "Active: " + Active + Environment.NewLine +
                 "ManufacturerName: " + ManufacturerName + Environment.NewLine +
                 "ProductCodeID: " + ProductCodeID + Environment.NewLine +

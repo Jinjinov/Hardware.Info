@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 
 // https://docs.microsoft.com/en-us/windows/win32/cimwin32prov/win32-videocontroller
 
@@ -9,6 +10,11 @@ namespace Hardware.Info
     /// </summary>
     public class VideoController
     {
+        /// <summary>
+        /// List of <see cref="Monitor" />
+        /// </summary>
+        public List<Monitor> MonitorList { get; set; } = new List<Monitor>();
+
         /// <summary>
         /// Memory size of the video adapter.
         /// </summary>

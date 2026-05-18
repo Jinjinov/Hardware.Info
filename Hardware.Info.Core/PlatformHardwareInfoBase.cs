@@ -63,6 +63,24 @@ namespace Hardware.Info
             }
         }
 
+        internal byte[] TryReadBytesFromFile(string path)
+        {
+            try
+            {
+                return File.ReadAllBytes(path);
+            }
+            catch (FileNotFoundException ex)
+            {
+                _logger.LogTrace(ex, "File not found: {path}", path);
+                return Array.Empty<byte>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Failed to read file: {path}", path);
+                return Array.Empty<byte>();
+            }
+        }
+
         internal uint TryReadIntegerFromFile(params string[] possiblePaths)
         {
             foreach (string path in possiblePaths)

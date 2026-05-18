@@ -5,6 +5,7 @@ using System.IO;
 using System.Linq;
 using System.Net;
 using System.Net.NetworkInformation;
+using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using Microsoft.Extensions.Logging;
@@ -755,19 +756,114 @@ namespace Hardware.Info.Linux
         {
             List<Monitor> monitorList = new List<Monitor>();
 
-            Monitor monitor = new Monitor();
+            const string drmPath = "/sys/class/drm";
 
-            // https://superuser.com/questions/526497/how-do-you-find-out-a-laptop-screen-panel-manufacturer-model-with-linux-sams
+            if (!Directory.Exists(drmPath))
+                return monitorList;
 
-            // /sys/class/graphics/fb0/mode
+            foreach (string connectorDir in Directory.EnumerateDirectories(drmPath))
+            {
+                string dirName = Path.GetFileName(connectorDir);
 
-            // /sys/class/drm/ * /edid
+                Match connectorMatch = Regex.Match(dirName, @"^card\d+-(.+)$");
+                if (!connectorMatch.Success)
+                    continue;
 
-            // https://github.com/linuxhw/EDID
+                string connectorName = connectorMatch.Groups[1].Value;
 
-            monitorList.Add(monitor);
+                string status = TryReadTextFromFile(Path.Combine(connectorDir, "status"));
+                if (status != "connected")
+                    continue;
+
+                byte[] edid = TryReadBytesFromFile(Path.Combine(connectorDir, "edid"));
+                if (edid.Length < 128)
+                    continue;
+
+                // Validate EDID header: 00 FF FF FF FF FF FF 00
+                if (edid[0] != 0x00 || edid[1] != 0xFF || edid[2] != 0xFF || edid[3] != 0xFF ||
+                    edid[4] != 0xFF || edid[5] != 0xFF || edid[6] != 0xFF || edid[7] != 0x00)
+                    continue;
+
+                string manufacturerCode = DecodeEisaId(edid[0x08], edid[0x09]);
+                ushort productCode = (ushort)(edid[0x0A] | (edid[0x0B] << 8));
+                string productCodeHex = productCode.ToString("X4");
+                ushort week = (ushort)edid[0x10];
+                ushort year = (ushort)(edid[0x11] + 1990);
+                string serialStr = ReadEdidDescriptor(edid, 0xFF);
+                string friendlyName = ReadEdidDescriptor(edid, 0xFC);
+
+                string name = !string.IsNullOrEmpty(friendlyName) ? friendlyName
+                            : !string.IsNullOrEmpty(manufacturerCode) ? $"{manufacturerCode}{productCodeHex}"
+                            : connectorName;
+
+                monitorList.Add(new Monitor
+                {
+                    Name = name,
+                    Caption = name,
+                    Description = connectorName,
+                    MonitorManufacturer = manufacturerCode,
+                    MonitorType = ParseConnectorType(connectorName),
+                    ManufacturerName = manufacturerCode,
+                    ProductCodeID = productCodeHex,
+                    SerialNumberID = serialStr,
+                    UserFriendlyName = friendlyName,
+                    WeekOfManufacture = week,
+                    YearOfManufacture = year,
+                    Active = true
+                });
+            }
 
             return monitorList;
+
+            static string DecodeEisaId(byte b0, byte b1)
+            {
+                int c1 = (b0 >> 2) & 0x1F;
+                int c2 = ((b0 & 0x03) << 3) | ((b1 >> 5) & 0x07);
+                int c3 = b1 & 0x1F;
+
+                if (c1 < 1 || c1 > 26 || c2 < 1 || c2 > 26 || c3 < 1 || c3 > 26)
+                    return string.Empty;
+
+                return new string(new[] { (char)('A' + c1 - 1), (char)('A' + c2 - 1), (char)('A' + c3 - 1) });
+            }
+
+            static string ReadEdidDescriptor(byte[] edid, byte type)
+            {
+                int[] offsets = { 0x36, 0x48, 0x5A, 0x6C };
+
+                foreach (int offset in offsets)
+                {
+                    if (offset + 17 >= edid.Length)
+                        break;
+
+                    if (edid[offset] != 0 || edid[offset + 1] != 0)
+                        continue;
+
+                    if (edid[offset + 3] != type)
+                        continue;
+
+                    int start = offset + 5;
+                    int end = start;
+                    while (end < start + 13 && edid[end] != 0x0A && edid[end] != 0x00)
+                        end++;
+
+                    return Encoding.ASCII.GetString(edid, start, end - start).Trim();
+                }
+
+                return string.Empty;
+            }
+
+            static string ParseConnectorType(string connectorName)
+            {
+                if (connectorName.StartsWith("HDMI"))  return "HDMI";
+                if (connectorName.StartsWith("eDP"))   return "Embedded DisplayPort";
+                if (connectorName.StartsWith("DP"))    return "DisplayPort";
+                if (connectorName.StartsWith("VGA"))   return "VGA";
+                if (connectorName.StartsWith("DVI"))   return "DVI";
+                if (connectorName.StartsWith("LVDS"))  return "LVDS";
+                if (connectorName.StartsWith("TV"))    return "TV";
+                return connectorName;
+            }
         }
 
         public List<Motherboard> GetMotherboardList()

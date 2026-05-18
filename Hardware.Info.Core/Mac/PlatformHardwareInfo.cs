@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Net;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
@@ -1331,7 +1332,152 @@ Network:
       Service Order: 0
             /**/
 
-            return base.GetNetworkAdapterList(includeBytesPersec, includeNetworkAdapterConfiguration);
+            List<NetworkAdapter> networkAdapterList = base.GetNetworkAdapterList(false, includeNetworkAdapterConfiguration, millisecondsDelayBetweenTwoMeasurements);
+
+            Dictionary<string, NetworkAdapter> adapterByName = networkAdapterList.ToDictionary(a => a.Name);
+
+            // system_profiler SPNetworkDataType → AdapterType, NetConnectionID, DefaultIPGatewayList, IPSubnetList, DNSServerSearchOrderList, DHCPServer
+            string svcName = string.Empty;
+            string bsdName = string.Empty;
+            string adapterType = string.Empty;
+            List<string> routers = new List<string>();
+            List<string> subnetMasks = new List<string>();
+            List<string> dnsServers = new List<string>();
+            string dhcpServer = string.Empty;
+            string section = string.Empty;
+
+            void CommitService()
+            {
+                if (string.IsNullOrEmpty(bsdName) || !adapterByName.TryGetValue(bsdName, out NetworkAdapter? adapter))
+                    return;
+
+                if (!string.IsNullOrEmpty(svcName))
+                {
+                    adapter.NetConnectionID = svcName;
+                    adapter.AdapterType = string.IsNullOrEmpty(adapterType) ? svcName : adapterType;
+                }
+
+                if (includeNetworkAdapterConfiguration)
+                {
+                    foreach (string r in routers)
+                        if (IPAddress.TryParse(r.Trim(), out IPAddress? ip))
+                            adapter.DefaultIPGatewayList.Add(ip);
+
+                    foreach (string m in subnetMasks)
+                        if (IPAddress.TryParse(m.Trim(), out IPAddress? ip))
+                            adapter.IPSubnetList.Add(ip);
+
+                    foreach (string d in dnsServers)
+                        if (IPAddress.TryParse(d.Trim(), out IPAddress? ip))
+                            adapter.DNSServerSearchOrderList.Add(ip);
+
+                    if (!string.IsNullOrEmpty(dhcpServer) && IPAddress.TryParse(dhcpServer.Trim(), out IPAddress? dhcp))
+                        adapter.DHCPServer = dhcp;
+                }
+            }
+
+            StartProcess("system_profiler", "SPNetworkDataType",
+                standardOutput =>
+                {
+                    int spaceCount = standardOutput.TakeWhile(c => c == ' ').Count();
+                    string line = standardOutput.Trim();
+
+                    if (string.IsNullOrEmpty(line))
+                        return;
+
+                    if (spaceCount == 4 && line.EndsWith(":") && !line.Contains(": "))
+                    {
+                        CommitService();
+                        svcName = line.TrimEnd(':');
+                        bsdName = string.Empty;
+                        adapterType = string.Empty;
+                        routers.Clear();
+                        subnetMasks.Clear();
+                        dnsServers.Clear();
+                        dhcpServer = string.Empty;
+                        section = string.Empty;
+                    }
+                    else if (spaceCount == 6)
+                    {
+                        section = string.Empty;
+
+                        if (line.StartsWith("BSD Device Name: "))
+                            bsdName = line.Replace("BSD Device Name: ", string.Empty);
+                        else if (line.StartsWith("Type: "))
+                            adapterType = line.Replace("Type: ", string.Empty);
+                        else if (line == "IPv4:")
+                            section = "ipv4";
+                        else if (line == "DNS:")
+                            section = "dns";
+                        else if (line == "DHCP Server Responses:")
+                            section = "dhcp";
+                    }
+                    else if (spaceCount == 10 && !string.IsNullOrEmpty(section))
+                    {
+                        if (section == "ipv4")
+                        {
+                            if (line.StartsWith("Router: "))
+                                routers.Add(line.Replace("Router: ", string.Empty));
+                            else if (line.StartsWith("Subnet Masks: "))
+                                subnetMasks.AddRange(line.Replace("Subnet Masks: ", string.Empty).Split(','));
+                        }
+                        else if (section == "dns" && line.StartsWith("Server Addresses: "))
+                        {
+                            dnsServers.AddRange(line.Replace("Server Addresses: ", string.Empty).Split(','));
+                        }
+                        else if (section == "dhcp" && line.StartsWith("Server Identifier: "))
+                        {
+                            dhcpServer = line.Replace("Server Identifier: ", string.Empty);
+                        }
+                    }
+                },
+                standardError => { });
+
+            CommitService();
+
+            // netstat -ib × 2 with delay → BytesSentPersec, BytesReceivedPersec
+            if (includeBytesPersec)
+            {
+                static Dictionary<string, (ulong ibytes, ulong obytes)> ParseNetstatIb(string output)
+                {
+                    var result = new Dictionary<string, (ulong ibytes, ulong obytes)>();
+                    foreach (string rawLine in output.Split('\n'))
+                    {
+                        string[] cols = rawLine.Trim().Split(new char[] { ' ', '\t' }, StringSplitOptions.RemoveEmptyEntries);
+                        if (cols.Length < 10 || !cols[2].StartsWith("<Link#"))
+                            continue;
+                        // Count from the end: Ibytes is 5th from end, Obytes is 2nd from end.
+                        // This is robust regardless of whether the Address column is present.
+                        int ibytesIdx = cols.Length - 5;
+                        int obytesIdx = cols.Length - 2;
+                        if (ulong.TryParse(cols[ibytesIdx], out ulong ibytes) && ulong.TryParse(cols[obytesIdx], out ulong obytes))
+                            result[cols[0]] = (ibytes, obytes);
+                    }
+                    return result;
+                }
+
+                var snapshot1 = ParseNetstatIb(ReadProcessOutput("netstat", "-ib"));
+                Thread.Sleep(millisecondsDelayBetweenTwoMeasurements);
+                var snapshot2 = ParseNetstatIb(ReadProcessOutput("netstat", "-ib"));
+
+                double seconds = millisecondsDelayBetweenTwoMeasurements / 1000.0;
+
+                foreach (KeyValuePair<string, (ulong ibytes, ulong obytes)> kv in snapshot2)
+                {
+                    if (!adapterByName.TryGetValue(kv.Key, out NetworkAdapter? adapter))
+                        continue;
+                    if (!snapshot1.TryGetValue(kv.Key, out (ulong ibytes, ulong obytes) s1))
+                        continue;
+
+                    ulong deltaRx = kv.Value.ibytes >= s1.ibytes ? kv.Value.ibytes - s1.ibytes : 0;
+                    ulong deltaTx = kv.Value.obytes >= s1.obytes ? kv.Value.obytes - s1.obytes : 0;
+
+                    adapter.BytesReceivedPersec = (ulong)(deltaRx / seconds);
+                    adapter.BytesSentPersec = (ulong)(deltaTx / seconds);
+                }
+            }
+
+            return networkAdapterList;
         }
 
         public List<Printer> GetPrinterList()
@@ -1710,6 +1856,5 @@ Graphics/Displays:
 
             return videoControllerList;
         }
-
     }
 }

@@ -776,13 +776,87 @@ namespace Hardware.Info.Linux
                     continue;
 
                 byte[] edid = TryReadBytesFromFile(Path.Combine(connectorDir, "edid"));
-                if (edid.Length < 128)
-                    continue;
+                AddMonitorFromEdid(edid, connectorName);
+            }
 
-                // Validate EDID header: 00 FF FF FF FF FF FF 00
+            if (monitorList.Count == 0)
+            {
+                string xrandrOutput = ReadProcessOutput("xrandr", "--props");
+
+                if (!string.IsNullOrEmpty(xrandrOutput))
+                {
+                    string? currentConnector = null;
+                    StringBuilder edidHex = new StringBuilder();
+                    bool inEdid = false;
+
+                    void TryAddMonitorFromXrandrEdid()
+                    {
+                        if (currentConnector == null || edidHex.Length < 256)
+                            return;
+
+                        byte[] edid;
+
+                        try
+                        {
+                            string hex = edidHex.ToString();
+                            edid = new byte[hex.Length / 2];
+                            for (int i = 0; i < edid.Length; i++)
+                                edid[i] = Convert.ToByte(hex.Substring(i * 2, 2), 16);
+                        }
+                        catch (Exception ex)
+                        {
+                            _logger.LogDebug(ex, "Failed to decode xrandr EDID for connector: {connector}", currentConnector);
+                            return;
+                        }
+
+                        AddMonitorFromEdid(edid, currentConnector);
+                    }
+
+                    foreach (string line in xrandrOutput.Split('\n'))
+                    {
+                        Match connectedMatch = Regex.Match(line, @"^(\S+) connected");
+                        if (connectedMatch.Success)
+                        {
+                            TryAddMonitorFromXrandrEdid();
+                            currentConnector = connectedMatch.Groups[1].Value;
+                            edidHex.Clear();
+                            inEdid = false;
+                            continue;
+                        }
+
+                        if (currentConnector == null)
+                            continue;
+
+                        if (line.TrimStart().StartsWith("EDID:"))
+                        {
+                            inEdid = true;
+                            continue;
+                        }
+
+                        if (inEdid)
+                        {
+                            string trimmed = line.Trim();
+                            if (Regex.IsMatch(trimmed, @"^[0-9a-fA-F]+$"))
+                                edidHex.Append(trimmed);
+                            else
+                                inEdid = false;
+                        }
+                    }
+
+                    TryAddMonitorFromXrandrEdid();
+                }
+            }
+
+            return monitorList;
+
+            void AddMonitorFromEdid(byte[] edid, string connectorName)
+            {
+                if (edid.Length < 128)
+                    return;
+
                 if (edid[0] != 0x00 || edid[1] != 0xFF || edid[2] != 0xFF || edid[3] != 0xFF ||
                     edid[4] != 0xFF || edid[5] != 0xFF || edid[6] != 0xFF || edid[7] != 0x00)
-                    continue;
+                    return;
 
                 string manufacturerCode = DecodeEisaId(edid[0x08], edid[0x09]);
                 ushort productCode = (ushort)(edid[0x0A] | (edid[0x0B] << 8));
@@ -812,8 +886,6 @@ namespace Hardware.Info.Linux
                     Active = true
                 });
             }
-
-            return monitorList;
 
             static string DecodeEisaId(byte b0, byte b1)
             {

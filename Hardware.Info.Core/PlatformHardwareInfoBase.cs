@@ -5,11 +5,15 @@ using System.IO;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Hardware.Info
 {
     internal class PlatformHardwareInfoBase
     {
+        protected ILogger _logger = NullLogger.Instance;
+
         internal static Process StartProcess(string cmd, string args)
         {
             ProcessStartInfo processStartInfo = new ProcessStartInfo(cmd, args)
@@ -24,7 +28,7 @@ namespace Hardware.Info
             return Process.Start(processStartInfo);
         }
 
-        internal static string ReadProcessOutput(string cmd, string args)
+        internal string ReadProcessOutput(string cmd, string args)
         {
             try
             {
@@ -34,25 +38,32 @@ namespace Hardware.Info
 
                 return streamReader.ReadToEnd().Trim();
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogWarning(ex, "Failed to read process output: {cmd} {args}", cmd, args);
                 return string.Empty;
             }
         }
 
-        internal static string TryReadTextFromFile(string path)
+        internal string TryReadTextFromFile(string path)
         {
             try
             {
                 return File.ReadAllText(path).Trim();
             }
-            catch
+            catch (FileNotFoundException ex)
             {
+                _logger.LogTrace(ex, "File not found: {path}", path);
+                return string.Empty;
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Failed to read file: {path}", path);
                 return string.Empty;
             }
         }
 
-        internal static uint TryReadIntegerFromFile(params string[] possiblePaths)
+        internal uint TryReadIntegerFromFile(params string[] possiblePaths)
         {
             foreach (string path in possiblePaths)
             {
@@ -67,14 +78,20 @@ namespace Hardware.Info
             return 0;
         }
 
-        internal static string[] TryReadLinesFromFile(string path)
+        internal string[] TryReadLinesFromFile(string path)
         {
             try
             {
                 return File.ReadAllLines(path);
             }
-            catch
+            catch (FileNotFoundException ex)
             {
+                _logger.LogTrace(ex, "File not found: {path}", path);
+                return Array.Empty<string>();
+            }
+            catch (Exception ex)
+            {
+                _logger.LogDebug(ex, "Failed to read file: {path}", path);
                 return Array.Empty<string>();
             }
         }
@@ -89,8 +106,12 @@ namespace Hardware.Info
 
             foreach (DriveInfo driveInfo in DriveInfo.GetDrives())
             {
+                string driveName = string.Empty;
+
                 try
                 {
+                    driveName = driveInfo.Name;
+
                     Volume volume = new Volume
                     {
                         FileSystem = driveInfo.DriveFormat,
@@ -104,8 +125,9 @@ namespace Hardware.Info
 
                     partition.VolumeList.Add(volume);
                 }
-                catch (UnauthorizedAccessException)
+                catch (UnauthorizedAccessException ex)
                 {
+                    _logger.LogDebug(ex, "Unauthorized access to drive: {drive}", driveName);
                 }
             }
 

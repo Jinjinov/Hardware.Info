@@ -7,6 +7,8 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 // https://www.binarytides.com/linux-commands-hardware-info/
 
@@ -17,6 +19,11 @@ namespace Hardware.Info.Linux
         private readonly MemoryStatus _memoryStatus = new MemoryStatus();
 
         private readonly OS _os = new OS();
+
+        public PlatformHardwareInfo(ILogger? logger = null)
+        {
+            _logger = logger ?? NullLogger.Instance;
+        }
 
         public OS GetOperatingSystem()
         {
@@ -346,7 +353,7 @@ namespace Hardware.Info.Linux
             return cpuList;
         }
 
-        private static void GetCpuCacheSize(Processor processor)
+        private void GetCpuCacheSize(Processor processor)
         {
             for (int i = 0; i <= 3; i++)
             {
@@ -376,7 +383,7 @@ namespace Hardware.Info.Linux
             }
         }
 
-        private static ulong GetCpuUsage(List<Processor> processorList, int millisecondsDelayBetweenTwoMeasurements)
+        private ulong GetCpuUsage(List<Processor> processorList, int millisecondsDelayBetweenTwoMeasurements)
         {
             // Column   Name    Description
             // 1        user    Time spent with normal processing in user mode.

@@ -5,6 +5,8 @@ using System.Net;
 using System.Net.NetworkInformation;
 using System.Net.Sockets;
 using System.Runtime.InteropServices;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 namespace Hardware.Info
 {
@@ -96,11 +98,18 @@ namespace Hardware.Info
         private readonly IPlatformHardwareInfo _platformHardwareInfo = null!;
 
         /// <summary>
+        /// Logger instance passed to platform hardware info implementations.
+        /// </summary>
+        protected ILogger Logger { get; private set; } = NullLogger.Instance;
+
+        /// <summary>
         /// Main Hardware.Info class
         /// </summary>
         /// <param name="timeoutInWMI">sets the Timeout property of the EnumerationOptions in the ManagementObjectSearcher that executes the query. The default value is EnumerationOptions.InfiniteTimeout</param>
-        public HardwareInfoBase(TimeSpan? timeoutInWMI = null)
+        /// <param name="logger">Optional logger for diagnostic output from hardware queries</param>
+        public HardwareInfoBase(TimeSpan? timeoutInWMI = null, ILogger? logger = null)
         {
+            Logger = logger ?? NullLogger.Instance;
             _platformHardwareInfo = CreatePlatformHardwareInfo(timeoutInWMI);
         }
 

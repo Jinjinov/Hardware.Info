@@ -6,6 +6,8 @@ using System.Net;
 using System.Runtime.InteropServices;
 using System.Security;
 using System.Text;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 // https://docs.microsoft.com/en-us/windows/win32/api/winnt/ns-winnt-osversioninfoexa
 
@@ -45,8 +47,9 @@ namespace Hardware.Info.Windows
 
         private readonly IWmiQueryProvider _wmiQueryProvider;
 
-        public PlatformHardwareInfo(IWmiQueryProvider wmiQueryProvider)
+        public PlatformHardwareInfo(IWmiQueryProvider wmiQueryProvider, ILogger? logger = null)
         {
+            _logger = logger ?? NullLogger.Instance;
             _wmiQueryProvider = wmiQueryProvider;
 
             GetOs();
@@ -158,7 +161,7 @@ namespace Hardware.Info.Windows
             return (obj is string str) ? str : string.Empty;
         }
 
-        public static string GetStringFromUInt16Array(ushort[] array)
+        public string GetStringFromUInt16Array(ushort[] array)
         {
             try
             {
@@ -172,8 +175,9 @@ namespace Hardware.Info.Windows
 
                 return str;
             }
-            catch
+            catch (Exception ex)
             {
+                _logger.LogTrace(ex, "Failed to convert UInt16 array to string");
                 return string.Empty;
             }
         }
@@ -291,9 +295,10 @@ namespace Hardware.Info.Windows
                         percentProcessorTime = GetPropertyValue<ulong>(mo["PercentProcessorTime"]);
                     }
                 }
-                catch //(ManagementException)
+                catch (Exception ex) //(ManagementException)
                 {
                     // https://github.com/Jinjinov/Hardware.Info/issues/30
+                    _logger.LogWarning(ex, "Failed to query Win32_PerfFormattedData_PerfOS_Processor - CPU core list and load average will be empty");
                 }
 
                 if (percentProcessorTime == 0ul)
@@ -323,9 +328,9 @@ namespace Hardware.Info.Windows
                     System.Threading.Thread.Sleep(1); // the first call to NextValue() always returns 0
                     processorPerformance = cpuCounter.NextValue();
                 }
-                catch
+                catch (Exception ex)
                 {
-                    // Ignore performance counter errors and just assume that it's at 100 %
+                    _logger.LogWarning(ex, "Failed to read PerformanceCounter - CPU clock speed will be reported at 100%");
                 }
             }
 
@@ -536,9 +541,11 @@ namespace Hardware.Info.Windows
 
             foreach (IWmiPropertySource win32PnpEntityMo in _wmiQueryProvider.Query(_managementScope, win32PnpEntityQuery))
             {
+                string deviceId = string.Empty;
+
                 try
                 {
-                    string deviceId = GetPropertyString(win32PnpEntityMo["DeviceId"]);
+                    deviceId = GetPropertyString(win32PnpEntityMo["DeviceId"]);
                     string win32DesktopMonitorQuery = $"SELECT Caption, Description, MonitorManufacturer, MonitorType, Name, PixelsPerXLogicalInch, PixelsPerYLogicalInch FROM Win32_DesktopMonitor WHERE PNPDeviceId='{deviceId}'".Replace(@"\", @"\\");
 
                     string wmiMonitorIdQuery = $"SELECT Active, ProductCodeID, SerialNumberID, ManufacturerName, UserFriendlyName, WeekOfManufacture, YearOfManufacture FROM WmiMonitorID WHERE InstanceName LIKE '{deviceId}%'".Replace(@"\", "_");
@@ -572,8 +579,9 @@ namespace Hardware.Info.Windows
 
                     monitorList.Add(monitor);
                 }
-                catch //(ManagementException)
+                catch (Exception ex) //(ManagementException)
                 {
+                    _logger.LogWarning(ex, "Failed to query monitor details for device: {deviceId}", deviceId);
                 }
             }
 
@@ -776,9 +784,11 @@ namespace Hardware.Info.Windows
                     VideoProcessor = GetPropertyString(mo["VideoProcessor"])
                 };
 
+                string deviceID = string.Empty;
+
                 try
                 {
-                    string deviceID = GetPropertyString(mo["PNPDeviceID"]);
+                    deviceID = GetPropertyString(mo["PNPDeviceID"]);
 
                     if (string.IsNullOrEmpty(deviceID))
                         continue;
@@ -795,11 +805,13 @@ namespace Hardware.Info.Windows
                         }
                     }
                 }
-                catch (SecurityException)
+                catch (SecurityException ex)
                 {
+                    _logger.LogDebug(ex, "Security exception reading registry for video controller: {deviceId}", deviceID);
                 }
-                catch (UnauthorizedAccessException)
+                catch (UnauthorizedAccessException ex)
                 {
+                    _logger.LogDebug(ex, "Unauthorized access reading registry for video controller: {deviceId}", deviceID);
                 }
 
                 videoControllerList.Add(videoController);

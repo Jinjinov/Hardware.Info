@@ -5,6 +5,8 @@ using System.Linq;
 using System.Runtime.InteropServices;
 using System.Text.RegularExpressions;
 using System.Threading;
+using Microsoft.Extensions.Logging;
+using Microsoft.Extensions.Logging.Abstractions;
 
 // https://developer.apple.com/library/archive/documentation/System/Conceptual/ManPages_iPhoneOS/man3/sysctlbyname.3.html
 // https://wiki.freepascal.org/Accessing_macOS_System_Information
@@ -20,6 +22,11 @@ namespace Hardware.Info.Mac
         private readonly MemoryStatus _memoryStatus = new MemoryStatus();
 
         private readonly OS _os = new OS();
+
+        public PlatformHardwareInfo(ILogger? logger = null)
+        {
+            _logger = logger ?? NullLogger.Instance;
+        }
 
         public OS GetOperatingSystem()
         {

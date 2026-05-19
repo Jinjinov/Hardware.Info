@@ -35,16 +35,27 @@ namespace Hardware.Info.Windows
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct LUID { public uint LowPart; public int HighPart; }
+    internal struct LUID
+    {
+        public uint LowPart;
+        public int HighPart;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DISPLAYCONFIG_DEVICE_INFO_HEADER { public uint type; public uint size; public LUID adapterId; public uint id; }
+    internal struct DISPLAYCONFIG_DEVICE_INFO_HEADER
+    {
+        public uint type;
+        public uint size;
+        public LUID adapterId;
+        public uint id;
+    }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
     internal struct DISPLAYCONFIG_ADAPTER_NAME
     {
         public DISPLAYCONFIG_DEVICE_INFO_HEADER header;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)] public string adapterDevicePath;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string adapterDevicePath;
     }
 
     [StructLayout(LayoutKind.Sequential, CharSet = CharSet.Unicode)]
@@ -56,21 +67,55 @@ namespace Hardware.Info.Windows
         public ushort edidManufactureId;
         public ushort edidProductCodeId;
         public uint connectorInstance;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]  public string monitorFriendlyDeviceName;
-        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)] public string monitorDevicePath;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 64)]
+        public string monitorFriendlyDeviceName;
+        [MarshalAs(UnmanagedType.ByValTStr, SizeConst = 128)]
+        public string monitorDevicePath;
     }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DISPLAYCONFIG_PATH_SOURCE_INFO { public LUID adapterId; public uint id; public uint modeInfoIdx; public uint statusFlags; }
+    internal struct DISPLAYCONFIG_PATH_SOURCE_INFO
+    {
+        public LUID adapterId;
+        public uint id;
+        public uint modeInfoIdx;
+        public uint statusFlags;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DISPLAYCONFIG_PATH_TARGET_INFO { public LUID adapterId; public uint id; public uint modeInfoIdx; public uint outputTechnology; public uint rotation; public uint scaling; public uint refreshRateNumerator; public uint refreshRateDenominator; public uint scanLineOrdering; [MarshalAs(UnmanagedType.Bool)] public bool targetAvailable; public uint statusFlags; }
+    internal struct DISPLAYCONFIG_PATH_TARGET_INFO
+    {
+        public LUID adapterId;
+        public uint id;
+        public uint modeInfoIdx;
+        public uint outputTechnology;
+        public uint rotation;
+        public uint scaling;
+        public uint refreshRateNumerator;
+        public uint refreshRateDenominator;
+        public uint scanLineOrdering;
+        [MarshalAs(UnmanagedType.Bool)]
+        public bool targetAvailable;
+        public uint statusFlags;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DISPLAYCONFIG_PATH_INFO { public DISPLAYCONFIG_PATH_SOURCE_INFO sourceInfo; public DISPLAYCONFIG_PATH_TARGET_INFO targetInfo; public uint flags; }
+    internal struct DISPLAYCONFIG_PATH_INFO
+    {
+        public DISPLAYCONFIG_PATH_SOURCE_INFO sourceInfo;
+        public DISPLAYCONFIG_PATH_TARGET_INFO targetInfo;
+        public uint flags;
+    }
 
     [StructLayout(LayoutKind.Sequential)]
-    internal struct DISPLAYCONFIG_MODE_INFO { public uint infoType; public uint id; public LUID adapterId; [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)] public uint[] modeInfo; }
+    internal struct DISPLAYCONFIG_MODE_INFO
+    {
+        public uint infoType;
+        public uint id;
+        public LUID adapterId;
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = 12)]
+        public uint[] modeInfo;
+    }
 
     internal class PlatformHardwareInfo : PlatformHardwareInfoBase, IPlatformHardwareInfo
     {
@@ -178,7 +223,7 @@ namespace Hardware.Info.Windows
 
         private const uint QDC_ONLY_ACTIVE_PATHS = 0x2;
         private const uint ERROR_SUCCESS = 0;
-        private const uint DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME  = 2;
+        private const uint DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME = 2;
         private const uint DISPLAYCONFIG_DEVICE_INFO_GET_ADAPTER_NAME = 4;
 
         private static string NormalizeDevicePath(string? path)
@@ -910,28 +955,28 @@ namespace Hardware.Info.Windows
                     string wmiIdQuery   = $"SELECT Active, ProductCodeID, SerialNumberID, ManufacturerName, UserFriendlyName, WeekOfManufacture, YearOfManufacture FROM WmiMonitorID WHERE InstanceName LIKE '{deviceId}%'".Replace(@"\", "_");
 
                     IWmiPropertySource? desktopMo = _wmiQueryProvider.Query(_managementScope, desktopQuery).FirstOrDefault();
-                    IWmiPropertySource? wmiIdMo   = _wmiQueryProvider.Query(_managementScopeWmi, wmiIdQuery).FirstOrDefault();
+                    IWmiPropertySource? wmiIdMo = _wmiQueryProvider.Query(_managementScopeWmi, wmiIdQuery).FirstOrDefault();
 
                     Monitor monitor = new Monitor();
 
                     if (desktopMo != null)
                     {
-                        monitor.Caption               = GetPropertyString(desktopMo["Caption"]);
-                        monitor.Description           = GetPropertyString(desktopMo["Description"]);
-                        monitor.MonitorManufacturer   = GetPropertyString(desktopMo["MonitorManufacturer"]);
-                        monitor.MonitorType           = GetPropertyString(desktopMo["MonitorType"]);
-                        monitor.Name                  = GetPropertyString(desktopMo["Name"]);
+                        monitor.Caption = GetPropertyString(desktopMo["Caption"]);
+                        monitor.Description = GetPropertyString(desktopMo["Description"]);
+                        monitor.MonitorManufacturer = GetPropertyString(desktopMo["MonitorManufacturer"]);
+                        monitor.MonitorType = GetPropertyString(desktopMo["MonitorType"]);
+                        monitor.Name = GetPropertyString(desktopMo["Name"]);
                         monitor.PixelsPerXLogicalInch = GetPropertyValue<uint>(desktopMo["PixelsPerXLogicalInch"]);
                         monitor.PixelsPerYLogicalInch = GetPropertyValue<uint>(desktopMo["PixelsPerYLogicalInch"]);
                     }
 
                     if (wmiIdMo != null)
                     {
-                        monitor.Active            = GetPropertyValue<bool>(wmiIdMo["Active"]);
-                        monitor.ProductCodeID     = GetStringFromUInt16Array(GetPropertyArray<ushort>(wmiIdMo["ProductCodeID"]));
-                        monitor.UserFriendlyName  = GetStringFromUInt16Array(GetPropertyArray<ushort>(wmiIdMo["UserFriendlyName"]));
-                        monitor.SerialNumberID    = GetStringFromUInt16Array(GetPropertyArray<ushort>(wmiIdMo["SerialNumberID"]));
-                        monitor.ManufacturerName  = GetStringFromUInt16Array(GetPropertyArray<ushort>(wmiIdMo["ManufacturerName"]));
+                        monitor.Active = GetPropertyValue<bool>(wmiIdMo["Active"]);
+                        monitor.ProductCodeID = GetStringFromUInt16Array(GetPropertyArray<ushort>(wmiIdMo["ProductCodeID"]));
+                        monitor.UserFriendlyName = GetStringFromUInt16Array(GetPropertyArray<ushort>(wmiIdMo["UserFriendlyName"]));
+                        monitor.SerialNumberID = GetStringFromUInt16Array(GetPropertyArray<ushort>(wmiIdMo["SerialNumberID"]));
+                        monitor.ManufacturerName = GetStringFromUInt16Array(GetPropertyArray<ushort>(wmiIdMo["ManufacturerName"]));
                         monitor.WeekOfManufacture = GetPropertyValue<byte>(wmiIdMo["WeekOfManufacture"]);
                         monitor.YearOfManufacture = GetPropertyValue<ushort>(wmiIdMo["YearOfManufacture"]);
                     }
@@ -956,24 +1001,28 @@ namespace Hardware.Info.Windows
             foreach (DISPLAYCONFIG_PATH_INFO path in paths)
             {
                 DISPLAYCONFIG_ADAPTER_NAME adapterReq = new DISPLAYCONFIG_ADAPTER_NAME();
-                adapterReq.header.type      = DISPLAYCONFIG_DEVICE_INFO_GET_ADAPTER_NAME;
-                adapterReq.header.size      = (uint)Marshal.SizeOf<DISPLAYCONFIG_ADAPTER_NAME>();
+                adapterReq.header.type = DISPLAYCONFIG_DEVICE_INFO_GET_ADAPTER_NAME;
+                adapterReq.header.size = (uint)Marshal.SizeOf<DISPLAYCONFIG_ADAPTER_NAME>();
                 adapterReq.header.adapterId = path.targetInfo.adapterId;
 
                 DISPLAYCONFIG_TARGET_DEVICE_NAME targetReq = new DISPLAYCONFIG_TARGET_DEVICE_NAME();
-                targetReq.header.type      = DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME;
-                targetReq.header.size      = (uint)Marshal.SizeOf<DISPLAYCONFIG_TARGET_DEVICE_NAME>();
+                targetReq.header.type = DISPLAYCONFIG_DEVICE_INFO_GET_TARGET_NAME;
+                targetReq.header.size = (uint)Marshal.SizeOf<DISPLAYCONFIG_TARGET_DEVICE_NAME>();
                 targetReq.header.adapterId = path.targetInfo.adapterId;
-                targetReq.header.id        = path.targetInfo.id;
+                targetReq.header.id = path.targetInfo.id;
 
-                if (DisplayConfigGetDeviceInfo(ref adapterReq) != ERROR_SUCCESS) continue;
-                if (DisplayConfigGetDeviceInfo(ref targetReq)  != ERROR_SUCCESS) continue;
+                if (DisplayConfigGetDeviceInfo(ref adapterReq) != ERROR_SUCCESS)
+                    continue;
+                if (DisplayConfigGetDeviceInfo(ref targetReq) != ERROR_SUCCESS)
+                    continue;
 
                 string adapterPath = NormalizeDevicePath(adapterReq.adapterDevicePath);
                 string monitorPath = NormalizeDevicePath(targetReq.monitorDevicePath);
 
-                if (!gpuByPnpId.TryGetValue(adapterPath, out VideoController? gpu)) continue;
-                if (!monitorByDeviceId.TryGetValue(monitorPath, out Monitor? monitor)) continue;
+                if (!gpuByPnpId.TryGetValue(adapterPath, out VideoController? gpu))
+                    continue;
+                if (!monitorByDeviceId.TryGetValue(monitorPath, out Monitor? monitor))
+                    continue;
 
                 gpu.MonitorList.Add(monitor);
             }

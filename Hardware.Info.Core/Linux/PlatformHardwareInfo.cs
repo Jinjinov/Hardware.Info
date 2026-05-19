@@ -397,13 +397,6 @@ namespace Hardware.Info.Linux
             // 8        steal   Time stolen by other operating systems running in a virtual environment.
             // 9        guest   Time spent for running a virtual CPU or guest OS under the control of the kernel.
 
-            // > cat /proc/stat 
-            // cpu 1279636934 73759586 192327563 12184330186 543227057 56603 68503253 0 0
-            // cpu0 297522664 8968710 49227610 418508635 72446546 56602 24904144 0 0
-            // cpu1 227756034 9239849 30760881 424439349 196694821 0 7517172 0 0
-            // cpu2 86902920 6411506 12412331 769921453 17877927 0 4809331 0 0
-            // ... 
-
             string[] cpuUsageLineLast = TryReadLinesFromFile("/proc/stat");
             Task.Delay(millisecondsDelayBetweenTwoMeasurements).Wait();
             string[] cpuUsageLineNow = TryReadLinesFromFile("/proc/stat");
@@ -600,85 +593,6 @@ namespace Hardware.Info.Linux
                     }
                 }
             }
-
-            /*
-            I: Bus=0019 Vendor=0000 Product=0001 Version=0000
-            N: Name="Power Button"
-            P: Phys=LNXPWRBN/button/input0
-            S: Sysfs=/devices/LNXSYSTM:00/LNXPWRBN:00/input/input0
-            U: Uniq=
-            H: Handlers=kbd event0 
-            B: PROP=0
-            B: EV=3
-            B: KEY=10000000000000 0
-
-            I: Bus=0019 Vendor=0000 Product=0003 Version=0000
-            N: Name="Sleep Button"
-            P: Phys=LNXSLPBN/button/input0
-            S: Sysfs=/devices/LNXSYSTM:00/LNXSLPBN:00/input/input1
-            U: Uniq=
-            H: Handlers=kbd event1 
-            B: PROP=0
-            B: EV=3
-            B: KEY=4000 0 0
-
-            I: Bus=0011 Vendor=0001 Product=0001 Version=ab41
-            N: Name="AT Translated Set 2 keyboard"
-            P: Phys=isa0060/serio0/input0
-            S: Sysfs=/devices/platform/i8042/serio0/input/input2
-            U: Uniq=
-            H: Handlers=sysrq kbd event2 leds 
-            B: PROP=0
-            B: EV=120013
-            B: KEY=402000000 3803078f800d001 feffffdfffefffff fffffffffffffffe
-            B: MSC=10
-            B: LED=7
-
-            I: Bus=0019 Vendor=0000 Product=0006 Version=0000
-            N: Name="Video Bus"
-            P: Phys=LNXVIDEO/video/input0
-            S: Sysfs=/devices/LNXSYSTM:00/LNXSYBUS:00/PNP0A03:00/LNXVIDEO:00/input/input5
-            U: Uniq=
-            H: Handlers=kbd event3 
-            B: PROP=0
-            B: EV=3
-            B: KEY=3e000b00000000 0 0 0
-
-            I: Bus=0011 Vendor=0002 Product=0006 Version=0000
-            N: Name="ImExPS/2 Generic Explorer Mouse"
-            P: Phys=isa0060/serio1/input0
-            S: Sysfs=/devices/platform/i8042/serio1/input/input4
-            U: Uniq=
-            H: Handlers=mouse0 event4 
-            B: PROP=1
-            B: EV=7
-            B: KEY=1f0000 0 0 0 0
-            B: REL=143
-
-            I: Bus=0001 Vendor=80ee Product=cafe Version=0000
-            N: Name="VirtualBox mouse integration"
-            P: Phys=
-            S: Sysfs=/devices/pci0000:00/0000:00:04.0/input/input7
-            U: Uniq=
-            H: Handlers=mouse2 event6 js1 
-            B: PROP=0
-            B: EV=b
-            B: KEY=10000 0 0 0 0
-            B: ABS=3
-
-            I: Bus=0003 Vendor=80ee Product=0021 Version=0110
-            N: Name="VirtualBox USB Tablet"
-            P: Phys=usb-0000:00:06.0-1/input0
-            S: Sysfs=/devices/pci0000:00/0000:00:06.0/usb2/2-1/2-1:1.0/0003:80EE:0021.0006/input/input12
-            U: Uniq=
-            H: Handlers=mouse1 event5 js0 
-            B: PROP=0
-            B: EV=1f
-            B: KEY=1f0000 0 0 0 0
-            B: REL=1940
-            B: ABS=3
-            B: MSC=10
-            /**/
 
             return keyboardList;
         }
@@ -1231,13 +1145,6 @@ namespace Hardware.Info.Linux
         {
             List<SoundDevice> soundDeviceList = new List<SoundDevice>();
 
-            // lspci -v | grep -i audio
-            // lspci | grep -i audio
-            /*
-            00:1b.0 Audio device: Intel Corporation 7 Series/C210 Series Chipset Family High Definition Audio Controller (rev 04)
-            01:00.1 Audio device: NVIDIA Corporation GK104 HDMI Audio Controller (rev a1)
-            /**/
-
             string processOutput = ReadProcessOutput("lspci", string.Empty);
 
             string[] lines = processOutput.Split(new[] { Environment.NewLine }, StringSplitOptions.RemoveEmptyEntries);
@@ -1265,14 +1172,6 @@ namespace Hardware.Info.Linux
             if (soundDeviceList.Count > 0)
                 return soundDeviceList;
 
-            // cat /proc/asound/cards
-            /*
-            0 [Intel          ]: HDA-Intel - HDA Intel
-                      HDA Intel at 0x93300000 irq 22
-            1 [SAA7134        ]: SAA7134 - SAA7134
-                      saa7133[0] at 0x9300c800 irq 21
-            /**/
-
             string[] soundCards = TryReadLinesFromFile("/proc/asound/cards");
 
             foreach (string soundCard in soundCards)
@@ -1299,24 +1198,6 @@ namespace Hardware.Info.Linux
 
             if (soundDeviceList.Count > 0)
                 return soundDeviceList;
-
-            // aplay -l
-            /*
-            card 0: Intel[HDA Intel], device 0: AD198x Analog[AD198x Analog]
-              Subdevices: 1 / 1
-              Subdevice #0: subdevice #0
-            card 0: Intel[HDA Intel], device 1: AD198x Digital[AD198x Digital]
-              Subdevices: 1 / 1
-              Subdevice #0: subdevice #0
-
-            card 0: Intel [HDA Intel], device 0: STAC92xx Analog [STAC92xx Analog]
-              Subdevices: 2/2
-              Subdevice #0: subdevice #0
-              Subdevice #1: subdevice #1
-            card 1: SAA7134 [SAA7134], device 0: SAA7134 PCM [SAA7134 PCM]
-              Subdevices: 1/1
-              Subdevice #0: subdevice #0
-            /**/
 
             processOutput = ReadProcessOutput("aplay", "-l");
 
@@ -1400,35 +1281,6 @@ namespace Hardware.Info.Linux
                     }
                 }
             }
-
-            // xrandr -q
-
-            /*
-            Screen 0: minimum 320 x 200, current 1280 x 800, maximum 4096 x 4096
-            VGA1 disconnected (normal left inverted right x axis y axis)
-            LVDS1 connected 1280x800+0+0 inverted X and Y axis (normal left inverted right x axis y axis) 261mm x 163mm
-               1280x800       59.8*+
-               1024x768       60.0
-               800x600        60.3     56.2
-               640x480        59.9
-            DVI1 disconnected (normal left inverted right x axis y axis)
-            TV1 disconnected (normal left inverted right x axis y axis)
-
-            Screen 0: minimum 320 x 200, current 1440 x 900, maximum 8192 x 8192
-            VGA-1 disconnected (normal left inverted right x axis y axis)
-            LVDS-1 connected 1440x900+0+0 (normal left inverted right x axis y axis) 304mm x 190mm
-               1440x900       60.1*+
-               1024x768       60.0
-               800x600        60.3
-               640x480        59.9
-
-            Screen 0: minimum 320 x 200, current 3200 x 1080, maximum 8192 x 8192
-            VGA-1 disconnected (normal left inverted right x axis y axis)
-            HDMI-1 connected primary 1920x1080+0+0 (normal left inverted right x axis y axis) 531mm x 299mm
-               1920x1080     59.93 +  60.00*   50.00    59.94  
-               1920x1080i    60.00    50.00    59.94  
-               1680x1050     59.88  
-            /**/
 
             Dictionary<string, VideoController> gpuByPciAddress = new Dictionary<string, VideoController>(StringComparer.OrdinalIgnoreCase);
 

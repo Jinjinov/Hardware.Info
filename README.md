@@ -293,10 +293,12 @@ Setting `includePerformanceCounter` to `false` excludes `PerformanceCounter` in 
 
 - 110.0.0.0
     - Added `ILogger<HardwareInfo>? logger = null` to `HardwareInfo` - thanks to [@TekuSP](https://github.com/TekuSP)
+    - Added `bool refreshMonitorList = true` to `RefreshVideoControllerList` - thanks to [@TekuSP](https://github.com/TekuSP)
+    - Added `MonitorList` in `VideoController` - thanks to [@TekuSP](https://github.com/TekuSP)
+    - Fixed `GetCpuList` in `Windows` - thanks to [@TekuSP](https://github.com/TekuSP)
     - Added `CurrentHorizontalResolution` in `Monitor`
     - Added `CurrentVerticalResolution` in `Monitor`
     - Added `CurrentRefreshRate` in `Monitor`
-    - Added `MonitorList` in `VideoController`
     - Added `GetMonitorList` in Linux
     - Added `GetPrinterList` in Linux
     - Added `GetBiosList` in macOS
@@ -305,10 +307,10 @@ Setting `includePerformanceCounter` to `false` excludes `PerformanceCounter` in 
     - Added `GetMouseList` in macOS
     - Added `GetPrinterList` in macOS
     - Added `GetSoundDeviceList` in macOS
-    - Fixed `GetDriveList` in macOS
-    - Fixed `GetNetworkAdapterList` in macOS
-    - Fixed `GetMonitorList` in macOS
     - Fixed `GetBatteryList` in macOS
+    - Fixed `GetDriveList` in macOS
+    - Fixed `GetMonitorList` in macOS
+    - Fixed `GetNetworkAdapterList` in macOS
 - 101.1.1.1
     - Fixed `EnumerationOptions` for `ManagementObjectSearcher` - by [@campersau](https://github.com/campersau)
 - 101.1.1.0

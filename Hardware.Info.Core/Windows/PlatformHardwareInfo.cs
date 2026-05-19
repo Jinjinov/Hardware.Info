@@ -413,6 +413,39 @@ namespace Hardware.Info.Windows
                     _logger.LogWarning(ex, "Failed to query Win32_PerfFormattedData_PerfOS_Processor - CPU core list and load average will be empty");
                 }
 
+                // https://github.com/Jinjinov/Hardware.Info/issues/101
+                // Win32_PerfFormattedData_PerfOS_Processor is unavailable on some Windows builds (e.g. Insider experimental ARM64).
+                // Fall back to Win32_PerfFormattedData_Counters_ProcessorInformation which uses "socket,core" Name format.
+                if (cpuCoreList.Count == 0)
+                {
+                    string fallbackQueryString = "SELECT Name, PercentProcessorTime FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name NOT LIKE '%_Total'";
+
+                    string fallbackTotalQueryString = "SELECT PercentProcessorTime FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE Name = '_Total'";
+
+                    try
+                    {
+                        foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, fallbackQueryString))
+                        {
+                            CpuCore core = new CpuCore
+                            {
+                                Name = GetPropertyString(mo["Name"]),
+                                PercentProcessorTime = GetPropertyValue<ulong>(mo["PercentProcessorTime"])
+                            };
+
+                            cpuCoreList.Add(core);
+                        }
+
+                        foreach (IWmiPropertySource mo in _wmiQueryProvider.Query(_managementScope, fallbackTotalQueryString))
+                        {
+                            percentProcessorTime = GetPropertyValue<ulong>(mo["PercentProcessorTime"]);
+                        }
+                    }
+                    catch (Exception ex)
+                    {
+                        _logger.LogWarning(ex, "Failed to query Win32_PerfFormattedData_Counters_ProcessorInformation - CPU core list and load average will be empty");
+                    }
+                }
+
                 if (percentProcessorTime == 0ul)
                 {
                     string processorQueryString = "SELECT LoadPercentage FROM Win32_Processor";

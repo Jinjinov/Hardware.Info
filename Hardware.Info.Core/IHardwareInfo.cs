@@ -176,6 +176,7 @@ namespace Hardware.Info
         /// <summary>
         /// Refresh video controller info
         /// </summary>
+        /// <param name="refreshMonitorList">Populate <see cref="VideoController.MonitorList"/> and refresh <see cref="IHardwareInfo.MonitorList"/>.</param>
         void RefreshVideoControllerList(bool refreshMonitorList = true);
     }
 }

@@ -227,6 +227,13 @@ If `includeBytesPersec` is false, `millisecondsDelayBetweenTwoMeasurements` has 
 
 Setting `includePerformanceCounter` to `false` excludes `PerformanceCounter` in Windows and avoids the exception in case Visual C++ 2005 CRT is not installed.
 
+```
+void RefreshVideoControllerList(bool refreshMonitorList = true)
+```
+
+When `refreshMonitorList` is `true` `VideoController.MonitorList` is populated and `IHardwareInfo.MonitorList` is refreshed.  
+When `refreshMonitorList` is `false` `VideoController.MonitorList` is empty and `IHardwareInfo.MonitorList` is not refreshed.
+
 ## Benchmarks
 
 ### Windows 8.1 (Intel i5-2500, 8 GB RAM):

@@ -11,13 +11,13 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
     a. https://www.nuget.org/packages/Hardware.Info
 
             <ItemGroup>
-                <PackageReference Include="Hardware.Info" Version="101.1.1.1" />
+                <PackageReference Include="Hardware.Info" Version="110.0.0.0" />
             </ItemGroup>
 
     b. https://www.nuget.org/packages/Hardware.Info.Aot
 
             <ItemGroup>
-                <PackageReference Include="Hardware.Info.Aot" Version="101.1.1.1" />
+                <PackageReference Include="Hardware.Info.Aot" Version="110.0.0.0" />
             </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:

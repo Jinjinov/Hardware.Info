@@ -416,7 +416,7 @@ namespace Hardware.Info.Windows
                 // https://github.com/Jinjinov/Hardware.Info/issues/101
                 // Win32_PerfFormattedData_PerfOS_Processor is unavailable on some Windows builds (e.g. Insider experimental ARM64).
                 // Fall back to Win32_PerfFormattedData_Counters_ProcessorInformation which uses "socket,core" Name format.
-                if (cpuCoreList.Count != 100)
+                if (cpuCoreList.Count == 0)
                 {
                     string fallbackQueryString = "SELECT Name, PercentProcessorTime FROM Win32_PerfFormattedData_Counters_ProcessorInformation WHERE NOT Name LIKE '%_Total'";
 

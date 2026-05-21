@@ -11,13 +11,13 @@ Battery, BIOS, CPU - processor, storage drive, keyboard, RAM - memory, monitor, 
     a. https://www.nuget.org/packages/Hardware.Info
 
             <ItemGroup>
-                <PackageReference Include="Hardware.Info" Version="110.0.0.0" />
+                <PackageReference Include="Hardware.Info" Version="110.0.0.1" />
             </ItemGroup>
 
     b. https://www.nuget.org/packages/Hardware.Info.Aot
 
             <ItemGroup>
-                <PackageReference Include="Hardware.Info.Aot" Version="110.0.0.0" />
+                <PackageReference Include="Hardware.Info.Aot" Version="110.0.0.1" />
             </ItemGroup>
 
 2. Call `RefreshAll()` or one of the other `Refresh*()` methods:
@@ -299,6 +299,8 @@ When `refreshMonitorList` is `false` `VideoController.MonitorList` is empty and 
 
 ## Version history:
 
+- 110.0.0.1
+    - Fixed `GetCpuList` in `Windows` - by [@TekuSP](https://github.com/TekuSP)
 - 110.0.0.0
     - Added `ILogger<HardwareInfo>? logger = null` to `HardwareInfo` - thanks to [@TekuSP](https://github.com/TekuSP)
     - Added `bool refreshMonitorList = true` to `RefreshVideoControllerList` - thanks to [@TekuSP](https://github.com/TekuSP)

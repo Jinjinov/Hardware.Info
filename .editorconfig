@@ -1,0 +1,23 @@
+# Set this file as the root .editorconfig (do not inherit from .editorconfig in parent folder)
+root = true
+
+# Apply to all files
+[*]
+
+# Use LF as the line ending (Unix-style line endings)
+end_of_line = lf
+
+insert_final_newline = true
+
+indent_style = space
+
+indent_size = 4
+
+trim_trailing_whitespace = true
+
+[*.{csproj,json,yaml,xml,svg}]
+indent_size = 2
+
+# Two trailing spaces = line break in Markdown
+[*.md]
+trim_trailing_whitespace = false
